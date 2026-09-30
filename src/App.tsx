@@ -25,26 +25,50 @@ export default function App() {
     const saved = localStorage.getItem('dns_active_flyer');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        const isPriceTable = parsed.graphicStyle === 'official_price_table' || parsed.graphicStyle === 'official_price_table_v1';
+        if (isPriceTable) {
+          const vis = {
+            header: true,
+            heroImage: true,
+            priceTables: true,
+            qrCode: true,
+            disclaimer: true,
+            footer: true,
+            ...parsed.sectionVisibility,
+            ...parsed.visibility
+          };
+          return {
+            ...parsed,
+            features: parsed.features || [],
+            sectionVisibility: vis,
+            visibility: vis
+          };
+        }
+        return parsed;
       } catch (e) {
         console.error('Failed to parse saved flyer', e);
       }
     }
 
     const base = FLYER_TEMPLATES[0].defaultContent as FlyerContent;
+    const defaultVis = base.sectionVisibility || {
+      header: true,
+      heroImage: true,
+      earlyBird: false,
+      promotionBox: false,
+      priceTables: true,
+      servicesBox: false,
+      ecoBanner: false,
+      qrCode: true,
+      disclaimer: true,
+      footer: true,
+    };
     return {
       ...base,
-      sectionVisibility: base.sectionVisibility || {
-        header: true,
-        heroImage: true,
-        promotionBox: true,
-        priceTables: true,
-        servicesBox: true,
-        ecoBanner: true,
-        qrCode: true,
-        disclaimer: true,
-        footer: true,
-      }
+      features: base.features || [],
+      sectionVisibility: defaultVis,
+      visibility: defaultVis,
     };
   });
 
@@ -115,21 +139,47 @@ export default function App() {
     const template = FLYER_TEMPLATES.find(t => t.id === templateId);
     if (template && template.defaultContent) {
       setActiveTemplateId(templateId);
-      setContent(prev => ({
-        ...prev,
-        ...template.defaultContent,
-        sectionVisibility: template.defaultContent.sectionVisibility || prev.sectionVisibility || {
+      setContent(prev => {
+        const defaultVis = template.defaultContent.sectionVisibility || {
           header: true,
+          bigTitle: true,
           heroImage: true,
+          earlyBird: false,
           promotionBox: true,
           priceTables: true,
           servicesBox: true,
+          sportsIcons: true,
           ecoBanner: true,
           qrCode: true,
           disclaimer: true,
           footer: true,
-        }
-      }));
+        };
+
+        const newContent: FlyerContent = {
+          ...prev,
+          ...template.defaultContent,
+
+          layoutTemplateId: templateId,
+          regionId: template.defaultContent.regionId || prev.regionId || 'dns_central',
+
+          // Explicitly clear stale translation sets so fresh translations are initialized
+          translations: undefined,
+
+          sectionVisibility: defaultVis,
+          visibility: defaultVis,
+
+          // Carry over persistent app preferences
+          format: prev.format || 'A4',
+          orientation: prev.orientation || 'portrait',
+          activeLanguage: prev.activeLanguage || 'it',
+          logoVariant: prev.logoVariant || 'default',
+          logoCornerStyle: prev.logoCornerStyle || 'rounded',
+          showCropMarks: prev.showCropMarks,
+          importedImages: prev.importedImages || [],
+        };
+
+        return newContent;
+      });
     }
   };
 
@@ -377,7 +427,7 @@ export default function App() {
 
   const handleExportPng = () => handleExportPngSingle(content.activeLanguage || 'it');
 
-  const isOnlineTicketModel = content.graphicStyle === 'online_ticket_manifesto' || ['ticket_online_daily', 'ticket_online_weekly_area', 'ticket_online_weekly_dns'].includes(activeTemplateId);
+  const isOnlineTicketModel = content.graphicStyle === 'online_ticket_manifesto' || content.graphicStyle === 'online_ticket_manifesto_v1';
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-roboto select-none">
@@ -519,7 +569,7 @@ export default function App() {
         onExportPngSeparate={handleExportPngSeparate}
         onExportPngSingle={handleExportPngSingle}
         isExporting={isExporting}
-        isPriceTable={content.graphicStyle === 'official_price_table'}
+        isPriceTable={content.graphicStyle === 'official_price_table' || content.graphicStyle === 'official_price_table_v1'}
       />
 
     </div>

@@ -3,7 +3,30 @@ export type PaperOrientation = 'portrait' | 'landscape';
 
 export type BrandColorScheme = 'frosted_ice' | 'nordic_sky' | 'deep_glacier' | 'ice_white';
 
-export type GraphicStyle = 'classic_corporate' | 'modern_glacier' | 'manifesto_voucher' | 'classic_official' | 'glacier_panorama' | 'nordic_modern' | 'official_price_table' | 'official_ticket_voucher' | 'online_ticket_manifesto';
+export type GraphicStyle = 
+  | 'classic_corporate' 
+  | 'classic_corporate_v1'
+  | 'modern_glacier' 
+  | 'modern_glacier_v1'
+  | 'manifesto_voucher' 
+  | 'manifesto_voucher_v1'
+  | 'classic_official' 
+  | 'classic_official_v1'
+  | 'glacier_panorama' 
+  | 'glacier_panorama_v1'
+  | 'nordic_modern' 
+  | 'nordic_modern_v1'
+  | 'official_price_table' 
+  | 'official_price_table_v1'
+  | 'official_ticket_voucher' 
+  | 'official_ticket_voucher_v1'
+  | 'online_ticket_manifesto'
+  | 'online_ticket_manifesto_v1'
+  | 'hotel_skipass_package'
+  | 'hotel_skipass_boutique'
+  | 'hotel_skipass_panorama'
+  | 'hotel_skipass_compact'
+  | 'hotel_skipass_fusion';
 
 export type LayoutTemplateId = 
   | 'official_price_list' 
@@ -12,10 +35,20 @@ export type LayoutTemplateId =
   | 'hotel_skipass_package' 
   | 'gift_voucher' 
   | 'hotel_manifesto' 
+  | 'ticket_digital_pass'
   | 'ticket_online_daily'
   | 'ticket_online_weekly_area'
   | 'ticket_online_weekly_dns'
   | 'custom';
+
+export interface RegionLogoOption {
+  id: string;
+  name: string;
+  logoSrc: string;
+  logoWhiteSrc?: string;
+  secondaryLogoSrc?: string;
+  secondaryLogoWhiteSrc?: string;
+}
 
 export interface RegionalLogo {
   id: string;
@@ -23,7 +56,12 @@ export interface RegionalLogo {
   regionName: string;
   subTitle: string;
   primaryColor?: string;
-  logoSrc?: string; // Optional custom regional logo path when uploaded by user
+  logoSrc?: string; // Optional custom regional logo path
+  logoWhiteSrc?: string; // Optional white/negative variant of regional logo
+  secondaryLogoSrc?: string;
+  secondaryLogoWhiteSrc?: string;
+  logos?: RegionLogoOption[]; // Optional list of logo variants available for this region
+  logoOptions?: RegionLogoOption[]; // Alias for logos
 }
 
 export interface SportsIcon {
@@ -132,16 +170,24 @@ export interface PriceListTexts {
   carouselSeasonPrice?: string;
   earlyBirdLabel?: string;
   earlyBirdDiscount?: string;
+  earlyBirdSub?: string;
 
   // Services Box
   infoServicesHeader?: string;
   infoKidsText?: string;
   infoSchoolsText?: string;
 
-  // Banner
+  // Banner & Custom Banner
   ecoTagline?: string;
   ecoTitle?: string;
   ecoSub?: string;
+  customBanner?: { 
+    type: 'eco' | 'event' | 'snow' | 'sponsor' | 'custom'; 
+    title?: string; 
+    text?: string; 
+    icon?: string; 
+    color?: string;
+  };
 
   // Disclaimers & Footer
   disclaimerDe?: string;
@@ -150,13 +196,29 @@ export interface PriceListTexts {
   footerText?: string;
 }
 
+export interface FooterConfig {
+  mode?: 'dns' | 'custom_area';
+  ticketBadgeText?: string;
+  websiteUrl?: string;
+  phone?: string;
+  email?: string;
+  embedQrCode?: boolean;
+  qrScanLabel?: string;
+  networkSlogan?: string;
+  networkAreasList?: string;
+}
+
 export type FlyerSectionId = 
   | 'header'
   | 'heroImage' 
+  | 'bigTitle'
   | 'earlyBird' 
   | 'promotionBox' 
   | 'priceTables' 
-  | 'servicesBox' 
+  | 'servicesBox'
+  | 'sportsIcons' 
+  | 'features'
+  | 'turnstileNote'
   | 'ecoBanner' 
   | 'qrCode'
   | 'disclaimer'
@@ -165,9 +227,14 @@ export type FlyerSectionId =
 export interface SectionVisibility {
   header: boolean;
   heroImage: boolean;
+  bigTitle?: boolean;
+  earlyBird: boolean;
   promotionBox: boolean;
   priceTables: boolean;
   servicesBox: boolean;
+  sportsIcons?: boolean;
+  features?: boolean;
+  turnstileNote?: boolean;
   ecoBanner: boolean;
   qrCode: boolean;
   disclaimer: boolean;
@@ -182,8 +249,11 @@ export interface MultilingualTextSet {
   title?: string;
   subtitle?: string;
   validityPeriod?: string;
+  validityTitle?: string;
   location?: string;
   pricePrefix?: string;
+  priceAmount?: string;
+  priceCurrency?: string;
   priceSuffix?: string;
   priceNote?: string;
   featuresTitle?: string;
@@ -191,11 +261,25 @@ export interface MultilingualTextSet {
   addressInfo?: string;
   holderName?: string;
   issueDate?: string;
+  ticketStatus?: string;
+  issuerName?: string;
+  turnstileNote?: string;
+  verificationNote?: string;
+  digitalPassType?: 'weekly_dns' | 'daily_area' | 'weekly_area';
+  promoBannerTitle?: string;
+  promoBannerText?: string;
+  promoBannerBadge?: string;
+  ecoBannerTitle?: string;
+  ecoBannerText?: string;
+  ecoBannerTagline?: string;
   features?: PackageFeature[];
   priceListTexts?: PriceListTexts;
 }
 
 export interface FlyerContent {
+  // Language mode: 'monolingual' for single-language per ticket or 'trilingual' for single document with 3 languages
+  languageMode?: 'monolingual' | 'trilingual';
+  
   // Active viewing/editing language
   activeLanguage?: LanguageCode;
   translations?: {
@@ -204,8 +288,32 @@ export interface FlyerContent {
     en?: MultilingualTextSet;
   };
 
-  // Brand Header
+  // Digital Pass Type (Weekly DNS, Daily Area, Weekly Area)
+  digitalPassType?: 'weekly_dns' | 'daily_area' | 'weekly_area';
+  selectedRegionOption?: string; // 'all' for 900+ km Carosello or regionId like '3_zinnen', 'anterselva', etc.
+  ticketStatus?: string;
+  issuerName?: string;
+  turnstileNote?: string;
+  verificationNote?: string;
+
+  // Digital Pass Specific Banners
+  promoBannerEnabled?: boolean;
+  promoBannerTitle?: string;
+  promoBannerText?: string;
+  promoBannerBadge?: string;
+  
+  ecoBannerEnabled?: boolean;
+  ecoBannerTitle?: string;
+  ecoBannerText?: string;
+  ecoBannerTagline?: string;
+
+  // Brand Header & Regional Logo Customization
   regionId: string;
+  selectedRegionLogoId?: string;
+  customRegionalLogoUrl?: string;
+  regionalLogoScale?: number; // scale percentage (e.g. 100 = 100%, 75, 125, 150)
+  logoBadgeBgStyle?: 'auto' | 'dark' | 'light' | 'none'; // Sfondo del badge logo: automatico (scuro nei temi scuri), scuro forzato, chiaro (bianco), o trasparente/nessuno
+  dnsLogoPlacement?: 'header' | 'footer_left' | 'hidden'; // Header (default/stacked), Footer Left, or Hidden
   customRegionName?: string;
   headerTagline: string;
   
@@ -257,11 +365,13 @@ export interface FlyerContent {
   qrCode: QRCodeConfig;
   
   // Layout Options
+  layoutTemplateId?: LayoutTemplateId;
   format: PaperFormat;
   orientation: PaperOrientation;
   themeColor: BrandColorScheme;
   graphicStyle: GraphicStyle;
-  cornerStyle?: 'rounded' | 'sharp'; // 'rounded' (default rounded edges) or 'sharp' (a spigolo / squadrati)
+  cornerStyle?: 'rounded' | 'sharp' | 'none'; // 'rounded' (default rounded edges), 'sharp' (a spigolo / squadrati), or 'none' (senza bordo/fondo)
+  logoCornerStyle?: 'rounded' | 'sharp' | 'none'; // Style for logo containers (regional logo badges)
   importedImages?: string[];
   customPrimaryColor: string;
   customAccentColor: string;
@@ -272,6 +382,9 @@ export interface FlyerContent {
   
   // Footer partner logos visibility
   showPartnerLogos: boolean;
+
+  // Custom Footer Configuration
+  footerConfig?: FooterConfig;
 
   // DNS Logo & Ornamental Graphic Elements
   logoVariant?: LogoVariantType;

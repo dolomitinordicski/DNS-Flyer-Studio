@@ -1,4 +1,4 @@
-import { FlyerContent, PaperFormat, GraphicStyle } from '../types';
+import { FlyerContent, PaperFormat, GraphicStyle, SectionVisibility } from '../types';
 import { DEFAULT_SECTION_ORDER } from '../components/flyer-variants/VariantTypes';
 
 /**
@@ -27,64 +27,72 @@ export function optimizeLayout(content: FlyerContent): OptimizedLayoutResult {
   const style: GraphicStyle = content.graphicStyle || 'classic_official';
 
   // ----------------------------------------------------
-  // 1. HEADER IMAGE HEIGHT BUFFER CALCULATION
-  // Resizes the image height as an elastic buffer to eliminate empty white space
+  // 1. PRESERVE USER SECTION VISIBILITY TOGGLES
+  // Do NOT re-enable sections that the user explicitly turned OFF!
   // ----------------------------------------------------
-  let heroImageHeightPx = 220;
+  const v1: Partial<SectionVisibility> = content.sectionVisibility || {};
+  const v2: Partial<SectionVisibility> = content.visibility || {};
 
-  if (style === 'official_price_table' || style === 'classic_official') {
-    // Price tables are content-dense, keep buffer controlled
-    if (fmt === 'A3') {
-      heroImageHeightPx = isLandscape ? 220 : 300;
-    } else if (fmt === 'A5') {
-      heroImageHeightPx = isLandscape ? 85 : 110;
+  const preservedVisibility: SectionVisibility = {
+    header: v1.header !== false && v2.header !== false,
+    heroImage: v1.heroImage !== false && v2.heroImage !== false,
+    bigTitle: v1.bigTitle !== false && v2.bigTitle !== false,
+    earlyBird: v1.earlyBird !== false && v2.earlyBird !== false,
+    promotionBox: v1.promotionBox !== false && v2.promotionBox !== false,
+    priceTables: v1.priceTables !== false && v2.priceTables !== false,
+    servicesBox: v1.servicesBox !== false && v2.servicesBox !== false,
+    sportsIcons: v1.sportsIcons !== false && v2.sportsIcons !== false,
+    ecoBanner: v1.ecoBanner !== false && v2.ecoBanner !== false,
+    qrCode: v1.qrCode !== false && v2.qrCode !== false,
+    disclaimer: v1.disclaimer !== false && v2.disclaimer !== false,
+    footer: v1.footer !== false && v2.footer !== false,
+  };
+
+  const activeVisibleCount = Object.values(preservedVisibility).filter(Boolean).length;
+
+  // ----------------------------------------------------
+  // 2. DYNAMIC HEADER IMAGE HEIGHT & BUFFER CALCULATION
+  // Adjust image height dynamically according to visible section density so everything fits on 1 page
+  // ----------------------------------------------------
+  let heroImageHeightPx = 140;
+
+  if (fmt === 'A3') {
+    if (isLandscape) {
+      heroImageHeightPx = activeVisibleCount >= 7 ? 180 : 240;
     } else {
-      // A4
-      heroImageHeightPx = isLandscape ? 130 : 170;
+      heroImageHeightPx = activeVisibleCount >= 7 ? 220 : 300;
     }
-  } else if (style === 'online_ticket_manifesto' || style === 'official_ticket_voucher') {
-    // Online tickets / vouchers need balanced ticket top banner
-    if (fmt === 'A3') {
-      heroImageHeightPx = isLandscape ? 260 : 340;
-    } else if (fmt === 'A5') {
-      heroImageHeightPx = isLandscape ? 95 : 125;
+  } else if (fmt === 'A5') {
+    if (isLandscape) {
+      heroImageHeightPx = activeVisibleCount >= 7 ? 45 : 60;
     } else {
-      // A4
-      heroImageHeightPx = isLandscape ? 150 : 200;
-    }
-  } else if (style === 'manifesto_voucher' || style === 'glacier_panorama') {
-    // Voucher & Panorama styles benefit from larger hero visual
-    if (fmt === 'A3') {
-      heroImageHeightPx = isLandscape ? 320 : 420;
-    } else if (fmt === 'A5') {
-      heroImageHeightPx = isLandscape ? 110 : 150;
-    } else {
-      // A4
-      heroImageHeightPx = isLandscape ? 190 : 260;
+      heroImageHeightPx = activeVisibleCount >= 7 ? 60 : 85;
     }
   } else {
-    // Corporate, Nordic Modern, Modern Glacier
-    if (fmt === 'A3') {
-      heroImageHeightPx = isLandscape ? 280 : 380;
-    } else if (fmt === 'A5') {
-      heroImageHeightPx = isLandscape ? 95 : 130;
+    // A4 (Default)
+    if (isLandscape) {
+      heroImageHeightPx = activeVisibleCount >= 7 ? 70 : 100;
     } else {
-      // A4
-      heroImageHeightPx = isLandscape ? 160 : 220;
+      // Portrait
+      if (style === 'official_price_table' || style === 'classic_official') {
+        heroImageHeightPx = activeVisibleCount >= 8 ? 95 : activeVisibleCount >= 6 ? 120 : 160;
+      } else {
+        heroImageHeightPx = activeVisibleCount >= 8 ? 110 : activeVisibleCount >= 6 ? 140 : 180;
+      }
     }
   }
 
   // ----------------------------------------------------
-  // 2. AUTOMATIC TEXT SCALING & LINE-BREAK ADJUSTMENTS
+  // 3. AUTOMATIC TEXT SCALING & LINE-BREAK ADJUSTMENTS
   // ----------------------------------------------------
   let textScaleFactor = 1.0;
   if (fmt === 'A3') {
     textScaleFactor = isLandscape ? 1.35 : 1.45;
   } else if (fmt === 'A5') {
-    textScaleFactor = isLandscape ? 0.76 : 0.82;
+    textScaleFactor = isLandscape ? 0.74 : 0.80;
   } else {
     // A4
-    textScaleFactor = isLandscape ? 0.94 : 1.0;
+    textScaleFactor = isLandscape ? 0.92 : (activeVisibleCount >= 8 ? 0.95 : 1.0);
   }
 
   // Clean up and optimize text line breaks
@@ -101,7 +109,7 @@ export function optimizeLayout(content: FlyerContent): OptimizedLayoutResult {
   const cleanedTagline = cleanText(content.headerTagline);
 
   // ----------------------------------------------------
-  // 3. VECTOR GRAPHICS SIZES (SWOOSH & CURVES)
+  // 4. VECTOR GRAPHICS SIZES (SWOOSH & CURVES)
   // ----------------------------------------------------
   let swooshWidth = 240;
   let curveSize = 340;
@@ -119,8 +127,7 @@ export function optimizeLayout(content: FlyerContent): OptimizedLayoutResult {
   }
 
   // ----------------------------------------------------
-  // 4. VERTICAL VS HORIZONTAL SECTION ORDER ISOLATION
-  // Ensure portrait vertical fix does not interfere with landscape horizontal fix
+  // 5. VERTICAL VS HORIZONTAL SECTION ORDER ISOLATION
   // ----------------------------------------------------
   const baseOrder = DEFAULT_SECTION_ORDER;
   const sectionOrderPortrait = content.sectionOrderPortrait && content.sectionOrderPortrait.length > 0 
@@ -130,22 +137,7 @@ export function optimizeLayout(content: FlyerContent): OptimizedLayoutResult {
     ? content.sectionOrderLandscape 
     : baseOrder;
 
-  // ----------------------------------------------------
-  // 5. SECTION VISIBILITY RESET & OPTIMIZATION
-  // ----------------------------------------------------
-  const fullVisibility = {
-    header: true,
-    heroImage: true,
-    promotionBox: true,
-    priceTables: true,
-    servicesBox: true,
-    ecoBanner: true,
-    qrCode: true,
-    disclaimer: true,
-    footer: true,
-  };
-
-  // Build optimized content object
+  // Build optimized content object with PRESERVED visibility
   const optimizedContent: FlyerContent = {
     ...content,
     heroImageHeightPx,
@@ -155,12 +147,12 @@ export function optimizeLayout(content: FlyerContent): OptimizedLayoutResult {
     badgeText: cleanedBadge,
     headerTagline: cleanedTagline,
     showCropMarks: false,
-    sectionVisibility: fullVisibility,
-    visibility: fullVisibility,
+    sectionVisibility: preservedVisibility,
+    visibility: preservedVisibility,
     sectionOrderPortrait,
     sectionOrderLandscape,
     nordicSwoosh: {
-      enabled: true,
+      enabled: content.nordicSwoosh?.enabled ?? true,
       position: content.nordicSwoosh?.position || 'top_right',
       variant: content.nordicSwoosh?.variant || 'swoosh_skier',
       size: 'custom',
@@ -168,7 +160,7 @@ export function optimizeLayout(content: FlyerContent): OptimizedLayoutResult {
       opacity: content.nordicSwoosh?.opacity ?? 90,
     },
     ornamentCurves: {
-      enabled: true,
+      enabled: content.ornamentCurves?.enabled ?? true,
       position: content.ornamentCurves?.position || 'header_right',
       sizePx: curveSize,
       opacity: content.ornamentCurves?.opacity ?? 25,
@@ -184,7 +176,7 @@ export function optimizeLayout(content: FlyerContent): OptimizedLayoutResult {
   };
 
   const formatLabel = `${fmt} (${isLandscape ? 'Orizzontale ↔️' : 'Verticale ↕️'})`;
-  const message = `✨ Layout e bilanciamento perfetti applicati per ${formatLabel} - Modello: ${style.toUpperCase()}`;
+  const message = `✨ Layout e bilanciamento perfetti applicati per ${formatLabel} (${activeVisibleCount} sezioni attive conservate)`;
 
   return { content: optimizedContent, message };
 }

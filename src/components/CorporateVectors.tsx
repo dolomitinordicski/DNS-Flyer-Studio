@@ -199,10 +199,12 @@ export const DolomitiFullLogo: React.FC<{
   customSecondary?: string;
   customAccent?: string;
   isDarkHeader?: boolean;
+  cornerStyle?: 'rounded' | 'sharp' | 'none';
 }> = ({ 
   variant = 'original', 
   className = "h-10",
-  isDarkHeader = false
+  isDarkHeader = false,
+  cornerStyle = 'rounded'
 }) => {
   if (variant === 'none') return null;
 
@@ -223,7 +225,12 @@ export const DolomitiFullLogo: React.FC<{
   let wrapperClass = `inline-flex items-center max-w-full shrink-0 ${className}`;
 
   if (variant === 'badge_card') {
-    wrapperClass += ' px-3 py-1.5 rounded-xl shadow-2xs border bg-white border-[#AAD0D1]';
+    if (cornerStyle === 'none') {
+      wrapperClass += ' px-1 py-0.5';
+    } else {
+      const rounding = cornerStyle === 'sharp' ? 'rounded-none' : 'rounded-xl';
+      wrapperClass += ` px-3 py-1.5 ${rounding} shadow-2xs border bg-white border-[#AAD0D1]`;
+    }
   }
 
   return (

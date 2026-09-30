@@ -3,18 +3,14 @@ import { FlyerContent } from '../types';
 import { REGIONAL_LOGOS } from '../data/regionalLogos';
 import { SPORTS_ICONS, getAllSportsIcons } from '../data/sportsIcons';
 import { DEFAULT_PRICE_LIST_TEXTS } from '../data/templates';
+import { getContentForLanguage } from '../utils/multilingual';
 import { 
   DolomitiSkierTrackEmblem, 
   NordicSwooshOverlay,
 } from './CorporateVectors';
 
 // Import Variants
-import { ClassicVariant } from './flyer-variants/ClassicVariant';
-import { ModernGlacierVariant } from './flyer-variants/ModernGlacierVariant';
-import { NordicModernVariant } from './flyer-variants/NordicModernVariant';
-import { OfficialPriceTableVariant } from './flyer-variants/OfficialPriceTableVariant';
-import { VoucherVariant } from './flyer-variants/VoucherVariant';
-import { OnlineTicketVariant } from './flyer-variants/OnlineTicketVariant';
+import { FLYER_VARIANT_MAP, ClassicVariant } from './flyer-variants/VariantTypes';
 
 interface FlyerCanvasProps {
   content: FlyerContent;
@@ -23,31 +19,60 @@ interface FlyerCanvasProps {
 
 export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ content, scale = 1 }, ref) => {
   // Selected regional logo info
-  const regionLogo = REGIONAL_LOGOS.find(r => r.id === content.regionId) || REGIONAL_LOGOS[0];
+  const baseRegionLogo = REGIONAL_LOGOS.find(r => r.id === content.regionId) || REGIONAL_LOGOS[0];
+  const selectedLogoOption = baseRegionLogo.logos?.find(l => l.id === content.selectedRegionLogoId) 
+    || baseRegionLogo.logoOptions?.find(l => l.id === content.selectedRegionLogoId)
+    || baseRegionLogo.logos?.[0]
+    || baseRegionLogo.logoOptions?.[0];
+
+  const regionLogo = {
+    ...baseRegionLogo,
+    logoSrc: content.customRegionalLogoUrl || selectedLogoOption?.logoSrc || baseRegionLogo.logoSrc,
+    logoWhiteSrc: content.customRegionalLogoUrl ? undefined : (selectedLogoOption?.logoWhiteSrc || baseRegionLogo.logoWhiteSrc),
+    secondaryLogoSrc: content.customRegionalLogoUrl ? undefined : (selectedLogoOption?.secondaryLogoSrc || baseRegionLogo.secondaryLogoSrc),
+    secondaryLogoWhiteSrc: content.customRegionalLogoUrl ? undefined : (selectedLogoOption?.secondaryLogoWhiteSrc || baseRegionLogo.secondaryLogoWhiteSrc),
+    regionalLogoScale: content.regionalLogoScale || 100,
+    dnsLogoPlacement: content.dnsLogoPlacement || 'header',
+  };
 
   // Map selected sports icons (standard + custom)
   const allIcons = getAllSportsIcons();
-  const activeSportsIcons = content.selectedSportsIcons
-    .map(iconId => allIcons.find(s => s.id === iconId))
+  const sportsIconList: any[] = Array.isArray(content.selectedSportsIcons) 
+    ? content.selectedSportsIcons 
+    : (Array.isArray(content.activeSportsIcons) ? content.activeSportsIcons : ['nordic_classic', 'nordic_skating', 'skipass', 'ski_bus']);
+  
+  const activeSportsIcons = sportsIconList
+    .map(iconId => typeof iconId === 'string' ? allIcons.find(s => s.id === iconId) || { id: iconId, nameIt: iconId, nameDe: iconId, nameEn: iconId } : iconId)
     .filter(Boolean);
+
+  // Localized Content for active language
+  const localizedContent = getContentForLanguage(content, content.activeLanguage || 'it');
 
   // Graphic Style choice
   const graphicStyle = content.graphicStyle || 'classic_official';
 
   // Price List Texts with defaults
-  const plt = { ...DEFAULT_PRICE_LIST_TEXTS, ...content.priceListTexts };
+  const plt = { ...DEFAULT_PRICE_LIST_TEXTS, ...localizedContent.priceListTexts };
 
   // Visibility Configuration
-  const visibility = content.sectionVisibility || content.visibility || {
-    header: true,
-    heroImage: true,
-    promotionBox: true,
-    priceTables: true,
-    servicesBox: true,
-    ecoBanner: true,
-    qrCode: true,
-    disclaimer: true,
-    footer: true,
+  const v1 = content.sectionVisibility || {};
+  const v2 = content.visibility || {};
+
+  const visibility = {
+    header: v1.header !== false && v2.header !== false,
+    bigTitle: v1.bigTitle !== false && v2.bigTitle !== false,
+    heroImage: v1.heroImage !== false && v2.heroImage !== false,
+    earlyBird: v1.earlyBird !== false && v2.earlyBird !== false,
+    promotionBox: v1.promotionBox !== false && v2.promotionBox !== false,
+    priceTables: v1.priceTables !== false && v2.priceTables !== false,
+    servicesBox: v1.servicesBox !== false && v2.servicesBox !== false,
+    sportsIcons: v1.sportsIcons !== false && v2.sportsIcons !== false,
+    features: v1.features !== false && v2.features !== false,
+    turnstileNote: v1.turnstileNote !== false && v2.turnstileNote !== false,
+    ecoBanner: v1.ecoBanner !== false && v2.ecoBanner !== false,
+    qrCode: v1.qrCode !== false && v2.qrCode !== false,
+    disclaimer: v1.disclaimer !== false && v2.disclaimer !== false,
+    footer: v1.footer !== false && v2.footer !== false,
   };
 
   // Dynamic Theme Colors based on Official Dolomiti NordicSki Brand Colors
@@ -105,6 +130,40 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
 
     const isHeaderLight = ['ice_white', 'nordic_sky'].includes(content.themeColor || 'frosted_ice');
     
+    // Determine badge background style (auto, dark, light, or none)
+    const bgMode = content.logoBadgeBgStyle || 'auto';
+    const isBadgeLight = bgMode === 'light' 
+      ? true 
+      : bgMode === 'dark' 
+      ? false 
+      : bgMode === 'none' 
+      ? isHeaderLight 
+      : isHeaderLight; // 'auto' mode: light if header is light, dark (rgba(255,255,255,0.15)) if header is dark
+
+    let headerBadgeBgStyle: React.CSSProperties = {};
+    if (bgMode === 'light') {
+      headerBadgeBgStyle = {
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        borderColor: 'rgba(0, 0, 0, 0.15)',
+      };
+    } else if (bgMode === 'dark') {
+      headerBadgeBgStyle = {
+        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        borderColor: 'rgba(255, 255, 255, 0.25)',
+      };
+    } else if (bgMode === 'none') {
+      headerBadgeBgStyle = {
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+      };
+    } else {
+      // 'auto' mode: dark background in dark headers (as before), light in light headers
+      headerBadgeBgStyle = {
+        backgroundColor: isHeaderLight ? `${primary}15` : 'rgba(255, 255, 255, 0.15)',
+        borderColor: isHeaderLight ? `${primary}25` : 'rgba(255, 255, 255, 0.25)',
+      };
+    }
+    
     return {
       primaryHex: primary,
       secondaryHex: secondary,
@@ -120,10 +179,8 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       headerTextColor: isHeaderLight ? 'text-slate-900' : 'text-white',
       headerSubtextColor: isHeaderLight ? 'text-slate-500' : 'text-slate-200',
       headerAccentColor: isHeaderLight ? 'text-[#0D4D5E]' : 'text-[#AAD0D1]',
-      headerBadgeBgStyle: {
-        backgroundColor: isHeaderLight ? `${primary}15` : 'rgba(255, 255, 255, 0.15)',
-        borderColor: isHeaderLight ? `${primary}25` : 'rgba(255, 255, 255, 0.25)',
-      },
+      headerBadgeBgStyle,
+      isBadgeLight,
       headerBorderColorStyle: {
         borderColor: isHeaderLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.15)'
       },
@@ -190,7 +247,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
   };
 
   const variantProps = {
-    content,
+    content: localizedContent,
     plt,
     theme,
     regionLogo,
@@ -263,29 +320,12 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
 
       {/* Render selected Variant */}
       {(() => {
-        switch (graphicStyle) {
-          case 'classic_corporate':
-          case 'classic_official':
-            return <ClassicVariant {...variantProps} />;
-          
-          case 'modern_glacier':
-          case 'glacier_panorama':
-            return <ModernGlacierVariant {...variantProps} />;
-          
-          case 'nordic_modern':
-            return <NordicModernVariant {...variantProps} />;
-          
-          case 'official_price_table':
-            return <OfficialPriceTableVariant {...variantProps} />;
-          
-          case 'manifesto_voucher':
-          case 'official_ticket_voucher':
-          case 'online_ticket_manifesto':
-            return <VoucherVariant {...variantProps} />;
-          
-          default:
-            return <ClassicVariant {...variantProps} />;
+        let effectiveGraphicStyle = graphicStyle;
+        if (content.layoutTemplateId === 'hotel_skipass_package' && !graphicStyle?.startsWith('hotel_skipass')) {
+          effectiveGraphicStyle = 'hotel_skipass_package';
         }
+        const VariantComponent = FLYER_VARIANT_MAP[effectiveGraphicStyle] || ClassicVariant;
+        return <VariantComponent {...variantProps} />;
       })()}
 
       {/* Nordic Swoosh Overlay */}

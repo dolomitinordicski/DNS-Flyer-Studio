@@ -1,29 +1,18 @@
-import React from 'react';
-import { 
-  Printer, 
-  Download, 
-  Share2, 
-  FileText, 
-  Layout, 
-  RotateCw, 
-  Eye, 
-  Image as ImageIcon,
-  Check,
-  TrendingUp,
-  Palette,
-  Sparkles
-} from 'lucide-react';
-import { PaperFormat, PaperOrientation, LayoutTemplateId } from '../types';
-import { FLYER_TEMPLATES } from '../data/templates';
-import { DolomitiFullLogo } from './CorporateVectors';
+import React, { useEffect, useRef } from 'react';
+import { Download, Eye, Printer, RotateCw, Share2 } from 'lucide-react';
+import { DNS_DESIGN_SYSTEM } from '@dolomitinordicski/dns-shared-data/design-system';
+import { initDNSNavigationRuntime } from '@dolomitinordicski/dns-shared-data/ui/navigation';
+import { PaperFormat, PaperOrientation } from '../types';
+import { AccessibilityMount } from './AccessibilityMount';
+import type { DNSCoreHeaderStatus } from '../lib/dnsCoreHeader';
+
+type UILanguage = 'de' | 'it';
 
 interface NavbarProps {
   paperFormat: PaperFormat;
   onChangeFormat: (format: PaperFormat) => void;
   orientation: PaperOrientation;
   onToggleOrientation: () => void;
-  activeTemplateId: LayoutTemplateId;
-  onSelectTemplate: (templateId: LayoutTemplateId) => void;
   showCropMarks: boolean;
   onToggleCropMarks: () => void;
   onOpenShareModal: () => void;
@@ -32,17 +21,42 @@ interface NavbarProps {
   isExporting: boolean;
   activeView: 'editor' | 'dashboard';
   onToggleView: (view: 'editor' | 'dashboard') => void;
-  onMakeItPerfect?: () => void;
   isOnlineTicketModel?: boolean;
+  uiLanguage: UILanguage;
+  onUiLanguageChange: (language: UILanguage) => void;
+  coreStatus: DNSCoreHeaderStatus;
 }
+
+const copy = {
+  de: {
+    subtitle: 'Drucksorten & Layout',
+    editor: 'Editor',
+    dashboard: 'Übersicht',
+    format: 'Format',
+    portrait: 'Hochformat',
+    landscape: 'Querformat',
+    crop: 'Schnitt',
+    share: 'Teilen',
+    pdf: 'PDF',
+  },
+  it: {
+    subtitle: 'Materiali grafici & layout',
+    editor: 'Editor',
+    dashboard: 'Dashboard',
+    format: 'Formato',
+    portrait: 'Verticale',
+    landscape: 'Orizzontale',
+    crop: 'Rifilo',
+    share: 'Condividi',
+    pdf: 'PDF',
+  },
+} as const;
 
 export const Navbar: React.FC<NavbarProps> = ({
   paperFormat,
   onChangeFormat,
   orientation,
   onToggleOrientation,
-  activeTemplateId,
-  onSelectTemplate,
   showCropMarks,
   onToggleCropMarks,
   onOpenShareModal,
@@ -51,175 +65,206 @@ export const Navbar: React.FC<NavbarProps> = ({
   isExporting,
   activeView,
   onToggleView,
-  onMakeItPerfect,
-  isOnlineTicketModel = false
+  isOnlineTicketModel = false,
+  uiLanguage,
+  onUiLanguageChange,
+  coreStatus,
 }) => {
-  return (
-    <header className="bg-white border-b border-slate-200 text-slate-900 sticky top-0 z-40 shadow-xs no-print">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
-        
-        {/* Brand Logo & View Switcher */}
-        <div className="flex items-center gap-3">
-          <DolomitiFullLogo variant="original" className="h-9 sm:h-10" />
-          <div className="border-l border-slate-200 pl-3 flex items-center gap-2">
-            
-            {/* View Mode Switcher Pills */}
-            <div className="bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200">
-              <button
-                onClick={() => onToggleView('editor')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeView === 'editor'
-                    ? 'bg-[#0D4D5E] text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Palette className="w-3.5 h-3.5" />
-                <span>Editor Studio</span>
-              </button>
+  const t = copy[uiLanguage];
+  const headerRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const progressTrackRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLSpanElement>(null);
 
-              <button
-                onClick={() => onToggleView('dashboard')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeView === 'dashboard'
-                    ? 'bg-[#0D4D5E] text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <TrendingUp className="w-3.5 h-3.5" />
-                <span>Dashboard</span>
-              </button>
+  useEffect(() => {
+    if (!headerRef.current || !navRef.current) return;
+    const runtime = initDNSNavigationRuntime({
+      header: headerRef.current,
+      nav: navRef.current,
+      progressTrack: progressTrackRef.current,
+      progressBar: progressBarRef.current,
+      navigation: DNS_DESIGN_SYSTEM.navigation,
+      responsive: DNS_DESIGN_SYSTEM.responsive,
+      headerTokens: DNS_DESIGN_SYSTEM.header,
+      motion: DNS_DESIGN_SYSTEM.motion,
+    });
+    return () => runtime.disconnect();
+  }, []);
+
+  return (
+    <>
+      <header
+        ref={headerRef}
+        id="dns-flyer-header"
+        className="sticky top-0 z-30 bg-[#0D4D5E] text-white shadow-[0_1px_0_rgba(255,255,255,.08)] no-print"
+      >
+        <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-5 py-3.5 md:px-8">
+          <div className="flex min-w-0 items-center gap-4">
+            <img
+              src="https://dolomitinordicski.github.io/dns-shared-data/brand/logo-web.png"
+              alt="Dolomiti NordicSki"
+              className="h-10 w-auto shrink-0 object-contain"
+            />
+            <div className="min-w-0">
+              <div className="whitespace-nowrap text-[22px] uppercase leading-none tracking-[.035em] text-white">
+                <strong>DNS</strong> <span className="font-normal">FLYER STUDIO</span>
+              </div>
+              <div className="mt-1.5 truncate font-roboto text-[11px] font-normal uppercase leading-tight tracking-[.06em] text-[#AAD0D1]">
+                {t.subtitle}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-4">
+            <div className="flex items-center gap-3">
+              <AccessibilityMount language={uiLanguage} />
+              <div className="flex gap-3 text-[10px] font-bold uppercase tracking-[.06em]">
+                {(['de', 'it'] as const).map(language => (
+                  <button
+                    key={language}
+                    type="button"
+                    onClick={() => onUiLanguageChange(language)}
+                    className={[
+                      'border-0 border-b-2 bg-transparent px-1 py-1 text-white',
+                      uiLanguage === language ? 'border-white' : 'border-transparent opacity-60',
+                    ].join(' ')}
+                    aria-pressed={uiLanguage === language}
+                  >
+                    {language.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
 
+            <div
+              className={[
+                'hidden items-center gap-2 text-[10px] font-semibold uppercase tracking-[.05em] xl:flex',
+                coreStatus.state === 'ready' ? 'text-[#d8f0e7]' : '',
+                coreStatus.state === 'error' ? 'text-[#ffd7d0]' : 'text-white/65',
+              ].join(' ')}
+              aria-live="polite"
+            >
+              <span
+                className={[
+                  'h-2 w-2 rounded-full',
+                  coreStatus.state === 'ready' ? 'bg-emerald-400' : '',
+                  coreStatus.state === 'error' ? 'bg-orange-400' : 'bg-[#AAD0D1]',
+                ].join(' ')}
+              />
+              {coreStatus.state === 'ready'
+                ? `${uiLanguage === 'de' ? 'DNS_Core verbunden' : 'DNS_Core connesso'} · ${coreStatus.reportingAreas}/${coreStatus.organizations}`
+                : coreStatus.state === 'error'
+                  ? (uiLanguage === 'de' ? 'DNS_Core nicht erreichbar' : 'DNS_Core non raggiungibile')
+                  : (uiLanguage === 'de' ? 'DNS_Core verbindet…' : 'Connessione a DNS_Core…')}
+            </div>
           </div>
         </div>
+      </header>
 
-        {/* Center Controls: Format, Orientation, Templates */}
-        <div className="hidden sm:flex items-center gap-2 sm:gap-3 bg-slate-100 p-1.5 rounded-xl border border-slate-200 overflow-x-auto">
-          
-          {/* Paper Format Picker */}
-          <div className="flex items-center gap-2 px-2">
-            <span className="text-[10px] font-black text-[#0D4D5E] uppercase tracking-widest hidden lg:block">Formato:</span>
-            <div className="flex items-center bg-white rounded-lg p-0.5 border border-slate-200 shadow-sm shrink-0">
-              {(['A4', 'A5', 'A3'] as PaperFormat[]).map((fmt) => {
-                const isA3Disabled = isOnlineTicketModel && fmt === 'A3';
-                return (
-                  <button
-                    key={fmt}
-                    disabled={isA3Disabled}
-                    onClick={() => onChangeFormat(fmt)}
-                    title={isA3Disabled ? 'Formato A3 disabilitato per Biglietti Online (solo A4 e A5)' : `Seleziona formato ${fmt}`}
-                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${
-                      paperFormat === fmt
-                        ? 'bg-[#0D4D5E] text-white shadow-md'
-                        : isA3Disabled
-                        ? 'text-slate-300 opacity-40 cursor-not-allowed'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    <div 
-                      className={`border-2 ${paperFormat === fmt ? 'border-white' : 'border-slate-300'} rounded-[1px] shadow-xs`}
-                      style={{
-                        width: fmt === 'A3' ? '14px' : fmt === 'A4' ? '12px' : '10px',
-                        height: fmt === 'A3' ? '20px' : fmt === 'A4' ? '17px' : '14px',
-                        backgroundColor: paperFormat === fmt ? 'rgba(255,255,255,0.3)' : 'transparent'
-                      }}
-                    />
-                    <span>{fmt}</span>
-                  </button>
-                );
-              })}
-            </div>
+      <nav ref={navRef} id="dns-flyer-nav" className="dns-tab-nav no-print" aria-label="DNS Flyer Studio">
+        <div
+          ref={progressTrackRef}
+          className="dns-scroll-progress-track"
+          role="progressbar"
+          aria-label="Page scroll progress"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={0}
+        >
+          <span ref={progressBarRef} className="dns-scroll-progress-bar" />
+        </div>
+
+        <div className="dns-tab-nav-inner gap-1">
+          <button
+            type="button"
+            onClick={() => onToggleView('editor')}
+            className={['dns-tab', activeView === 'editor' ? 'dns-tab-active' : ''].join(' ')}
+          >
+            {t.editor}
+          </button>
+          <button
+            type="button"
+            onClick={() => onToggleView('dashboard')}
+            className={['dns-tab', activeView === 'dashboard' ? 'dns-tab-active' : ''].join(' ')}
+          >
+            {t.dashboard}
+          </button>
+
+          <span className="mx-2 h-5 w-px shrink-0 bg-white/20" aria-hidden="true" />
+
+          <div className="flex shrink-0 items-center gap-1">
+            <span className="px-2 text-[9px] font-bold uppercase tracking-[.06em] text-white/60">{t.format}</span>
+            {(['A4', 'A5', 'A3'] as PaperFormat[]).map(fmt => {
+              const disabled = isOnlineTicketModel && fmt === 'A3';
+              return (
+                <button
+                  key={fmt}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => onChangeFormat(fmt)}
+                  className={[
+                    'rounded px-2.5 py-1.5 text-[10px] font-bold transition disabled:cursor-not-allowed disabled:opacity-30',
+                    paperFormat === fmt ? 'bg-white text-[#0D4D5E]' : 'text-white/75 hover:text-white',
+                  ].join(' ')}
+                >
+                  {fmt}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="h-4 w-px bg-slate-300" />
-
-          {/* Orientation Toggle */}
           <button
+            type="button"
             onClick={onToggleOrientation}
             disabled={isOnlineTicketModel}
-            title={
-              isOnlineTicketModel
-                ? 'I biglietti online richiedono esclusivamente il formato Verticale (Portrait)'
-                : 'Cambia orientamento pagina'
-            }
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-              isOnlineTicketModel
-                ? 'text-slate-400 opacity-50 cursor-not-allowed bg-slate-200/50'
-                : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/70'
-            }`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1.5 text-[10px] font-semibold text-white/75 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
-            <RotateCw className="w-3.5 h-3.5 text-[#0D4D5E]" />
-            <span>{orientation === 'portrait' ? 'Verticale' : 'Orizzontale'}</span>
-            {isOnlineTicketModel && (
-              <span className="text-[9px] font-bold bg-[#0D4D5E]/10 text-[#0D4D5E] px-1 py-0.2 rounded">Bloccato</span>
-            )}
+            <RotateCw className="h-3.5 w-3.5" />
+            {orientation === 'portrait' ? t.portrait : t.landscape}
           </button>
 
-          <div className="h-4 w-px bg-slate-300" />
-
-          {/* Crop Marks Toggle */}
           <button
+            type="button"
             onClick={onToggleCropMarks}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-              showCropMarks
-                ? 'bg-white text-[#0D4D5E] border border-[#0D4D5E]/30 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-            title="Mostra segni di rifilo e abbondanza per la tipografia"
+            className={[
+              'inline-flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1.5 text-[10px] font-semibold',
+              showCropMarks ? 'bg-white text-[#0D4D5E]' : 'text-white/75 hover:text-white',
+            ].join(' ')}
           >
-            <Eye className="w-3.5 h-3.5 text-[#0D4D5E]" />
-            <span>Segni di Stampa</span>
+            <Eye className="h-3.5 w-3.5" />
+            {t.crop}
           </button>
-        </div>
 
-        {/* Action Buttons: Make It Perfect, Print PDF, Share */}
-        <div className="flex items-center gap-2">
-          
-          {/* Make It Perfect CTA */}
-          {onMakeItPerfect && (
-            <button
-              onClick={onMakeItPerfect}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 font-black text-xs shadow-xs border border-amber-300 transition-all transform active:scale-95"
-              title="Riallinea, riduci/ingrandisci e bilancia la grafica per il formato selezionato"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-slate-950 animate-bounce" />
-              <span className="hidden sm:inline">Make it perfect</span>
-            </button>
-          )}
+          <span className="flex-1" />
 
-          {/* Social Share Modal */}
           <button
+            type="button"
             onClick={onOpenShareModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold border border-slate-200 transition-all"
-            title="Condividi sui Social Network o WhatsApp"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1.5 text-[10px] font-semibold text-white/75 hover:text-white"
           >
-            <Share2 className="w-3.5 h-3.5 text-[#0D4D5E]" />
-            <span className="hidden md:inline">Condividi</span>
+            <Share2 className="h-3.5 w-3.5" />
+            {t.share}
           </button>
-
-          {/* PNG Export */}
           <button
+            type="button"
             onClick={onExportPng}
             disabled={isExporting}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold border border-slate-200 transition-all disabled:opacity-50"
-            title="Scarica Immagine PNG ad Alta Risoluzione"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1.5 text-[10px] font-semibold text-white/75 hover:text-white disabled:opacity-40"
           >
-            <Download className="w-3.5 h-3.5 text-emerald-600" />
-            <span>PNG</span>
+            <Download className="h-3.5 w-3.5" />
+            PNG
           </button>
-
-          {/* PDF & Print Button (Primary CTA) */}
           <button
+            type="button"
             onClick={onPrintPdf}
             disabled={isExporting}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-[#0D4D5E] hover:bg-[#083642] text-white text-xs font-bold shadow-sm transition-all transform active:scale-95 disabled:opacity-50"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded bg-white px-3 py-1.5 text-[10px] font-bold text-[#0D4D5E] disabled:opacity-40"
           >
-            <Printer className="w-4 h-4" />
-            <span>Stampa PDF ({paperFormat})</span>
+            <Printer className="h-3.5 w-3.5" />
+            {t.pdf} · {paperFormat}
           </button>
         </div>
-
-      </div>
-    </header>
+      </nav>
+    </>
   );
 };

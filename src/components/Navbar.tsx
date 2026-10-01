@@ -1,7 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { Download, Eye, Printer, RotateCw, Share2 } from 'lucide-react';
-import { DNS_DESIGN_SYSTEM } from '@dolomitinordicski/dns-shared-data/design-system';
-import { initDNSNavigationRuntime } from '@dolomitinordicski/dns-shared-data/ui/navigation';
+import { initDNSToolChromeRuntime } from '@dolomitinordicski/dns-shared-data/ui/tool-chrome';
 import { PaperFormat, PaperOrientation } from '../types';
 import { AccessibilityMount } from './AccessibilityMount';
 import type { DNSCoreHeaderStatus } from '../lib/dnsCoreHeader';
@@ -71,32 +70,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   coreStatus,
 }) => {
   const t = copy[uiLanguage];
-  const headerRef = useRef<HTMLElement>(null);
-  const navRef = useRef<HTMLElement>(null);
-  const progressTrackRef = useRef<HTMLDivElement>(null);
-  const progressBarRef = useRef<HTMLSpanElement>(null);
-
   useEffect(() => {
-    if (!headerRef.current || !navRef.current) return;
-    const runtime = initDNSNavigationRuntime({
-      header: headerRef.current,
-      nav: navRef.current,
-      progressTrack: progressTrackRef.current,
-      progressBar: progressBarRef.current,
-      navigation: DNS_DESIGN_SYSTEM.navigation,
-      responsive: DNS_DESIGN_SYSTEM.responsive,
-      headerTokens: DNS_DESIGN_SYSTEM.header,
-      motion: DNS_DESIGN_SYSTEM.motion,
-    });
+    const runtime = initDNSToolChromeRuntime();
     return () => runtime.disconnect();
   }, []);
 
   return (
     <>
       <header
-        ref={headerRef}
+        data-dns-tool-header
         id="dns-flyer-header"
-        className="sticky top-0 z-30 bg-[#0D4D5E] text-white shadow-[0_1px_0_rgba(255,255,255,.08)] no-print"
+        className="bg-[#0D4D5E] text-white shadow-[0_1px_0_rgba(255,255,255,.08)] no-print"
       >
         <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-5 py-3.5 md:px-8">
           <div className="flex min-w-0 items-center gap-4">
@@ -161,19 +145,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </header>
 
-      <nav ref={navRef} id="dns-flyer-nav" className="dns-tab-nav no-print" aria-label="DNS Flyer Studio">
-        <div
-          ref={progressTrackRef}
-          className="dns-scroll-progress-track"
-          role="progressbar"
-          aria-label="Page scroll progress"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={0}
-        >
-          <span ref={progressBarRef} className="dns-scroll-progress-bar" />
-        </div>
-
+      <nav data-dns-tool-nav data-dns-command-bar id="dns-flyer-nav" className="dns-tab-nav no-print" aria-label="DNS Flyer Studio command bar">
         <div className="dns-tab-nav-inner gap-1">
           <button
             type="button"

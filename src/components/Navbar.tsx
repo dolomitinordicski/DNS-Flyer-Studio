@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Download, Eye, Printer, RotateCw, Share2 } from 'lucide-react';
 import { initDNSToolChromeRuntime } from '@dolomitinordicski/dns-shared-data/ui/tool-chrome';
+import { formatDNSCoreHeaderStatus } from '@dolomitinordicski/dns-shared-data/ui/header-status';
 import { PaperFormat, PaperOrientation } from '../types';
 import { AccessibilityMount } from './AccessibilityMount';
 import type { DNSCoreHeaderStatus } from '../lib/dnsCoreHeader';
@@ -70,6 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   coreStatus,
 }) => {
   const t = copy[uiLanguage];
+  const coreHeader = formatDNSCoreHeaderStatus(coreStatus, uiLanguage);
   useEffect(() => {
     const runtime = initDNSToolChromeRuntime();
     return () => runtime.disconnect();
@@ -82,27 +84,23 @@ export const Navbar: React.FC<NavbarProps> = ({
         id="dns-flyer-header"
         className="bg-[#0D4D5E] text-white shadow-[0_1px_0_rgba(255,255,255,.08)] no-print"
       >
-        <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-5 py-3.5 md:px-8">
-          <div className="flex min-w-0 items-center gap-4">
+        <div className="dns-tool-header-shell">
+          <div className="dns-tool-header-brand">
             <img
               src="https://dolomitinordicski.github.io/dns-shared-data/brand/logo-web.png"
               alt="Dolomiti NordicSki"
-              className="h-10 w-auto shrink-0 object-contain"
+              className="dns-tool-header-logo"
             />
-            <div className="min-w-0">
-              <div className="whitespace-nowrap text-[22px] uppercase leading-none tracking-[.035em] text-white">
-                <strong>DNS</strong> <span className="font-normal">FLYER STUDIO</span>
-              </div>
-              <div className="mt-1.5 truncate font-roboto text-[11px] font-normal uppercase leading-tight tracking-[.06em] text-[#AAD0D1]">
-                {t.subtitle}
-              </div>
+            <div className="dns-tool-header-identity">
+              <div className="dns-tool-header-title"><strong>DNS</strong> <span>FLYER STUDIO</span></div>
+              <div className="dns-tool-header-subtitle">{t.subtitle}</div>
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-4">
-            <div className="flex items-center gap-3">
+          <div className="dns-tool-header-actions">
+            <div className="dns-tool-header-controls">
               <AccessibilityMount language={uiLanguage} />
-              <div className="flex gap-3 text-[10px] font-bold uppercase tracking-[.06em]">
+              <div className="dns-tool-header-language">
                 {(['de', 'it'] as const).map(language => (
                   <button
                     key={language}
@@ -120,26 +118,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </div>
 
-            <div
-              className={[
-                'hidden items-center gap-2 text-[10px] font-semibold uppercase tracking-[.05em] xl:flex',
-                coreStatus.state === 'ready' ? 'text-[#d8f0e7]' : '',
-                coreStatus.state === 'error' ? 'text-[#ffd7d0]' : 'text-white/65',
-              ].join(' ')}
-              aria-live="polite"
-            >
-              <span
-                className={[
-                  'h-2 w-2 rounded-full',
-                  coreStatus.state === 'ready' ? 'bg-emerald-400' : '',
-                  coreStatus.state === 'error' ? 'bg-orange-400' : 'bg-[#AAD0D1]',
-                ].join(' ')}
-              />
-              {coreStatus.state === 'ready'
-                ? `${uiLanguage === 'de' ? 'DNS_Core verbunden' : 'DNS_Core connesso'} · ${coreStatus.reportingAreas}/${coreStatus.organizations}`
-                : coreStatus.state === 'error'
-                  ? (uiLanguage === 'de' ? 'DNS_Core nicht erreichbar' : 'DNS_Core non raggiungibile')
-                  : (uiLanguage === 'de' ? 'DNS_Core verbindet…' : 'Connessione a DNS_Core…')}
+            <div className="dns-tool-header-status" data-state={coreHeader.state} aria-live="polite">
+              <span className="dns-tool-header-status-dot" />
+              {coreHeader.text}
             </div>
           </div>
         </div>

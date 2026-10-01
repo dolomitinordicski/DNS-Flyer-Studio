@@ -1,10 +1,23 @@
 import { RegionalLogo } from '../types';
 import { OFFICIAL_ASSET_PATHS } from '../components/CorporateVectors';
-import logo3ZinnenSvg from '../assets/logo_regions/3-Zinnen_RGB.svg';
 import logo3ZinnenBadgeWhiteSvg from '../assets/logo_regions/3-Zinnen_Badge-White_RGB.svg';
-import logoAntholzertalSvg from '../assets/logo_regions/15_053_Logos_horizontal_4C_Antholzertal_2015 9-01.svg';
-import logoBiathlonSvg from '../assets/logo_regions/Biathlon-01.svg';
-import logoGsiesertalSvg from '../assets/logo_regions/Gsiesertal-Welsberg-Taisten-01.svg';
+
+const SHARED_REGION_ASSET_BASE =
+  'https://dolomitinordicski.github.io/dns-shared-data/brand/regions';
+
+const sharedRegionLogo = (filename: string) =>
+  `${SHARED_REGION_ASSET_BASE}/${filename}`;
+
+const logoAntholzertalSvg = sharedRegionLogo('antholzertal-kronplatz.svg');
+const logoBiathlonSvg = sharedRegionLogo('biathlon-antholz-2027.svg');
+const logoGsiesertalSvg = sharedRegionLogo('gsiesertal-welsberg-taisten.svg');
+const logo3ZinnenSvg = sharedRegionLogo('drei-zinnen-dolomites.svg');
+const logoOsttirolSvg = sharedRegionLogo('osttirol.svg');
+const logoComelicoSvg = sharedRegionLogo('val-comelico.svg');
+const logoCortinaSvg = sharedRegionLogo('cortina-dolomiti.svg');
+const logoAhrntalSvg = sharedRegionLogo('ahrntal-valle-aurina.svg');
+const logoSeiserAlmSvg = sharedRegionLogo('seiser-alm.svg');
+const logoValGardenaSvg = sharedRegionLogo('val-gardena.svg');
 
 export const REGIONAL_LOGOS: RegionalLogo[] = [
   {
@@ -30,7 +43,7 @@ export const REGIONAL_LOGOS: RegionalLogo[] = [
       },
       {
         id: 'biathlon',
-        name: 'Logo Biathlon Anterselva',
+        name: 'Biathlon Antholz · IBU World Cup 2027',
         logoSrc: logoBiathlonSvg,
       },
       {
@@ -71,7 +84,7 @@ export const REGIONAL_LOGOS: RegionalLogo[] = [
     regionName: 'Osttirol / Tirolo Orientale',
     subTitle: '400 km Transkranz Piste / Piste Transfrontaliere',
     primaryColor: '#0D4D5E',
-    logoSrc: OFFICIAL_ASSET_PATHS.logoFarbe
+    logoSrc: logoOsttirolSvg
   },
   {
     id: 'comelico',
@@ -79,7 +92,7 @@ export const REGIONAL_LOGOS: RegionalLogo[] = [
     regionName: 'Comelico / Val Comelico',
     subTitle: 'Piste di Fondo tra Cime Spettacolari',
     primaryColor: '#0D4D5E',
-    logoSrc: OFFICIAL_ASSET_PATHS.logoFarbe
+    logoSrc: logoComelicoSvg
   },
   {
     id: 'cortina',
@@ -87,7 +100,7 @@ export const REGIONAL_LOGOS: RegionalLogo[] = [
     regionName: 'Cortina d\'Ampezzo',
     subTitle: 'Pista Ferrovia & Fiames',
     primaryColor: '#0D4D5E',
-    logoSrc: OFFICIAL_ASSET_PATHS.logoFarbe
+    logoSrc: logoCortinaSvg
   },
   {
     id: 'ahrntal',
@@ -95,7 +108,7 @@ export const REGIONAL_LOGOS: RegionalLogo[] = [
     regionName: 'Ahrntal / Valle Aurina',
     subTitle: 'Sand in Taufers & Campo Tures',
     primaryColor: '#0D4D5E',
-    logoSrc: OFFICIAL_ASSET_PATHS.logoFarbe
+    logoSrc: logoAhrntalSvg
   },
   {
     id: 'seiser_alm_val_gardena',
@@ -103,6 +116,24 @@ export const REGIONAL_LOGOS: RegionalLogo[] = [
     regionName: 'Seiser Alm / Val Gardena (Alpe di Siusi)',
     subTitle: 'Dolomites Val Gardena & Seiser Alm / Alpe di Siusi',
     primaryColor: '#0D4D5E',
-    logoSrc: OFFICIAL_ASSET_PATHS.logoFarbe
+    logoSrc: logoSeiserAlmSvg,
+    logos: [
+      {
+        id: 'seiser-alm',
+        name: 'Dolomites Seiser Alm',
+        logoSrc: logoSeiserAlmSvg,
+      },
+      {
+        id: 'val-gardena',
+        name: 'Dolomites Val Gardena',
+        logoSrc: logoValGardenaSvg,
+      },
+      {
+        id: 'both',
+        name: 'Entrambi i Loghi (Seiser Alm + Val Gardena)',
+        logoSrc: logoSeiserAlmSvg,
+        secondaryLogoSrc: logoValGardenaSvg,
+      }
+    ]
   }
 ];

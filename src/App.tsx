@@ -13,11 +13,16 @@ import { Printer, Download, Eye, RotateCw, Cloud, Sparkles, CheckCircle2 } from 
 import { ExportModal } from './components/ExportModal';
 import { getContentForLanguage } from './utils/multilingual';
 import { optimizeLayout } from './utils/layoutOptimizer';
+import { probeDNSCoreHeader, type DNSCoreHeaderStatus } from './lib/dnsCoreHeader';
 
 export default function App() {
   // View mode: 'editor' | 'dashboard'
   const [activeView, setActiveView] = useState<'editor' | 'dashboard'>('editor');
   const [perfectToast, setPerfectToast] = useState<string | null>(null);
+  const [uiLanguage, setUiLanguage] = useState<'de' | 'it'>(() =>
+    localStorage.getItem('dns-flyer-ui-language') === 'de' ? 'de' : 'it',
+  );
+  const [coreStatus, setCoreStatus] = useState<DNSCoreHeaderStatus>({ state: 'loading' });
 
   // Initial Flyer Content from Template 1 or LocalStorage
   const [content, setContent] = useState<FlyerContent>(() => {
@@ -71,6 +76,14 @@ export default function App() {
       visibility: defaultVis,
     };
   });
+
+  useEffect(() => {
+    localStorage.setItem('dns-flyer-ui-language', uiLanguage);
+  }, [uiLanguage]);
+
+  useEffect(() => {
+    void probeDNSCoreHeader().then(setCoreStatus);
+  }, []);
 
   // Save to localStorage whenever content changes
   React.useEffect(() => {
@@ -438,19 +451,18 @@ export default function App() {
         onChangeFormat={handleChangeFormat}
         orientation={content.orientation}
         onToggleOrientation={handleToggleOrientation}
-        activeTemplateId={activeTemplateId}
-        onSelectTemplate={handleApplyTemplate}
         showCropMarks={content.showCropMarks}
         onToggleCropMarks={handleToggleCropMarks}
-        onOpenAiModal={() => {}} // Feature removed
         onOpenShareModal={() => setIsShareModalOpen(true)}
         onPrintPdf={() => setIsExportModalOpen(true)}
         onExportPng={() => setIsExportModalOpen(true)}
         isExporting={isExporting}
         activeView={activeView}
         onToggleView={(view) => setActiveView(view)}
-        onMakeItPerfect={handleMakeItPerfect}
         isOnlineTicketModel={isOnlineTicketModel}
+        uiLanguage={uiLanguage}
+        onUiLanguageChange={setUiLanguage}
+        coreStatus={coreStatus}
       />
 
       {/* Make It Perfect Floating Toast Notification */}

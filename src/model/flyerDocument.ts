@@ -9,6 +9,8 @@ import type {
   PaperOrientation,
   SectionVisibility,
 } from '../types';
+import type { BlockDataBinding } from './blockDataContract';
+import { createInlineBlockBindings } from './blockDataContract';
 
 export const FLYER_DOCUMENT_SCHEMA = 'dns.flyer-document' as const;
 export const FLYER_DOCUMENT_VERSION = 1 as const;
@@ -61,6 +63,7 @@ export interface FlyerDocumentV1 {
     visibility?: SectionVisibility;
     orderPortrait?: FlyerSectionId[];
     orderLandscape?: FlyerSectionId[];
+    bindings?: BlockDataBinding[];
   };
   assets: {
     heroImageUrl?: string;
@@ -128,6 +131,7 @@ export function createFlyerDocumentV1(
       visibility: cloned.sectionVisibility ?? cloned.visibility,
       orderPortrait: cloned.sectionOrderPortrait,
       orderLandscape: cloned.sectionOrderLandscape,
+      bindings: createInlineBlockBindings(cloned),
     },
     assets: {
       heroImageUrl: cloned.heroImageUrl,

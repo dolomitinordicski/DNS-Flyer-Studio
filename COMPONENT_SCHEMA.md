@@ -151,3 +151,66 @@ F4 NON modifica:
 - ordine personalizzato salvato dagli utenti.
 
 Le varianti legacy verranno migrate solo in F5 dopo confronto visuale.
+
+
+---
+
+## 6. Block Data Contract (F5B)
+
+F5B separates **rendering** from **data sourcing**.
+
+### Architectural rule
+
+Blocks never query Firebase/Firestore directly.
+
+The flow is:
+
+`Data provider → FlyerDocument bindings → Block data resolver → Block Engine → Renderer`
+
+### Supported source types
+
+Each block binding declares one of:
+
+- `inline` — data stored in the FlyerDocument/current FlyerContent;
+- `dns-core` — canonical DNS dataset resolved by an application provider;
+- `asset-library` — image/media asset references resolved by an asset provider;
+- `derived` — values calculated from document/application context.
+
+### Binding example
+
+```ts
+{
+  blockId: "price-table-1",
+  componentId: "PRICE_TABLE",
+  sectionId: "priceTables",
+  enabled: true,
+  order: 5,
+  source: {
+    kind: "dns-core",
+    dataset: "official-prices",
+    season: "2026-27"
+  }
+}
+```
+
+### Runtime contracts
+
+Each implemented block can declare:
+
+- accepted source kinds;
+- required fields;
+- optional fields;
+- validation;
+- inline resolver.
+
+Current documents are automatically written with `inline` bindings, therefore F5B does not change current rendering or persistence behavior.
+
+### Provider boundary for F6
+
+`blockDataResolver.ts` defines interfaces for:
+
+- DNS Core provider;
+- Asset Library provider;
+- Derived data provider.
+
+F6 will implement these providers with the canonical DNS data architecture / Firestore without importing Firebase into any visual block.

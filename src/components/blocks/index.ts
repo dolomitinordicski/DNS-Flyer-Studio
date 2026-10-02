@@ -24,9 +24,15 @@ export { DisclaimerBlock } from './DisclaimerBlock';
 export { BrandFooterBlock } from './BrandFooterBlock';
 
 export { BLOCK_DEFINITIONS, BLOCK_BY_COMPONENT_ID, BLOCK_BY_SECTION_ID, getRuntimeBlock, isBlockVisible, getEditorPanelsForSections } from './BlockEngine';
-export type { FlyerBlockDefinition, FlyerComponentId, BlockEditorPanel } from './BlockEngine';
+export type { FlyerBlockDefinition, BlockEditorPanel } from './BlockEngine';
+export type { FlyerComponentId, BlockDataBinding, BlockDataSource, BlockDataSourceKind, BlockValidationIssue } from '../../model/blockDataContract';
 export { BlockStackRenderer } from './BlockStackRenderer';
 
 
 export { BLOCK_PRESETS, getBlockPresetForGraphicStyle } from './BlockPresets';
 export type { BlockPresetDefinition, BlockPresetId } from './BlockPresets';
+
+export { BLOCK_DATA_CONTRACTS, getBlockDataContract, validateBlockData, resolveBlockData } from './BlockDataContracts';
+
+export type { BlockDataProviders, DNSCoreDataProvider, AssetLibraryDataProvider, DerivedDataProvider, ResolvedBlockBinding } from '../../model/blockDataResolver';
+export { resolveBlockBinding, resolveFlyerBindings } from '../../model/blockDataResolver';

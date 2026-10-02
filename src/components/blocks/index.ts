@@ -33,3 +33,6 @@ export { BLOCK_PRESETS, getBlockPresetForGraphicStyle } from './BlockPresets';
 export type { BlockPresetDefinition, BlockPresetId } from './BlockPresets';
 
 export { BLOCK_DATA_CONTRACTS, getBlockDataContract, validateBlockData, resolveBlockData } from './BlockDataContracts';
+
+export type { BlockDataProviders, DNSCoreDataProvider, AssetLibraryDataProvider, DerivedDataProvider, ResolvedBlockBinding } from '../../model/blockDataResolver';
+export { resolveBlockBinding, resolveFlyerBindings } from '../../model/blockDataResolver';

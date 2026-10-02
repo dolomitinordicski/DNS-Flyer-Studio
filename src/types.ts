@@ -1,3 +1,5 @@
+import type { FlyerDocumentV1 } from './model/flyerDocument';
+
 export type PaperFormat = 'A4' | 'A5' | 'A3';
 export type PaperOrientation = 'portrait' | 'landscape';
 
@@ -418,6 +420,7 @@ export interface FlyerRecord {
   priceInfo?: string;
   targetAudience?: string;
   content: FlyerContent;
+  document?: FlyerDocumentV1;
   thumbnailUrl?: string;
   createdByRegion?: string;
   createdAt: string;

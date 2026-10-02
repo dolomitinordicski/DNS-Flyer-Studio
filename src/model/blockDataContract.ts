@@ -105,3 +105,53 @@ export function requiredField(
   }
   return [];
 }
+
+
+export const DEFAULT_SECTION_COMPONENTS: Partial<Record<FlyerSectionId, FlyerComponentId>> = {
+  header: 'BRAND_HEADER',
+  bigTitle: 'BIG_TITLE',
+  heroImage: 'HERO_MEDIA',
+  earlyBird: 'PRICE_CAROUSEL',
+  promotionBox: 'PROMO_HERO',
+  priceTables: 'PRICE_TABLE',
+  servicesBox: 'SERVICE_GRID',
+  ecoBanner: 'CUSTOM_BANNER',
+  qrCode: 'CALL_TO_ACTION',
+  disclaimer: 'DISCLAIMER_LEGAL',
+  footer: 'BRAND_FOOTER',
+};
+
+export function createInlineBlockBindings(content: FlyerContent): BlockDataBinding[] {
+  const visibility = content.sectionVisibility ?? content.visibility ?? {} as Record<string, boolean>;
+  const order = content.orientation === 'landscape'
+    ? (content.sectionOrderLandscape ?? [])
+    : (content.sectionOrderPortrait ?? []);
+  const fallbackOrder: FlyerSectionId[] = [
+    'header',
+    'heroImage',
+    'bigTitle',
+    'earlyBird',
+    'promotionBox',
+    'priceTables',
+    'servicesBox',
+    'ecoBanner',
+    'qrCode',
+    'disclaimer',
+    'footer',
+  ];
+  const sectionOrder = order.length > 0 ? order : fallbackOrder;
+
+  return sectionOrder.flatMap((sectionId, index) => {
+    const componentId = DEFAULT_SECTION_COMPONENTS[sectionId];
+    if (!componentId) return [];
+    const explicit = (visibility as Record<string, boolean | undefined>)[sectionId];
+    return [{
+      blockId: `${componentId.toLowerCase()}-${index + 1}`,
+      componentId,
+      sectionId,
+      enabled: explicit !== false,
+      order: index,
+      source: { kind: 'inline' as const },
+    }];
+  });
+}

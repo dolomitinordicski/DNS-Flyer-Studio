@@ -15,13 +15,11 @@ import {
 } from 'lucide-react';
 import { FlyerContent } from '../types';
 import { 
-  saveDesignToDNS Core, 
+  saveDesignToFirebase, 
   loadDesignsFromFirebase, 
   deleteDesignFromFirebase, 
-  saveFlyerRecordToFirebase,
   SavedDesign 
 } from '../lib/firebase';
-import { REGIONAL_LOGOS } from '../data/regionalLogos';
 
 interface SavedDesignsModalProps {
   uiLanguage: 'de' | 'it';
@@ -90,30 +88,12 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
         currentContent.heroImageUrl
       );
 
-      // 2. Save into Regional Dashboard Registry
-      const regObj = REGIONAL_LOGOS.find(r => r.id === currentContent.regionId);
-      const regionName = regObj ? regObj.name : 'Dolomiti NordicSki';
-
-      await saveFlyerRecordToFirebase({
-        title: designTitle.trim(),
-        regionId: currentContent.regionId || 'dns_central',
-        regionName: regionName,
-        status: 'issued',
-        publishDate: new Date().toISOString().split('T')[0],
-        validityPeriod: currentContent.validityPeriod || 'Stagione 2026/27',
-        location: currentContent.location || 'Dolomiti NordicSki',
-        category: 'general',
-        priceInfo: currentContent.priceAmount ? `${currentContent.pricePrefix || ''} ${currentContent.priceAmount} ${currentContent.priceCurrency || '€'}` : 'Listino Ufficiale',
-        content: savedContent,
-        thumbnailUrl: currentContent.heroImageUrl || ''
-      });
-
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 4000);
       await fetchDesigns();
     } catch (err: any) {
       console.error('Error saving design:', err);
-      setErrorMessage(ui('Fehler beim Speichern: ', 'Errore durante il salvataggio in Firebase: ') + (err.message || 'Riprova.'));
+      setErrorMessage(ui('Fehler beim Speichern: ', 'Errore durante il salvataggio in DNS Core: ') + (err.message || 'Riprova.'));
     } finally {
       setIsSaving(false);
     }

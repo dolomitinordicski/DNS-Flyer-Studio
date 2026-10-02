@@ -1,71 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-  LayoutTemplate, 
-  Type, 
-  Palette, 
-  MapPin, 
-  Image as ImageIcon, 
-  QrCode, 
-  Plus, 
-  Trash2, 
-  Check, 
-  Layers,
-  Settings,
-  Sliders,
-  Upload,
-  Globe,
-  Dumbbell,
-  Cloud,
-  Layout,
-  CheckCircle2,
-  Copy,
-  Save,
-  Loader2,
-  FolderPlus,
-  ShieldCheck,
-  Eye,
-  EyeOff,
-  Sparkles,
-  ArrowUp,
-  ArrowDown,
-  ChevronsUp,
-  ChevronsDown,
-  RotateCcw,
-  Move,
-  Maximize2,
-  Square,
-  Ticket,
-  Hotel
-} from 'lucide-react';
-import { FlyerContent, LayoutTemplateId, BrandColorScheme, PaperFormat, GraphicStyle, FlyerSectionId, LanguageCode, MultilingualTextSet, SportsIcon } from '../types';
-import { FLYER_TEMPLATES, DEFAULT_PRICE_LIST_TEXTS, DIGITAL_PASS_PRESETS } from '../data/templates';
-import { REGIONAL_LOGOS } from '../data/regionalLogos';
-import { SPORTS_ICONS, getSportsIconName, getAllSportsIcons } from '../data/sportsIcons';
-import { DolomitiSkierTrackEmblem, OFFICIAL_ASSET_PATHS } from './CorporateVectors';
-import { WireframeIcon } from './WireframeIcon';
-import { isSvgUrl } from '../utils/logoUtils';
-import { DIGITAL_PASS_REGIONS } from './blocks/RegionalAreasGridBlock';
-import { 
-  saveDesignToFirebase, 
-  loadDesignsFromFirebase, 
-  deleteDesignFromFirebase, 
-  SavedDesign,
+import React, { useEffect, useRef, useState } from 'react';
+import type { FlyerContent, LayoutTemplateId, SportsIcon } from '../types';
+import {
+  deleteCustomIconFromFirebase,
   loadCustomIconsFromFirebase,
+  loadDesignsFromFirebase,
   saveCustomIconToFirebase,
-  deleteCustomIconFromFirebase
+  saveDesignToFirebase,
+  type SavedDesign,
 } from '../lib/firebase';
-import { DEFAULT_SECTION_ORDER } from './flyer-variants/VariantTypes';
-import { LANGUAGE_OPTIONS, getInitialTranslations, getContentForLanguage } from '../utils/multilingual';
 import { EditorChrome, type EditorTabId } from './editor/EditorChrome';
-import { IconsEditorTab } from './editor/IconsEditorTab';
-import { QRCodeEditorTab } from './editor/QRCodeEditorTab';
-import { RegionEditorTab } from './editor/RegionEditorTab';
-import { ImagesEditorTab } from './editor/ImagesEditorTab';
-import { StyleEditorTab } from './editor/StyleEditorTab';
 import { TemplatesEditorTab } from './editor/TemplatesEditorTab';
 import { LayoutVariantsEditorTab } from './editor/LayoutVariantsEditorTab';
 import { GraphicElementsEditorTab } from './editor/GraphicElementsEditorTab';
 import { ContentEditorTab } from './editor/ContentEditorTab';
+import { RegionEditorTab } from './editor/RegionEditorTab';
+import { ImagesEditorTab } from './editor/ImagesEditorTab';
+import { StyleEditorTab } from './editor/StyleEditorTab';
+import { IconsEditorTab } from './editor/IconsEditorTab';
+import { QRCodeEditorTab } from './editor/QRCodeEditorTab';
 import { STOCK_IMAGES } from './editor/editorAssets';
 
 interface EditorPanelProps {

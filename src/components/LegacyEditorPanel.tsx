@@ -9,7 +9,7 @@ import {
   type SavedDesign,
 } from '../lib/firebase';
 import { LegacyEditorChrome, type LegacyEditorTabId } from './editor/LegacyEditorChrome';
-import { TemplatesEditorTab } from './editor/TemplatesEditorTab';
+import { LegacyTemplatesEditorTab } from './editor/LegacyTemplatesEditorTab';
 import { LayoutVariantsEditorTab } from './editor/LayoutVariantsEditorTab';
 import { GraphicElementsEditorTab } from './editor/GraphicElementsEditorTab';
 import { ContentEditorTab } from './editor/ContentEditorTab';
@@ -317,7 +317,7 @@ export const LegacyEditorPanel: React.FC<LegacyEditorPanelProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         
         {activeTab === 'templates' && (
-          <TemplatesEditorTab
+          <LegacyTemplatesEditorTab
             uiLanguage={uiLanguage}
             content={content}
             firebaseSavedModels={firebaseSavedModels}

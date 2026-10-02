@@ -241,7 +241,11 @@ export default function App() {
 
   // Load Saved Design from Firebase
   const handleLoadSavedDesign = (savedContent: FlyerContent) => {
-    setContent(savedContent);
+    const product = getFlyerProductByTemplate(savedContent.layoutTemplateId);
+    const scopedContent = currentReportingAreaId
+      ? { ...savedContent, regionId: currentReportingAreaId }
+      : savedContent;
+    setContent(product ? lockContentToProduct(scopedContent, product) : scopedContent);
   };
 
   // Helper to compute optimal graphic sizes for format & orientation

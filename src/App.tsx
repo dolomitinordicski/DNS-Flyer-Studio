@@ -186,7 +186,7 @@ export default function App() {
           // Carry over persistent app preferences
           format: prev.format || 'A4',
           orientation: prev.orientation || 'portrait',
-          activeLanguage: prev.activeLanguage || 'de',
+          activeLanguage: prev.activeLanguage || 'it',
           logoVariant: prev.logoVariant || 'default',
           logoCornerStyle: prev.logoCornerStyle || 'rounded',
           showCropMarks: prev.showCropMarks,
@@ -440,7 +440,7 @@ export default function App() {
     }
   };
 
-  const handleExportPng = () => handleExportPngSingle(content.activeLanguage || 'de');
+  const handleExportPng = () => handleExportPngSingle(content.activeLanguage || 'it');
 
   const isOnlineTicketModel = content.graphicStyle === 'online_ticket_manifesto' || content.graphicStyle === 'online_ticket_manifesto_v1';
 
@@ -606,7 +606,7 @@ export default function App() {
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         format={content.format}
-        activeLanguage={content.activeLanguage || 'de'}
+        activeLanguage={content.activeLanguage || 'it'}
         onExportPdfBundle={handleExportPdfBundle}
         onExportPdfSeparate={handleExportPdfSeparate}
         onExportPdfSingle={handleExportPdfSingle}

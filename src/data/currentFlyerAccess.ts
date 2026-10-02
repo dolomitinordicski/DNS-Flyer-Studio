@@ -1,5 +1,7 @@
 import {
   collection,
+  doc,
+  getDoc,
   getDocs,
   query,
   where,
@@ -17,11 +19,11 @@ export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
   if (!user) return { isAdmin: false };
 
   const [userSnap, grantsSnap] = await Promise.all([
-    getDocs(query(collection(dnsCoreDb, 'users'), where('__name__', '==', user.uid))),
+    getDoc(doc(dnsCoreDb, 'users', user.uid)),
     getDocs(query(collection(dnsCoreDb, 'accessGrants'), where('userId', '==', user.uid))),
   ]);
 
-  const userData = userSnap.docs[0]?.data();
+  const userData = userSnap.exists() ? userSnap.data() : undefined;
   const isAdmin = Array.isArray(userData?.globalRoles) && userData.globalRoles.includes('dns-admin');
 
   const grants = grantsSnap.docs

@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import rawFirebaseConfig from '../../firebase-applet-config.json';
 import { FlyerContent, FlyerRecord, SportsIcon } from '../types';
+import { createFlyerDocumentV1, flyerDocumentToContent, isFlyerDocumentV1, type FlyerDocumentV1 } from '../model/flyerDocument';
 import { INITIAL_FLYER_REGISTRY } from '../data/mockFlyerRegistry';
 
 interface FirebaseAppletConfig {
@@ -35,6 +36,7 @@ export interface SavedDesign {
   graphicStyle: any;
   themeColor: string;
   content: FlyerContent;
+  document?: FlyerDocumentV1;
   thumbnail?: string;
   createdAt: string;
   updatedAt: string;
@@ -47,10 +49,29 @@ const LOCAL_STORAGE_KEY = 'dns_flyer_saved_designs';
 function getLocalDesigns(): SavedDesign[] {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const items = raw ? JSON.parse(raw) : [];
+    return Array.isArray(items) ? items.map(normalizeSavedDesign) : [];
   } catch {
     return [];
   }
+}
+
+function normalizeSavedDesign(item: any): SavedDesign {
+  const document = isFlyerDocumentV1(item?.document) ? item.document : undefined;
+  const content = document
+    ? flyerDocumentToContent(document)
+    : (item?.content as FlyerContent);
+  return {
+    ...item,
+    content,
+    document: document ?? (content ? createFlyerDocumentV1(content, {
+      id: item?.id,
+      title: item?.title,
+      source: 'legacy',
+      createdAt: item?.createdAt,
+      updatedAt: item?.updatedAt,
+    }) : undefined),
+  };
 }
 
 function saveLocalDesigns(items: SavedDesign[]) {
@@ -94,6 +115,13 @@ export async function saveDesignToFirebase(
     graphicStyle: graphicStyle || 'classic_official',
     themeColor: content.themeColor || 'classic_blue',
     content: JSON.parse(JSON.stringify(content)),
+    document: createFlyerDocumentV1(content, {
+      id: docId,
+      title,
+      source: 'saved-design',
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    }),
     thumbnail: thumbnail || '',
     updatedAt: nowIso,
     createdAt: nowIso
@@ -145,7 +173,18 @@ export async function loadDesignsFromFirebase(): Promise<SavedDesign[]> {
           regionId: data.regionId || 'default',
           graphicStyle: data.graphicStyle || 'classic_official',
           themeColor: data.themeColor || 'classic_blue',
-          content: data.content as FlyerContent,
+          content: isFlyerDocumentV1(data.document)
+            ? flyerDocumentToContent(data.document)
+            : data.content as FlyerContent,
+          document: isFlyerDocumentV1(data.document)
+            ? data.document
+            : createFlyerDocumentV1(data.content as FlyerContent, {
+                id: docSnap.id,
+                title: data.title,
+                source: 'legacy',
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt,
+              }),
           thumbnail: data.thumbnail || '',
           createdAt: data.createdAt || new Date().toISOString(),
           updatedAt: data.updatedAt || new Date().toISOString()

@@ -50,6 +50,7 @@ import { DolomitiFullLogo } from './CorporateVectors';
 import { FlyerCanvas } from './FlyerCanvas';
 
 interface FlyerDashboardProps {
+  uiLanguage: 'de' | 'it';
   onLoadFlyerIntoEditor: (content: FlyerContent) => void;
   onOpenNewFlyerModal?: () => void;
 }
@@ -82,7 +83,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   general: '#417483'
 };
 
-export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ onLoadFlyerIntoEditor }) => {
+export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLoadFlyerIntoEditor }) => {
+  const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [records, setRecords] = useState<FlyerRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -192,7 +194,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ onLoadFlyerIntoE
         name: shortName,
         fullName: reg.name,
         Emessi: issued,
-        'In Programmazione': scheduled,
+        '{ui('In Planung', 'In Programmazione')}': scheduled,
         Totale: issued + scheduled
       };
     }).filter(d => d.Totale > 0 || selectedRegionId === 'all');
@@ -337,13 +339,13 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ onLoadFlyerIntoE
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#AAD0D1] border border-white/15 text-xs font-bold uppercase tracking-wider font-vietnam">
                 <Building2 className="w-3.5 h-3.5" />
-                <span>Piattaforma Multiregionale Dolomiti NordicSki</span>
+                <span>Dolomiti NordicSki · {ui('Gebietsübergreifende Plattform', 'Piattaforma Multiregionale')}</span>
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-vietnam tracking-tight">
-                Registro Grafico & Programmazione Flyer
+                {ui('Flyer-Register & Planung', 'Registro Grafico & Programmazione Flyer')}
               </h1>
               <p className="text-slate-200 text-sm sm:text-base font-normal leading-relaxed">
-                Panoramica centralizzata dei flyer pubblicati e in programma per tutte le 9 regioni del carosello. Filtra per organizzazione, analizza la copertura temporale e gestisci le release ufficiali.
+                {ui('Zentrale Übersicht über veröffentlichte und geplante Flyer der 8 DNS-Gebiete. Nach Organisation filtern, Zeiträume analysieren und offizielle Veröffentlichungen verwalten.', 'Panoramica centralizzata dei flyer pubblicati e in programma per tutte le 8 aree DNS. Filtra per organizzazione, analizza la copertura temporale e gestisci le release ufficiali.')}
               </p>
             </div>
 
@@ -354,7 +356,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ onLoadFlyerIntoE
                 className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#AAD0D1] hover:bg-[#82b8b9] text-[#0D4D5E] font-black text-xs sm:text-sm shadow-md transition-all transform active:scale-95 font-vietnam"
               >
                 <PlusCircle className="w-4 h-4" />
-                <span>Programma Nuovo Flyer</span>
+                <span>{ui('Neuen Flyer planen', 'Programma Nuovo Flyer')}</span>
               </button>
             </div>
           </div>
@@ -374,7 +376,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ onLoadFlyerIntoE
             </div>
             <div>
               <div className="text-2xl font-black text-slate-900 font-vietnam">{metrics.total}</div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Flyer Totali</div>
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{ui('Flyer gesamt', 'Flyer Totali')}</div>
             </div>
           </div>
 
@@ -384,7 +386,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ onLoadFlyerIntoE
             </div>
             <div>
               <div className="text-2xl font-black text-emerald-600 font-vietnam">{metrics.issued}</div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pubblicati / Emessi</div>
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{ui('Veröffentlicht', 'Pubblicati / Emessi')}</div>
             </div>
           </div>
 
@@ -403,8 +405,8 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ onLoadFlyerIntoE
               <Building2 className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-2xl font-black text-purple-700 font-vietnam">{metrics.activeRegionsCount} / 9</div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Regioni Attive</div>
+              <div className="text-2xl font-black text-purple-700 font-vietnam">{metrics.activeRegionsCount} / 8</div>
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{ui('Aktive Gebiete', 'Aree Attive')}</div>
             </div>
           </div>
 

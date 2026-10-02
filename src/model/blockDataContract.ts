@@ -121,7 +121,7 @@ export const DEFAULT_SECTION_COMPONENTS: Partial<Record<FlyerSectionId, FlyerCom
   footer: 'BRAND_FOOTER',
 };
 
-export function createInlineBlockBindings(content: FlyerContent): BlockDataBinding[] {
+export function createDefaultBlockBindings(content: FlyerContent): BlockDataBinding[] {
   const visibility = content.sectionVisibility ?? content.visibility ?? {} as Record<string, boolean>;
   const order = content.orientation === 'landscape'
     ? (content.sectionOrderLandscape ?? [])
@@ -151,7 +151,25 @@ export function createInlineBlockBindings(content: FlyerContent): BlockDataBindi
       sectionId,
       enabled: explicit !== false,
       order: index,
-      source: { kind: 'inline' as const },
+      source: componentId === 'PRICE_TABLE'
+        && (content.layoutTemplateId === 'official_price_list'
+          || content.layoutTemplateId === 'regional_price_list'
+          || content.graphicStyle === 'official_price_table')
+        ? {
+            kind: 'dns-core' as const,
+            dataset: 'ticketPricingConfigs',
+            season: normalizeSeasonId(content.validityPeriod),
+          }
+        : { kind: 'inline' as const },
     }];
   });
+}
+
+
+/** @deprecated F6.5: use createDefaultBlockBindings. Kept for compatibility. */
+export const createInlineBlockBindings = createDefaultBlockBindings;
+
+function normalizeSeasonId(value?: string): string {
+  const normalized = value?.trim().replace('/', '-');
+  return normalized && /^\d{4}-\d{2}$/.test(normalized) ? normalized : '2026-27';
 }

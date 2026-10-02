@@ -2,6 +2,7 @@ import type { FlyerContent, PriceListTexts } from '../types';
 import type { DNSCoreBlockDataSource } from '../model/blockDataContract';
 import { dnsCoreBlockDataProvider } from './blockDataProviders';
 import { seasonIdFromContent } from './flyerRepository';
+import { toCanonicalReportingAreaId } from './canonicalRegionIds';
 
 interface PricingConfig {
   id?: string;
@@ -42,7 +43,7 @@ export async function hydratePriceTableFromDNSCore(content: FlyerContent): Promi
   const configs = raw.filter(isPricingConfig);
   if (configs.length === 0) return content;
 
-  const canonical = buildCanonicalPriceTexts(configs, content.regionId);
+  const canonical = buildCanonicalPriceTexts(configs, toCanonicalReportingAreaId(content.regionId));
   if (Object.keys(canonical).length === 0) return content;
 
   const mergeTexts = (base?: PriceListTexts): PriceListTexts => ({
@@ -72,7 +73,7 @@ export async function hydratePriceTableFromDNSCore(content: FlyerContent): Promi
 
 export function buildCanonicalPriceTexts(
   configs: PricingConfig[],
-  regionId: string,
+  reportingAreaId: string | null,
 ): Partial<PriceListTexts> {
   const candidates = configs
     .filter(config =>
@@ -85,14 +86,14 @@ export function buildCanonicalPriceTexts(
     .sort((a, b) => (b.revision ?? 0) - (a.revision ?? 0));
 
   const area = (productCode: PricingConfig['productCode']) =>
-    pickPrice(candidates, productCode, 'reportingArea', regionId)
+    pickPrice(candidates, productCode, 'reportingArea', reportingAreaId ?? '')
     ?? pickPrice(candidates, productCode, 'network', 'dolomiti-nordicski');
 
   const network = (productCode: PricingConfig['productCode']) =>
     pickPrice(candidates, productCode, 'network', 'dolomiti-nordicski');
 
   const result: Partial<PriceListTexts> = {};
-  if (regionId && regionId !== 'dns_central') {
+  if (reportingAreaId) {
     const day = area('day');
     const weekArea = area('wk-area');
     const seasonArea = area('sk-area');

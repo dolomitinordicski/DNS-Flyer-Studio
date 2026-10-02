@@ -67,9 +67,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <div className="bg-[#0D4D5E]/10 border border-[#0D4D5E]/30 p-3.5 rounded-xl flex items-start gap-3 text-slate-900">
               <Globe className="w-5 h-5 text-[#0D4D5E] shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-xs text-[#0D4D5E] block">Modello Listino DNS e Regioni (Struttura Unificata)</span>
+                <span className="font-bold text-xs text-[#0D4D5E] block">{ui('DNS- und Gebiets-Preisliste (einheitliche Struktur)', 'Modello Listino DNS e Regioni (Struttura Unificata)')}</span>
                 <span className="text-[11px] text-slate-700 leading-relaxed block mt-0.5">
-                  La compilazione in 3 lingue separate è disattivata per questo modello. Verrà generata la versione ufficiale unica ad alta risoluzione pronta per la stampa tipografica.
+                  {ui('Für dieses Modell ist die Ausgabe in drei getrennten Sprachen deaktiviert. Es wird eine einzige offizielle hochauflösende Version erzeugt.', 'La compilazione in 3 lingue separate è disattivata per questo modello. Verrà generata la versione ufficiale unica ad alta risoluzione pronta per la stampa tipografica.')}
                 </span>
               </div>
             </div>
@@ -77,9 +77,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center gap-3">
               <Globe className="w-5 h-5 text-[#0D4D5E] shrink-0" />
               <div>
-                <span className="font-bold text-slate-900 block">3 Lingue Configurate (DE / IT / EN)</span>
+                <span className="font-bold text-slate-900 block">{ui('3 Sprachen konfiguriert (DE / IT / EN)', '3 Lingue Configurate (DE / IT / EN)')}</span>
                 <span className="text-[11px] text-slate-500">
-                  Puoi scaricare un singolo PDF trilingue con 3 pagine ordinate, 3 file distinti per ciascuna lingua, oppure solo la lingua attiva (<strong>{activeLanguage.toUpperCase()}</strong>).
+                  {ui('Du kannst ein dreisprachiges PDF mit 3 Seiten, 3 getrennte Dateien oder nur die aktive Sprache herunterladen', 'Puoi scaricare un singolo PDF trilingue con 3 pagine ordinate, 3 file distinti per ciascuna lingua, oppure solo la lingua attiva')} (<strong>{activeLanguage.toUpperCase()}</strong>).
                 </span>
               </div>
             </div>
@@ -103,14 +103,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   </div>
                   <div>
                     <span className="font-bold text-slate-900 text-xs block group-hover:text-[#0D4D5E]">
-                      📄 Scarica PDF Listino Prezzi Ufficiale (300 DPI)
+                      {ui('📄 Offizielle Preisliste als PDF herunterladen (300 DPI)', '📄 Scarica PDF Listino Prezzi Ufficiale (300 DPI)')}
                     </span>
                     <span className="text-[11px] text-slate-500">
-                      Documento PDF vettoriale ad alta definizione per la stampa.
+                      {ui('Hochauflösendes PDF-Dokument für den Druck.', 'Documento PDF vettoriale ad alta definizione per la stampa.')}
                     </span>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 px-2.5 py-1 rounded-md shrink-0">Stampa HQ</span>
+                <span className="text-xs font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 px-2.5 py-1 rounded-md shrink-0">{ui('HQ-Druck', 'Stampa HQ')}</span>
               </button>
             ) : (
               <>
@@ -219,7 +219,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   className="py-2.5 px-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-2xs"
                 >
                   <Download className="w-4 h-4 text-emerald-600" />
-                  <span>3 Immagini PNG (DE, IT, EN)</span>
+                  <span>{ui('3 PNG-Bilder (DE, IT, EN)', '3 Immagini PNG (DE, IT, EN)')}</span>
                 </button>
               )}
 
@@ -232,7 +232,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 className="py-2.5 px-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-2xs"
               >
                 <Download className="w-4 h-4 text-[#0D4D5E]" />
-                <span>Scarica Immagine PNG Listino</span>
+                <span>{ui('Preisliste als PNG herunterladen', 'Scarica Immagine PNG Listino')}</span>
               </button>
             </div>
           </div>
@@ -255,7 +255,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             disabled={isExporting}
             className="px-4 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold transition-all"
           >
-            Annulla
+            {ui('Abbrechen', 'Annulla')}
           </button>
         </div>
 

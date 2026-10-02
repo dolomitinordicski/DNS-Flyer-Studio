@@ -1,5 +1,8 @@
 import type React from 'react';
 import type { FlyerContent, FlyerSectionId, SectionVisibility } from '../../types';
+import type { FlyerComponentId } from '../../model/blockDataContract';
+import type { BlockDataContract } from '../../model/blockDataContract';
+import { getBlockDataContract } from './BlockDataContracts';
 import type { BlockProps } from './BlockTypes';
 import { BrandHeaderBlock } from './BrandHeaderBlock';
 import { BigTitleBlock } from './BigTitleBlock';
@@ -12,26 +15,6 @@ import { CustomBannerBlock } from './CustomBannerBlock';
 import { CallToActionBlock } from './CallToActionBlock';
 import { DisclaimerBlock } from './DisclaimerBlock';
 import { BrandFooterBlock } from './BrandFooterBlock';
-
-export type FlyerComponentId =
-  | 'BRAND_HEADER'
-  | 'HERO_MEDIA'
-  | 'PROMO_HERO'
-  | 'PRICE_TABLE'
-  | 'PRICE_CAROUSEL'
-  | 'SERVICE_GRID'
-  | 'INFO_SERVICES_BOX'
-  | 'CUSTOM_BANNER'
-  | 'EVENT_SCHEDULE'
-  | 'MAP_LOCATION_BLOCK'
-  | 'CUSTOM_TEXT_BLOCK'
-  | 'PARTNER_SPONSOR_GRID'
-  | 'SOCIAL_COMMUNITY_BAR'
-  | 'CONTACT_CARD_BOX'
-  | 'CALL_TO_ACTION'
-  | 'DISCLAIMER_LEGAL'
-  | 'BRAND_FOOTER'
-  | 'BIG_TITLE';
 
 export type BlockEditorPanel =
   | 'brand'
@@ -60,6 +43,7 @@ export interface FlyerBlockDefinition {
   implementation: 'runtime' | 'planned';
   renderer?: React.FC<BlockProps>;
   defaultVisible?: boolean;
+  dataContract?: BlockDataContract;
 }
 
 const runtime = (
@@ -81,6 +65,7 @@ const runtime = (
   optionalFields,
   implementation: 'runtime',
   defaultVisible,
+  dataContract: getBlockDataContract(componentId),
 });
 
 const planned = (
@@ -94,6 +79,7 @@ const planned = (
   editorPanels,
   requiredFields,
   implementation: 'planned',
+  dataContract: getBlockDataContract(componentId),
 });
 
 export const BLOCK_DEFINITIONS: readonly FlyerBlockDefinition[] = [

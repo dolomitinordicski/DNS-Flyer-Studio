@@ -10,13 +10,14 @@ import { dnsCoreDb, getDNSCoreUser } from '../lib/dnsCore';
 
 export interface CurrentFlyerAccess {
   isAdmin: boolean;
+  hasNetworkAccess: boolean;
   reportingAreaId?: string;
   organizationId?: string;
 }
 
 export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
   const user = getDNSCoreUser();
-  if (!user) return { isAdmin: false };
+  if (!user) return { isAdmin: false, hasNetworkAccess: false };
 
   const [userSnap, grantsSnap] = await Promise.all([
     getDoc(doc(dnsCoreDb, 'users', user.uid)),
@@ -30,11 +31,13 @@ export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
     .map(item => item.data())
     .filter(item => item.active === true);
 
+  const networkGrant = grants.find(item => item.scopeType === 'network' && item.scopeId === 'dolomiti-nordicski');
   const reportingArea = grants.find(item => item.scopeType === 'reportingArea');
   const organization = grants.find(item => item.scopeType === 'organization');
 
   return {
     isAdmin,
+    hasNetworkAccess: isAdmin || !!networkGrant,
     reportingAreaId: reportingArea?.scopeId,
     organizationId: organization?.scopeId,
   };

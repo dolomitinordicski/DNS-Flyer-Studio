@@ -13,6 +13,23 @@ import type {
 export const FLYER_DOCUMENT_SCHEMA = 'dns.flyer-document' as const;
 export const FLYER_DOCUMENT_VERSION = 1 as const;
 
+const LEGACY_GRAPHIC_STYLE_MAP: Partial<Record<GraphicStyle, GraphicStyle>> = {
+  classic_corporate_v1: 'classic_corporate',
+  classic_official_v1: 'classic_official',
+  modern_glacier_v1: 'modern_glacier',
+  glacier_panorama_v1: 'glacier_panorama',
+  nordic_modern_v1: 'nordic_modern',
+  official_price_table_v1: 'official_price_table',
+  online_ticket_manifesto_v1: 'online_ticket_manifesto',
+  manifesto_voucher_v1: 'manifesto_voucher',
+  official_ticket_voucher_v1: 'official_ticket_voucher',
+};
+
+export function normalizeGraphicStyle(style: GraphicStyle): GraphicStyle {
+  return LEGACY_GRAPHIC_STYLE_MAP[style] ?? style;
+}
+
+
 export interface FlyerDocumentV1 {
   schema: typeof FLYER_DOCUMENT_SCHEMA;
   version: typeof FLYER_DOCUMENT_VERSION;
@@ -97,7 +114,7 @@ export function createFlyerDocumentV1(
     brand: {
       regionId: cloned.regionId || 'dns_central',
       selectedRegionLogoId: cloned.selectedRegionLogoId,
-      graphicStyle: cloned.graphicStyle,
+      graphicStyle: normalizeGraphicStyle(cloned.graphicStyle),
       themeColor: cloned.themeColor,
     },
     page: {
@@ -147,7 +164,7 @@ export function flyerDocumentToContent(document: FlyerDocumentV1): FlyerContent 
     activeLanguage: document.locale.activeLanguage,
     regionId: document.brand.regionId,
     selectedRegionLogoId: document.brand.selectedRegionLogoId ?? legacy.selectedRegionLogoId,
-    graphicStyle: document.brand.graphicStyle,
+    graphicStyle: normalizeGraphicStyle(document.brand.graphicStyle),
     themeColor: document.brand.themeColor,
     format: document.page.format,
     orientation: document.page.orientation,
@@ -174,7 +191,9 @@ export function normalizeFlyerContent(value: unknown): FlyerContent | null {
   if (!candidate.regionId || !candidate.format || !candidate.orientation || !candidate.graphicStyle) {
     return null;
   }
-  return structuredCloneSafe(candidate as FlyerContent);
+  const normalized = structuredCloneSafe(candidate as FlyerContent);
+  normalized.graphicStyle = normalizeGraphicStyle(normalized.graphicStyle);
+  return normalized;
 }
 
 function structuredCloneSafe<T>(value: T): T {

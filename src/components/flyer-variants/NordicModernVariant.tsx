@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlyerVariantProps, getActiveOrder } from './VariantTypes';
-import { BLOCK_REGISTRY } from '../blocks';
+import { BlockStackRenderer } from '../blocks';
 
 export const NordicModernVariant: React.FC<FlyerVariantProps> = ({
   content,
@@ -35,24 +35,17 @@ export const NordicModernVariant: React.FC<FlyerVariantProps> = ({
       <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-cyan-500/10 blur-[120px] -z-10 rounded-full" />
       <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-blue-600/10 blur-[120px] -z-10 rounded-full" />
 
-      {getActiveOrder(content)
-        .filter(id => (visibility as any)[id] !== false)
-        .map(id => {
-          const Block = BLOCK_REGISTRY[id];
-          return Block ? (
-            <Block 
-              key={id} 
-              content={content} 
-              theme={theme} 
-              plt={plt}
-              regionLogo={regionLogo} 
-              activeSportsIcons={activeSportsIcons}
-              visibility={visibility} 
-              format={content.format || 'A4'}
-              orientation={content.orientation || 'portrait'} 
-            />
-          ) : null;
-        })}
+      <BlockStackRenderer
+        order={getActiveOrder(content)}
+        content={content}
+        theme={theme}
+        plt={plt}
+        regionLogo={regionLogo}
+        activeSportsIcons={activeSportsIcons}
+        visibility={visibility}
+        format={content.format || 'A4'}
+        orientation={content.orientation || 'portrait'}
+      />
     </div>
   );
 };

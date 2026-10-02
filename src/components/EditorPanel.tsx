@@ -11,7 +11,7 @@ import { SimpleContentEditorTab } from './editor/SimpleContentEditorTab';
 import { SimpleImageEditorTab } from './editor/SimpleImageEditorTab';
 import { SimpleStyleEditorTab } from './editor/SimpleStyleEditorTab';
 import { QRCodeEditorTab } from './editor/QRCodeEditorTab';
-import { getFlyerProductByTemplate } from '../model/flyerProductModel';
+import { getFlyerProductByTemplate, lockContentToProduct } from '../model/flyerProductModel';
 
 interface EditorPanelProps {
   uiLanguage: 'de' | 'it';
@@ -92,7 +92,10 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             onApplyTemplate={onApplyTemplate}
             onSave={saveDraft}
             onOpenSavedDesignsModal={onOpenSavedDesignsModal}
-            onLoadSaved={saved => onChangeContent(saved)}
+            onLoadSaved={saved => {
+              const savedProduct = getFlyerProductByTemplate(saved.layoutTemplateId);
+              onChangeContent(savedProduct ? lockContentToProduct(saved, savedProduct) : saved);
+            }}
           />
         )}
 

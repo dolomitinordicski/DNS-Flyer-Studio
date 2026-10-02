@@ -573,6 +573,15 @@ export default function App() {
         </div>
       )}
 
+      <footer data-dns-tool-footer className="no-print">
+        <div className="dns-tool-footer-shell">
+          <div className="dns-tool-footer-primary">Dolomiti NordicSki · Flyer Studio</div>
+          <div className="dns-tool-footer-meta">
+            {uiLanguage === 'de' ? 'Gemeinsame DNS Foundation · Benutzeroberfläche DE / IT' : 'DNS Foundation condivisa · Interfaccia DE / IT'}
+          </div>
+        </div>
+      </footer>
+
       {/* Social Media Direct Sharing Modal */}
       <SocialShareModal
         uiLanguage={uiLanguage}

@@ -17,6 +17,8 @@ import { probeDNSCoreHeader, type DNSCoreHeaderStatus } from './lib/dnsCoreHeade
 import { getDNSFoundationRuntime } from './lib/foundationRuntime';
 import { createFlyerDocumentV1, normalizeFlyerContent } from './model/flyerDocument';
 import { signInDNSCore, signOutDNSCore, subscribeDNSCoreUser } from './lib/dnsCore';
+import { loadCurrentFlyerAccess } from './data/currentFlyerAccess';
+import { getFlyerProductByTemplate, lockContentToProduct } from './model/flyerProductModel';
 
 export default function App() {
   // View mode: 'editor' | 'dashboard'
@@ -26,6 +28,7 @@ export default function App() {
   const [uiLanguage, setUiLanguageState] = useState<'de' | 'it'>(() => foundation.getLanguage());
   const [coreStatus, setCoreStatus] = useState<DNSCoreHeaderStatus>({ state: 'loading' });
   const [coreUserEmail, setCoreUserEmail] = useState<string | null>(null);
+  const [currentReportingAreaId, setCurrentReportingAreaId] = useState<string | null>(null);
 
   // Initial Flyer Content from Template 1 or LocalStorage
   const [content, setContent] = useState<FlyerContent>(() => {
@@ -90,7 +93,19 @@ export default function App() {
 
   useEffect(() => {
     void probeDNSCoreHeader().then(setCoreStatus);
-    return subscribeDNSCoreUser(user => setCoreUserEmail(user?.email ?? null));
+    return subscribeDNSCoreUser(user => {
+      setCoreUserEmail(user?.email ?? null);
+      if (!user) {
+        setCurrentReportingAreaId(null);
+        return;
+      }
+      void loadCurrentFlyerAccess()
+        .then(access => setCurrentReportingAreaId(access.reportingAreaId ?? null))
+        .catch(error => {
+          console.error('Failed to resolve DNS Core Flyer access:', error);
+          setCurrentReportingAreaId(null);
+        });
+    });
   }, []);
 
   const handleCoreSignIn = async () => {
@@ -192,12 +207,16 @@ export default function App() {
           footer: true,
         };
 
+        const product = getFlyerProductByTemplate(templateId);
         const newContent: FlyerContent = {
           ...prev,
           ...template.defaultContent,
 
           layoutTemplateId: templateId,
-          regionId: template.defaultContent.regionId || prev.regionId || 'dns_central',
+          regionId: currentReportingAreaId
+            || template.defaultContent.regionId
+            || prev.regionId
+            || 'dns_central',
 
           // Explicitly clear stale translation sets so fresh translations are initialized
           translations: undefined,
@@ -215,14 +234,18 @@ export default function App() {
           importedImages: prev.importedImages || [],
         };
 
-        return newContent;
+        return product ? lockContentToProduct(newContent, product) : newContent;
       });
     }
   };
 
   // Load Saved Design from Firebase
   const handleLoadSavedDesign = (savedContent: FlyerContent) => {
-    setContent(savedContent);
+    const product = getFlyerProductByTemplate(savedContent.layoutTemplateId);
+    const scopedContent = currentReportingAreaId
+      ? { ...savedContent, regionId: currentReportingAreaId }
+      : savedContent;
+    setContent(product ? lockContentToProduct(scopedContent, product) : scopedContent);
   };
 
   // Helper to compute optimal graphic sizes for format & orientation

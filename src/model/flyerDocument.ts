@@ -11,6 +11,8 @@ import type {
 } from '../types';
 import type { BlockDataBinding } from './blockDataContract';
 import { createInlineBlockBindings } from './blockDataContract';
+import type { FlyerProductType, FlyerOverrides } from './flyerProductModel';
+import { extractFlyerOverrides, getFlyerProductByTemplate } from './flyerProductModel';
 
 export const FLYER_DOCUMENT_SCHEMA = 'dns.flyer-document' as const;
 export const FLYER_DOCUMENT_VERSION = 1 as const;
@@ -41,6 +43,13 @@ export interface FlyerDocumentV1 {
     createdAt?: string;
     updatedAt?: string;
     source: 'legacy' | 'editor' | 'saved-design' | 'registry';
+    productType?: FlyerProductType;
+    templateId?: LayoutTemplateId;
+  };
+  product?: {
+    type: FlyerProductType;
+    templateId: LayoutTemplateId;
+    overrides: FlyerOverrides;
   };
   locale: {
     mode: 'monolingual' | 'trilingual';
@@ -100,6 +109,7 @@ export function createFlyerDocumentV1(
   options: CreateFlyerDocumentOptions = {},
 ): FlyerDocumentV1 {
   const cloned = structuredCloneSafe(content);
+  const product = getFlyerProductByTemplate(cloned.layoutTemplateId);
   return {
     schema: FLYER_DOCUMENT_SCHEMA,
     version: FLYER_DOCUMENT_VERSION,
@@ -109,7 +119,14 @@ export function createFlyerDocumentV1(
       createdAt: options.createdAt,
       updatedAt: options.updatedAt,
       source: options.source ?? 'editor',
+      productType: product?.type,
+      templateId: product?.templateId,
     },
+    product: product ? {
+      type: product.type,
+      templateId: product.templateId,
+      overrides: extractFlyerOverrides(cloned, product),
+    } : undefined,
     locale: {
       mode: cloned.languageMode ?? 'monolingual',
       activeLanguage: cloned.activeLanguage ?? 'it',

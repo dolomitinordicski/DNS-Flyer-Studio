@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, Eye, LogIn, LogOut, Printer, RotateCw, Share2 } from 'lucide-react';
+import { Download, LogIn, LogOut, Printer, Share2 } from 'lucide-react';
 import { formatDNSCoreHeaderStatus } from '@dolomitinordicski/dns-shared-data/ui/header-status';
 import { PaperFormat, PaperOrientation } from '../types';
 import type { DNSCoreHeaderStatus } from '../lib/dnsCoreHeader';
@@ -59,18 +59,18 @@ const copy = {
 
 export const Navbar: React.FC<NavbarProps> = ({
   paperFormat,
-  onChangeFormat,
-  orientation,
-  onToggleOrientation,
-  showCropMarks,
-  onToggleCropMarks,
+  onChangeFormat: _onChangeFormat,
+  orientation: _orientation,
+  onToggleOrientation: _onToggleOrientation,
+  showCropMarks: _showCropMarks,
+  onToggleCropMarks: _onToggleCropMarks,
   onOpenShareModal,
   onPrintPdf,
   onExportPng,
   isExporting,
-  activeView,
-  onToggleView,
-  isOnlineTicketModel = false,
+  activeView: _activeView,
+  onToggleView: _onToggleView,
+  isOnlineTicketModel: _isOnlineTicketModel = false,
   uiLanguage,
   onUiLanguageChange,
   coreStatus,
@@ -154,66 +154,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       <nav data-dns-tool-nav data-dns-command-bar id="dns-flyer-nav" className="dns-tab-nav no-print" aria-label="DNS Flyer Studio command bar">
         <div className="dns-tab-nav-inner gap-1">
-          <button
-            type="button"
-            onClick={() => onToggleView('editor')}
-            className={['dns-tab', activeView === 'editor' ? 'dns-tab-active' : ''].join(' ')}
-          >
-            {t.editor}
-          </button>
-          <button
-            type="button"
-            onClick={() => onToggleView('dashboard')}
-            className={['dns-tab', activeView === 'dashboard' ? 'dns-tab-active' : ''].join(' ')}
-          >
-            {t.dashboard}
-          </button>
-
-          <span className="mx-2 h-5 w-px shrink-0 bg-white/20" aria-hidden="true" />
-
-          <div className="flex shrink-0 items-center gap-1">
-            <span className="px-2 text-[9px] font-bold uppercase tracking-[.06em] text-white/60">{t.format}</span>
-            {(['A4', 'A5', 'A3'] as PaperFormat[]).map(fmt => {
-              const disabled = isOnlineTicketModel && fmt === 'A3';
-              return (
-                <button
-                  key={fmt}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => onChangeFormat(fmt)}
-                  className={[
-                    'rounded px-2.5 py-1.5 text-[10px] font-bold transition disabled:cursor-not-allowed disabled:opacity-30',
-                    paperFormat === fmt ? 'bg-white text-[#0D4D5E]' : 'text-white/75 hover:text-white',
-                  ].join(' ')}
-                >
-                  {fmt}
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            type="button"
-            onClick={onToggleOrientation}
-            disabled={isOnlineTicketModel}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1.5 text-[10px] font-semibold text-white/75 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-          >
-            <RotateCw className="h-3.5 w-3.5" />
-            {orientation === 'portrait' ? t.portrait : t.landscape}
-          </button>
-
-          <button
-            type="button"
-            onClick={onToggleCropMarks}
-            className={[
-              'inline-flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1.5 text-[10px] font-semibold',
-              showCropMarks ? 'bg-white text-[#0D4D5E]' : 'text-white/75 hover:text-white',
-            ].join(' ')}
-          >
-            <Eye className="h-3.5 w-3.5" />
-            {t.crop}
-          </button>
-
           <span className="flex-1" />
 
           <button

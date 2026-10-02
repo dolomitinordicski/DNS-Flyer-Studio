@@ -3,6 +3,7 @@ import { X, Printer, Download, FileText, Globe, Check, Layers, Loader2 } from 'l
 import { PaperFormat, LanguageCode } from '../types';
 
 interface ExportModalProps {
+  uiLanguage: 'de' | 'it';
   isOpen: boolean;
   onClose: () => void;
   format: PaperFormat;
@@ -17,6 +18,7 @@ interface ExportModalProps {
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
+  uiLanguage,
   isOpen,
   onClose,
   format,
@@ -29,6 +31,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   isExporting,
   isPriceTable = false
 }) => {
+  const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   if (!isOpen) return null;
 
   return (
@@ -43,9 +46,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold tracking-tight">
-                {isPriceTable ? 'Esportazione & Stampa Listino Ufficiale' : 'Esportazione & Stampa Multilingua'}
+                {isPriceTable ? ui('Offizielle Preisliste exportieren & drucken', 'Esportazione & Stampa Listino Ufficiale') : ui('Mehrsprachig exportieren & drucken', 'Esportazione & Stampa Multilingua')}
               </h3>
-              <p className="text-xs text-slate-300 font-medium">Formato Selezionato: <strong className="text-white">{format}</strong></p>
+              <p className="text-xs text-slate-300 font-medium">{ui('Gewähltes Format:', 'Formato Selezionato:')} <strong className="text-white">{format}</strong></p>
             </div>
           </div>
           <button
@@ -83,7 +86,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           )}
 
           <div className="space-y-3 pt-1">
-            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Opzioni Esportazione PDF:</span>
+            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">{ui('PDF-Exportoptionen:', 'Opzioni Esportazione PDF:')}</span>
 
             {isPriceTable ? (
               <button
@@ -203,7 +206,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
 
           <div className="border-t border-slate-200 pt-3 space-y-2">
-            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Esportazione Immagine PNG:</span>
+            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">{ui('PNG-Bildexport:', 'Esportazione Immagine PNG:')}</span>
             
             <div className={isPriceTable ? "grid grid-cols-1" : "grid grid-cols-2 gap-2"}>
               {!isPriceTable && (
@@ -241,10 +244,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           {isExporting ? (
             <div className="flex items-center gap-2 text-[#0D4D5E] font-bold">
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Generazione documenti in corso...</span>
+              <span>{ui('Dokumente werden erstellt...', 'Generazione documenti in corso...')}</span>
             </div>
           ) : (
-            <span>Pronto per l'esportazione tipografica</span>
+            <span>{ui('Bereit für den Export', "Pronto per l'esportazione tipografica")}</span>
           )}
 
           <button

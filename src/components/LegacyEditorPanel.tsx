@@ -27,6 +27,7 @@ interface LegacyEditorPanelProps {
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
   onOpenSavedDesignsModal: () => void;
   onMakeItPerfect?: () => void;
+  onExitLegacy?: () => void;
 }
 
 
@@ -37,7 +38,8 @@ export const LegacyEditorPanel: React.FC<LegacyEditorPanelProps> = ({
   onChangeContent,
   onApplyTemplate,
   onOpenSavedDesignsModal,
-  onMakeItPerfect
+  onMakeItPerfect,
+  onExitLegacy,
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [activeTab, setActiveTab] = useState<LegacyEditorTabId>('templates');
@@ -308,6 +310,7 @@ export const LegacyEditorPanel: React.FC<LegacyEditorPanelProps> = ({
         onTabChange={setActiveTab}
         onOpenSavedDesignsModal={onOpenSavedDesignsModal}
         onMakeItPerfect={onMakeItPerfect}
+        onExitLegacy={onExitLegacy}
       />
 
       {/* Tab Content Body */}

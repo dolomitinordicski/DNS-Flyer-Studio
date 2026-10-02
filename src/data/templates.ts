@@ -222,7 +222,7 @@ export const FLYER_TEMPLATES: FlyerTemplate[] = [
     id: 'official_price_list',
     name: '1. Listino Prezzi Carosello 900+ km',
     tagline: 'Listino Ufficiale Dolomiti NordicSki 2026/27',
-    description: 'Tabella prezzi e tariffe ufficiali del Carosello Dolomiti NordicSki (Giornaliero, Settimanale 7 giorni, Stagionale e tessere multi-giorno) con dettagli banner.',
+    description: 'Listino generale ufficiale Dolomiti NordicSki. I prezzi DNS provengono da Data Entry; i prezzi regionali “a partire da” sono inseriti manualmente da DNS.',
     previewColor: '#0D4D5E',
     defaultContent: {
       languageMode: 'trilingual',
@@ -290,7 +290,7 @@ export const FLYER_TEMPLATES: FlyerTemplate[] = [
     id: 'regional_price_list',
     name: '2. Listino Prezzi Singola Regione',
     tagline: 'Tariffe Locali Aree e Valli Partner',
-    description: 'Modello specifico per la singola area di fondo (es. 3 Cime, Valle Anterselva, Seiser Alm, Cortina, Valle Gsies, Osttirol, Comelico, Valle Aurina) con prezzi e punti vendita locali.',
+    description: 'Listino della singola area. Prezzi e dati tariffari sono alimentati dal dataset DNS Data Entry per l’area dell’utente.',
     previewColor: '#417483',
     defaultContent: {
       languageMode: 'trilingual',

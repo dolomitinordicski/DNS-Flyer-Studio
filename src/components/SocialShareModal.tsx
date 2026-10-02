@@ -3,6 +3,7 @@ import { X, Share2, Copy, Check, MessageSquare, Facebook, Twitter, Linkedin, Dow
 import { FlyerContent } from '../types';
 
 interface SocialShareModalProps {
+  uiLanguage: 'de' | 'it';
   isOpen: boolean;
   onClose: () => void;
   content: FlyerContent;
@@ -10,11 +11,13 @@ interface SocialShareModalProps {
 }
 
 export const SocialShareModal: React.FC<SocialShareModalProps> = ({
+  uiLanguage,
   isOpen,
   onClose,
   content,
   onDownloadPng
 }) => {
+  const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
@@ -84,10 +87,10 @@ ${normalizedUrl}
             </div>
             <div>
               <h3 className="font-vietnam font-bold text-base text-slate-900">
-                Condivisione Diretta Social
+                {ui('Direkt in sozialen Medien teilen', 'Condivisione Diretta Social')}
               </h3>
               <p className="text-xs text-slate-500 font-medium">
-                Pubblica il pacchetto offerta sui canali social ufficiali
+                {ui('Flyer über die offiziellen Social-Media-Kanäle teilen', 'Pubblica il pacchetto offerta sui canali social ufficiali')}
               </p>
             </div>
           </div>
@@ -104,7 +107,7 @@ ${normalizedUrl}
           
           {/* Quick Direct Social Share Buttons */}
           <div>
-            <label className="block text-slate-700 font-bold mb-2">Condividi Subito via Link</label>
+            <label className="block text-slate-700 font-bold mb-2">{ui('Direkt per Link teilen', 'Condividi Subito via Link')}</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               
               {/* WhatsApp */}
@@ -146,7 +149,7 @@ ${normalizedUrl}
                 className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-[#003865] hover:bg-blue-900 text-white border border-[#003865] transition-all font-bold shadow-xs"
               >
                 <Share2 className="w-5 h-5 text-cyan-300" />
-                <span>Condividi App</span>
+                <span>{ui('Teilen', 'Condividi App')}</span>
               </button>
 
             </div>
@@ -162,7 +165,7 @@ ${normalizedUrl}
               className="w-full py-3 rounded-xl bg-[#E30613] hover:bg-red-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition-all"
             >
               <Download className="w-4 h-4" />
-              <span>Scarica Immagine Flyer PNG per Post & Storie</span>
+              <span>{ui('Flyer-PNG für Posts & Stories herunterladen', 'Scarica Immagine Flyer PNG per Post & Storie')}</span>
             </button>
           </div>
 

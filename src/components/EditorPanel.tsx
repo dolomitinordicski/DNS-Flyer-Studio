@@ -56,6 +56,9 @@ import {
 } from '../lib/firebase';
 import { DEFAULT_SECTION_ORDER } from './flyer-variants/VariantTypes';
 import { LANGUAGE_OPTIONS, getInitialTranslations, getContentForLanguage } from '../utils/multilingual';
+import { EditorChrome, type EditorTabId } from './editor/EditorChrome';
+import { IconsEditorTab } from './editor/IconsEditorTab';
+import { QRCodeEditorTab } from './editor/QRCodeEditorTab';
 
 interface EditorPanelProps {
   uiLanguage: 'de' | 'it';
@@ -84,7 +87,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onMakeItPerfect
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
-  const [activeTab, setActiveTab] = useState<'templates' | 'style_variant' | 'graphic_elements' | 'content' | 'region' | 'images' | 'style' | 'icons' | 'qr'>('templates');
+  const [activeTab, setActiveTab] = useState<EditorTabId>('templates');
   const [activeOrderOrientation, setActiveOrderOrientation] = useState<'portrait' | 'landscape'>(content.orientation || 'portrait');
 
   // Sync orientation tab when flyer orientation changes externally
@@ -346,68 +349,13 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   return (
     <aside className="w-full lg:w-96 bg-white border-r border-slate-200 text-slate-800 flex flex-col h-[calc(100vh-4rem)] overflow-hidden no-print">
       
-      {/* Top Banner for Firebase Saved Designs Trigger & Make It Perfect */}
-      <div className="bg-[#0D4D5E] px-3.5 py-2 text-white flex flex-col gap-2 border-b border-[#0D4D5E]/80">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Cloud className="w-4 h-4 text-[#AAD0D1] animate-pulse" />
-            <span className="text-xs font-bold font-vietnam">Database Cloud Firebase</span>
-          </div>
-          <button
-            onClick={onOpenSavedDesignsModal}
-            className="px-2.5 py-1 bg-white/15 hover:bg-white/25 rounded-lg text-[11px] font-bold text-white border border-white/20 transition-all flex items-center gap-1.5"
-          >
-            <span>Design Salvati</span>
-            <span className="bg-[#AAD0D1] text-slate-950 px-1.5 py-0.2 rounded-full text-[9px] font-black">
-              Cloud
-            </span>
-          </button>
-        </div>
-
-        {/* Make It Perfect Quick Action Button */}
-        {onMakeItPerfect && (
-          <button
-            onClick={onMakeItPerfect}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 rounded-xl text-xs font-black shadow-md transition-all border border-amber-300 transform active:scale-98"
-          >
-            <Sparkles className="w-4 h-4 text-slate-950 animate-bounce" />
-            <span>{ui('LAYOUT OPTIMIEREN', 'PERFEZIONA GRAFICA')}</span>
-          </button>
-        )}
-      </div>
-
-      {/* Navigation Tabs Header - 3 Column Grid ensuring ALL tabs including Colori are visible on all screen sizes */}
-      <div className="grid grid-cols-3 gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200">
-        {[
-          { id: 'templates', label: ui('Vorlagen', 'Modelli'), icon: LayoutTemplate },
-          { id: 'style_variant', label: ui('Layout', 'Stile'), icon: Layout },
-          { id: 'graphic_elements', label: ui('Grafikelemente', 'Elementi grafici'), icon: Sparkles },
-          { id: 'content', label: ui('Texte', 'Testi'), icon: Type },
-          { id: 'region', label: ui('Gebiet', 'Regione'), icon: MapPin },
-          { id: 'images', label: ui('Bilder', 'Immagini'), icon: ImageIcon },
-          { id: 'style', label: ui('Farben', 'Colori'), icon: Palette },
-          { id: 'icons', label: ui('Icons', 'Icone'), icon: Dumbbell },
-          { id: 'qr', label: 'QR Code', icon: QrCode }
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              data-tab={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                isActive
-                  ? 'bg-[#0D4D5E] text-white shadow-xs'
-                  : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-200/80 border border-slate-200/70'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#AAD0D1]' : 'text-[#0D4D5E]'}`} />
-              <span className="truncate">{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <EditorChrome
+        uiLanguage={uiLanguage}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onOpenSavedDesignsModal={onOpenSavedDesignsModal}
+        onMakeItPerfect={onMakeItPerfect}
+      />
 
       {/* Tab Content Body */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -5414,249 +5362,27 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
           </div>
         )}
 
-        {/* TAB 7: ICONE SPORTIVE */}
         {activeTab === 'icons' && (
-          <div className="space-y-4 text-xs">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 font-vietnam flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Dumbbell className="w-4 h-4 text-[#0D4D5E]" />
-                  Libreria Icone Sportive & Simboli Wireframe
-                </span>
-                <span className="text-[10px] font-extrabold text-[#0D4D5E] bg-[#0D4D5E]/10 px-2 py-0.5 rounded-full">
-                  {content.selectedSportsIcons.length}/6 Selezionate
-                </span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Seleziona le icone per i biglietti e listini. I testi cambiano automaticamente nella lingua prescelta ({content.activeLanguage?.toUpperCase() || 'IT'}).
-              </p>
-            </div>
-
-            {/* Notification Toast */}
-            {iconToast && (
-              <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl font-bold flex items-center gap-2 text-xs">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>{iconToast}</span>
-              </div>
-            )}
-
-            {/* Upload New Custom Icon Box */}
-            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-              <div className="font-extrabold text-slate-900 flex items-center justify-between text-xs">
-                <span className="flex items-center gap-1.5">
-                  <Upload className="w-4 h-4 text-[#0D4D5E]" />
-                  Aggiungi Icona dal PC (Database Firestore)
-                </span>
-                <span className="text-[9px] uppercase font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
-                  Firestore DB
-                </span>
-              </div>
-
-              <div className="space-y-2.5">
-                <div>
-                  <label className="text-[10px] font-bold text-slate-600 uppercase block mb-1">
-                    Nome dell'Icona / Servizio:
-                  </label>
-                  <input
-                    type="text"
-                    value={newIconName}
-                    onChange={(e) => setNewIconName(e.target.value)}
-                    placeholder="es. Pista Notturna VIP, Skibus Dedicato..."
-                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0D4D5E]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-600 uppercase block mb-1">
-                      Categoria:
-                    </label>
-                    <select
-                      value={newIconCategory}
-                      onChange={(e) => setNewIconCategory(e.target.value as any)}
-                      className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0D4D5E]"
-                    >
-                      <option value="Nordic Skiing">Nordic Skiing</option>
-                      <option value="Services">Services</option>
-                      <option value="Accommodation">Accommodation</option>
-                      <option value="Events">Events</option>
-                      <option value="Custom">Custom</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-600 uppercase block mb-1">
-                      File Immagine / Simbolo:
-                    </label>
-                    <input
-                      type="file"
-                      ref={customIconFileInputRef}
-                      accept="image/*"
-                      onChange={handleCustomIconFileChange}
-                      className="hidden"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => customIconFileInputRef.current?.click()}
-                      className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center gap-1.5 truncate"
-                    >
-                      <Upload className="w-3.5 h-3.5 text-[#0D4D5E]" />
-                      <span className="truncate">{newIconImageBase64 ? 'Cambia File...' : 'Scegli File'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {newIconImageBase64 && (
-                  <div className="flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200">
-                    <img src={newIconImageBase64} alt="Anteprima" className="w-8 h-8 object-contain rounded border p-0.5" />
-                    <span className="text-[10px] font-bold text-emerald-700">Simbolo caricato pronto per il salvataggio</span>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={handleSaveCustomIcon}
-                  disabled={isUploadingCustomIcon}
-                  className="w-full py-2 px-3 bg-[#0D4D5E] hover:bg-[#072F3A] text-white font-extrabold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{isUploadingCustomIcon ? 'Salvataggio in Firestore...' : 'Salva Nuova Icona nel Database Firestore'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Icons Grid with Wireframe Symbols and Localized Names */}
-            <div>
-              <div className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-2">
-                Scegli e Attiva Icone Vettoriali:
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                {(() => {
-                  const combined = getAllSportsIcons(customFirestoreIcons);
-                  return combined.map((icon) => {
-                    const isSelected = content.selectedSportsIcons.includes(icon.id);
-                    const localizedName = getSportsIconName(icon, content.activeLanguage || 'it');
-                    return (
-                      <div
-                        key={icon.id}
-                        onClick={() => handleToggleSportsIcon(icon.id)}
-                        className={`p-2.5 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 relative group ${
-                          isSelected
-                            ? 'bg-[#0D4D5E] border-[#0D4D5E] text-white shadow-xs'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        {/* Wireframe symbol preview */}
-                        <div className={`p-2 rounded-xl shrink-0 flex items-center justify-center ${
-                          isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-[#0D4D5E]'
-                        }`}>
-                          <WireframeIcon icon={icon} className="w-5 h-5" />
-                        </div>
-
-                        <div className="min-w-0 flex-1 pr-4">
-                          <div className={`font-bold text-[11px] font-vietnam leading-tight truncate ${isSelected ? 'text-white' : 'text-slate-900'}`}>
-                            {localizedName}
-                          </div>
-                          <div className={`text-[9px] mt-0.5 line-clamp-1 flex items-center gap-1 ${isSelected ? 'text-slate-200' : 'text-slate-500'}`}>
-                            <span>{icon.category}</span>
-                            {icon.isCustom && (
-                              <span className="px-1 py-0.2 rounded text-[7.5px] font-black uppercase bg-amber-400 text-slate-900">
-                                Firestore
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Check selection badge */}
-                        <div className="absolute top-2 right-2">
-                          <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
-                            isSelected ? 'bg-white text-[#0D4D5E] font-black' : 'border border-slate-300'
-                          }`}>
-                            {isSelected && '✓'}
-                          </div>
-                        </div>
-
-                        {/* Custom Icon Delete Button */}
-                        {icon.isCustom && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteCustomIcon(icon.id);
-                            }}
-                            title="Elimina da Firestore"
-                            className="absolute bottom-2 right-2 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-            </div>
-          </div>
+          <IconsEditorTab
+            content={content}
+            customFirestoreIcons={customFirestoreIcons}
+            iconToast={iconToast}
+            newIconName={newIconName}
+            setNewIconName={setNewIconName}
+            newIconCategory={newIconCategory}
+            setNewIconCategory={setNewIconCategory}
+            newIconImageBase64={newIconImageBase64}
+            customIconFileInputRef={customIconFileInputRef}
+            onCustomIconFileChange={handleCustomIconFileChange}
+            isUploadingCustomIcon={isUploadingCustomIcon}
+            onSaveCustomIcon={handleSaveCustomIcon}
+            onToggleSportsIcon={handleToggleSportsIcon}
+            onDeleteCustomIcon={handleDeleteCustomIcon}
+          />
         )}
 
-        {/* TAB 8: QR CODE DINAMICO */}
         {activeTab === 'qr' && (
-          <div className="space-y-4 text-xs">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 font-vietnam flex items-center gap-2">
-                <QrCode className="w-4 h-4 text-[#0D4D5E]" />
-                QR Code Dinamico
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Genera un QR code personalizzato per reindirizzare i clienti all'offerta online.
-              </p>
-            </div>
-
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="font-bold text-slate-900">Attiva QR Code nel Flyer</label>
-                <input
-                  type="checkbox"
-                  checked={content.qrCode.enabled}
-                  onChange={(e) => onChangeContent({
-                    qrCode: { ...content.qrCode, enabled: e.target.checked }
-                  })}
-                  className="w-4 h-4 accent-[#0D4D5E] rounded cursor-pointer"
-                />
-              </div>
-
-              {content.qrCode.enabled && (
-                <>
-                  <div>
-                    <label className="block text-slate-700 font-bold mb-1">Link / URL dell'Offerta</label>
-                    <input
-                      type="text"
-                      value={content.qrCode.url}
-                      onChange={(e) => onChangeContent({
-                        qrCode: { ...content.qrCode, url: e.target.value }
-                      })}
-                      placeholder="https://www.dolomitinordicski.com/offerta"
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 font-bold mb-1">Etichetta Sotto QR Code</label>
-                    <input
-                      type="text"
-                      value={content.qrCode.label}
-                      onChange={(e) => onChangeContent({
-                        qrCode: { ...content.qrCode, label: e.target.value }
-                      })}
-                      placeholder="Scansiona per prenotare"
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
+          <QRCodeEditorTab content={content} onChangeContent={onChangeContent} />
         )}
 
       </div>

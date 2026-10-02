@@ -373,7 +373,7 @@ export const FLYER_TEMPLATES: FlyerTemplate[] = [
       format: 'A4',
       orientation: 'portrait',
       themeColor: 'frosted_ice',
-      graphicStyle: 'online_ticket_manifesto_v1',
+      graphicStyle: 'online_ticket_manifesto',
       sectionVisibility: {
         header: true,
         bigTitle: true,

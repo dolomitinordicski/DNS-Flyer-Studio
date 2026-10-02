@@ -28,7 +28,7 @@
     "react-dom": "^19.0.1",
     "recharts": "^3.10.1",
     "vite": "^6.2.3",
-    "@dolomitinordicski/dns-shared-data": "github:dolomitinordicski/dns-shared-data#a06d7b0e6f55e9971bde62969bf83d6877b6fe4d"
+    "@dolomitinordicski/dns-shared-data": "github:dolomitinordicski/dns-shared-data#07f321f8230054212db3e08ba6542e1f1777450d"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

@@ -2,17 +2,11 @@ import React from 'react';
 import { FlyerContent, FlyerSectionId } from '../../types';
 
 import { ClassicVariant } from './ClassicVariant';
-import { ClassicVariant1 } from './ClassicVariant1';
 import { ModernGlacierVariant } from './ModernGlacierVariant';
-import { ModernGlacierVariant1 } from './ModernGlacierVariant1';
 import { NordicModernVariant } from './NordicModernVariant';
-import { NordicModernVariant1 } from './NordicModernVariant1';
 import { OfficialPriceTableVariant } from './OfficialPriceTableVariant';
-import { OfficialPriceTableVariant1 } from './OfficialPriceTableVariant1';
 import { OnlineTicketVariant } from './OnlineTicketVariant';
-import { OnlineTicketVariant1 } from './OnlineTicketVariant1';
 import { VoucherVariant } from './VoucherVariant';
-import { VoucherVariant1 } from './VoucherVariant-1';
 import { HotelSkipassVariant } from './HotelSkipassVariant';
 import { HotelSkipassPanoramaVariant } from './HotelSkipassPanoramaVariant';
 import { HotelSkipassCompactVariant } from './HotelSkipassCompactVariant';
@@ -20,17 +14,11 @@ import { HotelSkipassFusionVariant } from './HotelSkipassFusionVariant';
 
 export {
   ClassicVariant,
-  ClassicVariant1,
   ModernGlacierVariant,
-  ModernGlacierVariant1,
   NordicModernVariant,
-  NordicModernVariant1,
   OfficialPriceTableVariant,
-  OfficialPriceTableVariant1,
   OnlineTicketVariant,
-  OnlineTicketVariant1,
   VoucherVariant,
-  VoucherVariant1,
   HotelSkipassVariant,
   HotelSkipassPanoramaVariant,
   HotelSkipassCompactVariant,
@@ -39,23 +27,23 @@ export {
 
 export const FLYER_VARIANT_MAP: Record<string, React.FC<FlyerVariantProps>> = {
   classic_corporate: ClassicVariant,
-  classic_corporate_v1: ClassicVariant1,
+  classic_corporate_v1: ClassicVariant,
   classic_official: ClassicVariant,
-  classic_official_v1: ClassicVariant1,
+  classic_official_v1: ClassicVariant,
   modern_glacier: ModernGlacierVariant,
-  modern_glacier_v1: ModernGlacierVariant1,
+  modern_glacier_v1: ModernGlacierVariant,
   glacier_panorama: ModernGlacierVariant,
-  glacier_panorama_v1: ModernGlacierVariant1,
+  glacier_panorama_v1: ModernGlacierVariant,
   nordic_modern: NordicModernVariant,
-  nordic_modern_v1: NordicModernVariant1,
+  nordic_modern_v1: NordicModernVariant,
   official_price_table: OfficialPriceTableVariant,
-  official_price_table_v1: OfficialPriceTableVariant1,
+  official_price_table_v1: OfficialPriceTableVariant,
   online_ticket_manifesto: OnlineTicketVariant,
-  online_ticket_manifesto_v1: OnlineTicketVariant1,
+  online_ticket_manifesto_v1: OnlineTicketVariant,
   manifesto_voucher: VoucherVariant,
-  manifesto_voucher_v1: VoucherVariant1,
+  manifesto_voucher_v1: VoucherVariant,
   official_ticket_voucher: VoucherVariant,
-  official_ticket_voucher_v1: VoucherVariant1,
+  official_ticket_voucher_v1: VoucherVariant,
   hotel_skipass_package: HotelSkipassVariant,
   hotel_skipass_boutique: HotelSkipassVariant,
   hotel_skipass_panorama: HotelSkipassPanoramaVariant,

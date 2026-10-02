@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlyerVariantProps, getActiveOrder } from './VariantTypes';
-import { BLOCK_REGISTRY } from '../blocks';
+import { BlockStackRenderer } from '../blocks';
 
 export const VoucherVariant: React.FC<FlyerVariantProps> = ({
   content,
@@ -41,24 +41,17 @@ export const VoucherVariant: React.FC<FlyerVariantProps> = ({
       {/* Dashed Voucher Cutout Border Frame */}
       <div className="absolute inset-1.5 sm:inset-3 border-2 border-dashed border-slate-300 rounded-3xl pointer-events-none z-0 opacity-60" />
 
-      {getActiveOrder(content)
-        .filter(id => (visibility as any)[id] !== false)
-        .map(id => {
-          const Block = BLOCK_REGISTRY[id];
-          return Block ? (
-            <Block 
-              key={id} 
-              content={content} 
-              theme={theme} 
-              plt={plt}
-              regionLogo={regionLogo} 
-              activeSportsIcons={activeSportsIcons}
-              visibility={visibility} 
-              format={content.format || 'A4'}
-              orientation={content.orientation || 'portrait'} 
-            />
-          ) : null;
-        })}
+      <BlockStackRenderer
+        order={getActiveOrder(content)}
+        content={content}
+        theme={theme}
+        plt={plt}
+        regionLogo={regionLogo}
+        activeSportsIcons={activeSportsIcons}
+        visibility={visibility}
+        format={content.format || 'A4'}
+        orientation={content.orientation || 'portrait'}
+      />
     </div>
   );
 };

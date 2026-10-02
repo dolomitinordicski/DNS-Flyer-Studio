@@ -362,8 +362,6 @@ export default function App() {
   const handleExportPdfBundle = async () => {
     if (!flyerRef.current) return;
     setIsExporting(true);
-    const originalContent = { ...content };
-
     try {
       const doc = new jsPDF({
         orientation: content.orientation,
@@ -389,7 +387,6 @@ export default function App() {
       console.error('Error exporting PDF bundle:', err);
       window.print();
     } finally {
-      setContent(originalContent);
       setIsExporting(false);
     }
   };
@@ -398,8 +395,6 @@ export default function App() {
   const handleExportPdfSeparate = async () => {
     if (!flyerRef.current) return;
     setIsExporting(true);
-    const originalContent = { ...content };
-
     try {
       const languages: LanguageCode[] = ['de', 'it', 'en'];
       for (const lang of languages) {
@@ -418,7 +413,6 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting separate PDFs:', err);
     } finally {
-      setContent(originalContent);
       setIsExporting(false);
     }
   };
@@ -427,8 +421,6 @@ export default function App() {
   const handleExportPdfSingle = async (lang: LanguageCode) => {
     if (!flyerRef.current) return;
     setIsExporting(true);
-    const originalContent = { ...content };
-
     try {
       const canvas = await renderCanvasForLang(lang);
       if (!canvas) return;
@@ -444,7 +436,6 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting single PDF:', err);
     } finally {
-      setContent(originalContent);
       setIsExporting(false);
     }
   };
@@ -453,8 +444,6 @@ export default function App() {
   const handleExportPngSeparate = async () => {
     if (!flyerRef.current) return;
     setIsExporting(true);
-    const originalContent = { ...content };
-
     try {
       const languages: LanguageCode[] = ['de', 'it', 'en'];
       for (const lang of languages) {
@@ -470,7 +459,6 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting separate PNGs:', err);
     } finally {
-      setContent(originalContent);
       setIsExporting(false);
     }
   };
@@ -479,8 +467,6 @@ export default function App() {
   const handleExportPngSingle = async (lang: LanguageCode) => {
     if (!flyerRef.current) return;
     setIsExporting(true);
-    const originalContent = { ...content };
-
     try {
       const canvas = await renderCanvasForLang(lang);
       if (!canvas) return;
@@ -492,7 +478,6 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting single PNG:', err);
     } finally {
-      setContent(originalContent);
       setIsExporting(false);
     }
   };

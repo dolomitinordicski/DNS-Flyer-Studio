@@ -178,7 +178,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
     const total = records.length;
     const issued = records.filter(r => r.status === 'issued').length;
     const scheduled = records.filter(r => r.status === 'scheduled').length;
-    const activeRegionsCount = new Set(records.map(r => r.regionId)).size;
+    const activeRegionsCount = new Set(records.filter(r => r.regionId !== 'dns_central').map(r => r.regionId)).size;
     return { total, issued, scheduled, activeRegionsCount };
   }, [records]);
 
@@ -194,7 +194,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
         name: shortName,
         fullName: reg.name,
         Emessi: issued,
-        '{ui('In Planung', 'In Programmazione')}': scheduled,
+        'In Programmazione': scheduled,
         Totale: issued + scheduled
       };
     }).filter(d => d.Totale > 0 || selectedRegionId === 'all');
@@ -421,7 +421,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input 
                 type="text"
-                placeholder="Cerca per titolo, località, target..."
+                placeholder={ui('Nach Titel, Ort, Zielgruppe suchen...', 'Cerca per titolo, località, target...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0D4D5E]"
@@ -439,7 +439,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                   onChange={(e) => setSelectedRegionId(e.target.value)}
                   className="bg-transparent border-none focus:outline-none text-xs font-bold text-slate-800 cursor-pointer"
                 >
-                  <option value="all">Tutte le Organizzazioni (9 Regioni)</option>
+                  <option value="all">{ui('Alle Organisationen (8 Gebiete)', 'Tutte le Organizzazioni (8 Aree)')}</option>
                   {REGIONAL_LOGOS.map(reg => (
                     <option key={reg.id} value={reg.id}>
                       {reg.name}
@@ -456,9 +456,9 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   className="bg-transparent border-none focus:outline-none text-xs font-bold text-slate-800 cursor-pointer"
                 >
-                  <option value="all">Tutti gli Stati</option>
-                  <option value="issued">🟢 Pubblicati / Emessi</option>
-                  <option value="scheduled">📅 In Programmazione</option>
+                  <option value="all">{ui('Alle Status', 'Tutti gli Stati')}</option>
+                  <option value="issued">🟢 {ui('Veröffentlicht', 'Pubblicati / Emessi')}</option>
+                  <option value="scheduled">📅 {ui('In Planung', 'In Programmazione')}</option>
                 </select>
               </div>
 
@@ -470,7 +470,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="bg-transparent border-none focus:outline-none text-xs font-bold text-slate-800 cursor-pointer"
                 >
-                  <option value="all">Tutte le Categorie</option>
+                  <option value="all">{ui('Alle Kategorien', 'Tutte le Categorie')}</option>
                   {Object.entries(CATEGORY_LABELS).map(([catKey, label]) => (
                     <option key={catKey} value={catKey}>
                       {label}
@@ -614,7 +614,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 font-vietnam">
-                    Programmazione Temporale Release (Stagione 2025/26)
+                    {ui('Zeitplanung Veröffentlichungen (Saison 2025/26)', 'Programmazione Temporale Release (Stagione 2025/26)')}
                   </h3>
                   <p className="text-xs text-slate-500">
                     Volume mensile di pubblicazione flyer per organizzazione
@@ -807,7 +807,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                             <button
                               onClick={(e) => handleDuplicateRecord(item, e)}
                               className="p-2 rounded-xl bg-slate-100 hover:bg-[#AAD0D1]/40 text-[#0D4D5E] transition-all"
-                              title="Duplica flyer"
+                              title={ui('Flyer duplizieren', 'Duplica flyer')}
                             >
                               <Copy className="w-4 h-4 text-[#0D4D5E]" />
                             </button>
@@ -824,7 +824,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                           <button
                             onClick={(e) => handleDeleteRecord(item.id, e)}
                             className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
-                            title="Elimina flyer dal registro"
+                            title={ui('Flyer aus dem Register löschen', 'Elimina flyer dal registro')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -846,7 +846,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
             <div className="border-b border-slate-100 pb-4">
               <h3 className="text-lg font-bold text-slate-900 font-vietnam">
-                Calendario Programmazione Release (Stagione 2025/2026)
+                {ui('Veröffentlichungskalender (Saison 2025/2026)', 'Calendario Programmazione Release (Stagione 2025/2026)')}
               </h3>
               <p className="text-xs text-slate-500">
                 Sviluppo cronologico delle campagne pubblicitarie regionali
@@ -902,7 +902,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                           <button
                             onClick={(e) => handleDuplicateRecord(record, e)}
                             className="p-2 rounded-xl bg-slate-100 hover:bg-[#AAD0D1]/40 text-[#0D4D5E] transition-all"
-                            title="Duplica"
+                            title={ui('Duplizieren', 'Duplica')}
                           >
                             <Copy className="w-4 h-4 text-[#0D4D5E]" />
                           </button>
@@ -919,7 +919,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                         <button
                           onClick={(e) => handleDeleteRecord(record.id, e)}
                           className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
-                          title="Elimina"
+                          title={ui('Löschen', 'Elimina')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -986,7 +986,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                           <button
                             onClick={(e) => handleDuplicateRecord(r, e)}
                             className="p-2 rounded-lg bg-slate-100 text-[#0D4D5E] hover:bg-[#AAD0D1]/40 transition-all"
-                            title="Duplica"
+                            title={ui('Duplizieren', 'Duplica')}
                           >
                             <Copy className="w-4 h-4" />
                           </button>
@@ -1000,7 +1000,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                           <button
                             onClick={(e) => handleDeleteRecord(r.id, e)}
                             className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
-                            title="Elimina"
+                            title={ui('Löschen', 'Elimina')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1026,7 +1026,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-xl font-black text-slate-900 font-vietnam">
-                  Programma Nuovo Flyer
+                  {ui('Neuen Flyer planen', 'Programma Nuovo Flyer')}
                 </h3>
                 <p className="text-xs text-slate-500">
                   Registra o pianifica un'uscita promozionale per una regione
@@ -1045,7 +1045,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               {/* Region Selector */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  Organizzazione / Regione Target
+                  {ui('Organisation / Zielgebiet', 'Organizzazione / Regione Target')}
                 </label>
                 <select
                   value={formData.regionId}
@@ -1063,7 +1063,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               {/* Title */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  Titolo Offerta / Iniziativa
+                  {ui('Titel Angebot / Initiative', 'Titolo Offerta / Iniziativa')}
                 </label>
                 <input
                   type="text"
@@ -1086,7 +1086,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                     onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as FlyerStatus }))}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                   >
-                    <option value="scheduled">📅 In Programmazione</option>
+                    <option value="scheduled">📅 {ui('In Planung', 'In Programmazione')}</option>
                     <option value="issued">🟢 Emesso / Pubblicato</option>
                   </select>
                 </div>

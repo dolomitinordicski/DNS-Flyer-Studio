@@ -83,6 +83,23 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
   },
 ] as const;
 
+const ALL_SECTION_IDS: FlyerSectionId[] = [
+  'header',
+  'heroImage',
+  'bigTitle',
+  'earlyBird',
+  'promotionBox',
+  'priceTables',
+  'servicesBox',
+  'sportsIcons',
+  'features',
+  'turnstileNote',
+  'ecoBanner',
+  'qrCode',
+  'disclaimer',
+  'footer',
+];
+
 export const CANONICAL_TEMPLATE_IDS = FLYER_PRODUCTS.map(product => product.templateId);
 
 export function getFlyerProductByTemplate(templateId?: LayoutTemplateId): FlyerProductDefinition | undefined {
@@ -94,7 +111,7 @@ export function lockContentToProduct(
   product: FlyerProductDefinition,
 ): FlyerContent {
   const visibility = Object.fromEntries(
-    product.blockStack.map(sectionId => [sectionId, true]),
+    ALL_SECTION_IDS.map(sectionId => [sectionId, product.blockStack.includes(sectionId)]),
   );
 
   return {

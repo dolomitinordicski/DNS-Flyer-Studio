@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { FlyerContent } from '../types';
 import { 
-  saveDesignToFirebase, 
+  saveDesignToDNS Core, 
   loadDesignsFromFirebase, 
   deleteDesignFromFirebase, 
   saveFlyerRecordToFirebase,
@@ -64,7 +64,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
       setDesigns(items);
     } catch (err: any) {
       console.error('Failed to load designs:', err);
-      setErrorMessage(ui('Gespeicherte Designs konnten nicht geladen werden.', 'Impossibile caricare i design salvati da Firestore.'));
+      setErrorMessage(ui('Gespeicherte Designs konnten nicht geladen werden.', 'Impossibile caricare i design salvati da DNS Core.'));
     } finally {
       setIsLoading(false);
     }

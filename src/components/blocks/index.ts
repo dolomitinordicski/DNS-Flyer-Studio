@@ -27,3 +27,6 @@ export { BLOCK_DEFINITIONS, BLOCK_BY_COMPONENT_ID, BLOCK_BY_SECTION_ID, getRunti
 export type { FlyerBlockDefinition, FlyerComponentId, BlockEditorPanel } from './BlockEngine';
 export { BlockStackRenderer } from './BlockStackRenderer';
 
+
+export { BLOCK_PRESETS, getBlockPresetForGraphicStyle } from './BlockPresets';
+export type { BlockPresetDefinition, BlockPresetId } from './BlockPresets';

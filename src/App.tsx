@@ -10,6 +10,7 @@ import { SavedDesignsModal } from './components/SavedDesignsModal';
 import { FlyerDashboard } from './components/FlyerDashboard';
 import { FlyerContent, PaperFormat, PaperOrientation, LayoutTemplateId, LanguageCode } from './types';
 import { FLYER_TEMPLATES } from './data/templates';
+import { LEGACY_FLYER_TEMPLATES } from './data/legacyTemplates';
 import { Printer, Download, Eye, RotateCw, Cloud, Sparkles, CheckCircle2 } from 'lucide-react';
 import { ExportModal } from './components/ExportModal';
 import { getContentForLanguage } from './utils/multilingual';
@@ -266,6 +267,22 @@ export default function App() {
         return product ? lockContentToProduct(newContent, product) : newContent;
       });
     }
+  };
+
+  const handleApplyLegacyTemplate = (templateId: LayoutTemplateId) => {
+    const template = LEGACY_FLYER_TEMPLATES.find(t => t.id === templateId);
+    if (!template?.defaultContent) return;
+
+    setActiveTemplateId(templateId);
+    setContent(prev => ({
+      ...prev,
+      ...template.defaultContent,
+      layoutTemplateId: templateId,
+      format: template.defaultContent.format || prev.format || 'A4',
+      orientation: template.defaultContent.orientation || prev.orientation || 'portrait',
+      activeLanguage: template.defaultContent.activeLanguage || prev.activeLanguage || 'it',
+      importedImages: prev.importedImages || [],
+    } as FlyerContent));
   };
 
   // Load Saved Design from Firebase
@@ -585,7 +602,7 @@ export default function App() {
                 uiLanguage={uiLanguage}
                 content={content}
                 onChangeContent={handleUpdateContent}
-                onApplyTemplate={handleApplyTemplate}
+                onApplyTemplate={handleApplyLegacyTemplate}
                 onOpenSavedDesignsModal={() => setIsSavedDesignsModalOpen(true)}
                 onMakeItPerfect={handleMakeItPerfect}
                 onExitLegacy={() => setLegacyReviewMode(false)}

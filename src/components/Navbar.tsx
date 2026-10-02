@@ -68,8 +68,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onPrintPdf,
   onExportPng,
   isExporting,
-  activeView,
-  onToggleView,
+  activeView: _activeView,
+  onToggleView: _onToggleView,
   isOnlineTicketModel: _isOnlineTicketModel = false,
   uiLanguage,
   onUiLanguageChange,
@@ -154,21 +154,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       <nav data-dns-tool-nav data-dns-command-bar id="dns-flyer-nav" className="dns-tab-nav no-print" aria-label="DNS Flyer Studio command bar">
         <div className="dns-tab-nav-inner gap-1">
-          <button
-            type="button"
-            onClick={() => onToggleView('editor')}
-            className={['dns-tab', activeView === 'editor' ? 'dns-tab-active' : ''].join(' ')}
-          >
-            {t.editor}
-          </button>
-          <button
-            type="button"
-            onClick={() => onToggleView('dashboard')}
-            className={['dns-tab', activeView === 'dashboard' ? 'dns-tab-active' : ''].join(' ')}
-          >
-            {t.dashboard}
-          </button>
-
           <span className="flex-1" />
 
           <button

@@ -58,6 +58,7 @@ import { DEFAULT_SECTION_ORDER } from './flyer-variants/VariantTypes';
 import { LANGUAGE_OPTIONS, getInitialTranslations, getContentForLanguage } from '../utils/multilingual';
 
 interface EditorPanelProps {
+  uiLanguage: 'de' | 'it';
   content: FlyerContent;
   onChangeContent: (updated: Partial<FlyerContent>) => void;
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
@@ -75,12 +76,14 @@ const STOCK_IMAGES = [
 ];
 
 export const EditorPanel: React.FC<EditorPanelProps> = ({
+  uiLanguage,
   content,
   onChangeContent,
   onApplyTemplate,
   onOpenSavedDesignsModal,
   onMakeItPerfect
 }) => {
+  const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [activeTab, setActiveTab] = useState<'templates' | 'style_variant' | 'graphic_elements' | 'content' | 'region' | 'images' | 'style' | 'icons' | 'qr'>('templates');
   const [activeOrderOrientation, setActiveOrderOrientation] = useState<'portrait' | 'landscape'>(content.orientation || 'portrait');
 
@@ -156,7 +159,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
       return;
     }
     if (!newIconImageBase64) {
-      alert('Seleziona un\'immagine o simbolo icona dal PC.');
+      alert(ui('Bitte ein Bild oder Symbol für das Icon auswählen.', 'Seleziona un\'immagine o simbolo icona dal PC.'));
       return;
     }
 
@@ -182,7 +185,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
       setNewIconImageBase64('');
       if (customIconFileInputRef.current) customIconFileInputRef.current.value = '';
 
-      setIconToast('Nuova icona aggiunta al Database Firestore!');
+      setIconToast(ui('Neues Icon zur Bibliothek hinzugefügt.', 'Nuova icona aggiunta al Database Firestore!'));
       setTimeout(() => setIconToast(null), 4000);
     } catch (err) {
       console.error('Save custom icon failed:', err);
@@ -209,7 +212,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
 
   // Helper 1: Add a New Custom Model
   const handleCreateNewModel = () => {
-    const newTitle = prompt('Inserisci il nome per il nuovo modello:', 'Nuovo Modello Personalizzato');
+    const newTitle = prompt(ui('Name für die neue Vorlage eingeben:', 'Inserisci il nome per il nuovo modello:'), ui('Neue benutzerdefinierte Vorlage', 'Nuovo Modello Personalizzato'));
     if (!newTitle) return;
 
     onChangeContent({
@@ -226,7 +229,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
       ]
     });
 
-    setSaveToast('Nuovo modello creato! Ora puoi personalizzarlo e salvarlo su Firebase.');
+    setSaveToast(ui('Neue Vorlage erstellt. Du kannst sie jetzt anpassen und speichern.', 'Nuovo modello creato! Ora puoi personalizzarlo e salvarlo su Firebase.'));
     setTimeout(() => setSaveToast(null), 4000);
   };
 
@@ -254,7 +257,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
       );
       
       await fetchSavedModels();
-      setSaveToast(' Modello salvato con successo su Firebase Cloud!');
+      setSaveToast(ui('Vorlage erfolgreich gespeichert.', 'Modello salvato con successo su Firebase Cloud!'));
       setTimeout(() => setSaveToast(null), 4000);
     } catch (err: any) {
       alert('Errore durante il salvataggio su Firebase: ' + (err.message || 'Riprova.'));
@@ -270,7 +273,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
 
     const file = files[0];
     if (!file.type.startsWith('image/')) {
-      alert('Seleziona un file immagine valido (PNG, JPG, WebP).');
+      alert(ui('Bitte eine gültige Bilddatei auswählen (PNG, JPG, WebP).', 'Seleziona un file immagine valido (PNG, JPG, WebP).'));
       return;
     }
 
@@ -331,7 +334,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
       });
     } else {
       if (content.selectedSportsIcons.length >= 6) {
-        alert('Puoi selezionare al massimo 6 icone sportive contemporaneamente.');
+        alert(ui('Es können maximal 6 Sport-Icons gleichzeitig ausgewählt werden.', 'Puoi selezionare al massimo 6 icone sportive contemporaneamente.'));
         return;
       }
       onChangeContent({
@@ -368,7 +371,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 rounded-xl text-xs font-black shadow-md transition-all border border-amber-300 transform active:scale-98"
           >
             <Sparkles className="w-4 h-4 text-slate-950 animate-bounce" />
-            <span>MAKE IT PERFECT (Perfeziona Grafica)</span>
+            <span>{ui('LAYOUT OPTIMIEREN', 'PERFEZIONA GRAFICA')}</span>
           </button>
         )}
       </div>
@@ -376,14 +379,14 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
       {/* Navigation Tabs Header - 3 Column Grid ensuring ALL tabs including Colori are visible on all screen sizes */}
       <div className="grid grid-cols-3 gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200">
         {[
-          { id: 'templates', label: 'Modelli', icon: LayoutTemplate },
-          { id: 'style_variant', label: 'Stile', icon: Layout },
-          { id: 'graphic_elements', label: 'Graphic Elements', icon: Sparkles },
-          { id: 'content', label: 'Testi', icon: Type },
-          { id: 'region', label: 'Regione', icon: MapPin },
-          { id: 'images', label: 'Immagini', icon: ImageIcon },
-          { id: 'style', label: 'Colori', icon: Palette },
-          { id: 'icons', label: 'Icone', icon: Dumbbell },
+          { id: 'templates', label: ui('Vorlagen', 'Modelli'), icon: LayoutTemplate },
+          { id: 'style_variant', label: ui('Layout', 'Stile'), icon: Layout },
+          { id: 'graphic_elements', label: ui('Grafikelemente', 'Elementi grafici'), icon: Sparkles },
+          { id: 'content', label: ui('Texte', 'Testi'), icon: Type },
+          { id: 'region', label: ui('Gebiet', 'Regione'), icon: MapPin },
+          { id: 'images', label: ui('Bilder', 'Immagini'), icon: ImageIcon },
+          { id: 'style', label: ui('Farben', 'Colori'), icon: Palette },
+          { id: 'icons', label: ui('Icons', 'Icone'), icon: Dumbbell },
           { id: 'qr', label: 'QR Code', icon: QrCode }
         ].map((tab) => {
           const Icon = tab.icon;
@@ -416,14 +419,14 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
               <h3 className="text-sm font-bold text-slate-900 font-vietnam flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <LayoutTemplate className="w-4 h-4 text-[#0D4D5E]" />
-                  Modelli Documenti Dolomiti NordicSki
+                  {ui('Dolomiti NordicSki Dokumentvorlagen', 'Modelli Documenti Dolomiti NordicSki')}
                 </span>
                 <span className="text-[10px] font-bold bg-[#0D4D5E]/10 text-[#0D4D5E] px-2 py-0.5 rounded-full font-vietnam">
-                  9 Ufficiali
+                  {ui('9 offiziell', '9 Ufficiali')}
                 </span>
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                Seleziona uno dei listini o documenti ufficiali, crea un nuovo modello o duplica quello attivo. Salva e sincronizza su Firebase.
+                {ui('Wähle eine offizielle Vorlage, erstelle eine neue oder dupliziere die aktive. Speichern und synchronisieren über Firebase.', 'Seleziona uno dei listini o documenti ufficiali, crea un nuovo modello o duplica quello attivo. Salva e sincronizza su Firebase.')}
               </p>
             </div>
 
@@ -443,17 +446,17 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                 type="button"
                 onClick={handleCreateNewModel}
                 className="flex flex-col items-center justify-center p-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-[#0D4D5E] rounded-lg text-[10px] font-bold text-[#0D4D5E] transition-all shadow-2xs group"
-                title="Inizia un nuovo modello vuoto"
+                title={ui('Neue leere Vorlage beginnen', 'Inizia un nuovo modello vuoto')}
               >
                 <FolderPlus className="w-4 h-4 mb-1 text-[#0D4D5E] group-hover:scale-110 transition-transform" />
-                <span>+ Nuovo</span>
+                <span>{ui('+ Neu', '+ Nuovo')}</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleDuplicateCurrentModel}
                 className="flex flex-col items-center justify-center p-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-[#0D4D5E] rounded-lg text-[10px] font-bold text-slate-700 hover:text-[#0D4D5E] transition-all shadow-2xs group"
-                title="Copia e duplica il modello correntemente attivo"
+                title={ui('Aktive Vorlage duplizieren', 'Copia e duplica il modello correntemente attivo')}
               >
                 <Copy className="w-4 h-4 mb-1 text-[#417483] group-hover:scale-110 transition-transform" />
                 <span>📋 Copia</span>
@@ -464,7 +467,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                 onClick={handleSaveModelToFirebase}
                 disabled={isSavingToFirebase}
                 className="flex flex-col items-center justify-center p-2 bg-[#0D4D5E] hover:bg-[#083845] text-white rounded-lg text-[10px] font-bold transition-all shadow-2xs disabled:opacity-50 group"
-                title="Salva modello nel Database Firebase Cloud"
+                title={ui('Vorlage speichern', 'Salva modello nel Database Firebase Cloud')}
               >
                 {isSavingToFirebase ? (
                   <Loader2 className="w-4 h-4 mb-1 animate-spin text-[#AAD0D1]" />
@@ -516,13 +519,13 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-[#0D4D5E] uppercase tracking-wider font-vietnam flex items-center gap-1.5">
                     <Cloud className="w-3.5 h-3.5 text-[#417483]" />
-                    I Miei Modelli Salvati in Firebase ({firebaseSavedModels.length})
+                    {ui('Gespeicherte Vorlagen', 'I Miei Modelli Salvati in Firebase')} ({firebaseSavedModels.length})
                   </h4>
                   <button
                     onClick={onOpenSavedDesignsModal}
                     className="text-[10px] text-[#0D4D5E] font-bold hover:underline"
                   >
-                    Gestisci Tutti
+                    {ui('Alle verwalten', 'Gestisci Tutti')}
                   </button>
                 </div>
 
@@ -546,7 +549,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                         </div>
                       </div>
                       <span className="text-[9px] font-bold bg-[#AAD0D1]/30 text-[#0D4D5E] px-2 py-0.5 rounded-full font-vietnam shrink-0">
-                        Carica
+                        {ui('Laden', 'Carica')}
                       </span>
                     </div>
                   ))}
@@ -602,14 +605,14 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider font-vietnam flex items-center gap-1.5">
                   <Square className="w-4 h-4 text-[#0D4D5E]" />
-                  <span>Stile Bordi ed Angoli Elementi</span>
+                  <span>{ui('Kanten & Ecken', 'Stile Bordi ed Angoli Elementi')}</span>
                 </h4>
                 <span className="text-[10px] font-bold bg-[#0D4D5E]/10 text-[#0D4D5E] px-2 py-0.5 rounded-full font-vietnam">
                   {content.cornerStyle === 'sharp' ? 'A Spigolo' : content.cornerStyle === 'none' ? 'Senza Bordo' : 'Arrotondati'}
                 </span>
               </div>
               <p className="text-[11px] text-slate-600 leading-snug">
-                Scegli se applicare angoli morbidi arrotondati, spigoli squadrati oppure rimuovere completamente il bordo a card, box e immagini.
+                {ui('Wähle abgerundete, eckige oder randlose Elemente.', 'Scegli se applicare angoli morbidi arrotondati, spigoli squadrati oppure rimuovere completamente il bordo a card, box e immagini.')}
               </p>
               <div className="grid grid-cols-3 gap-2 pt-1">
                 <button
@@ -901,7 +904,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                   {/* Variant Choice */}
                   <div>
                     <label className="block text-[10px] font-black text-slate-700 uppercase tracking-wider mb-2">
-                      Variante Grafica Ufficiale
+                      {ui('Offizielle Grafikvariante', 'Variante Grafica Ufficiale')}
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
@@ -993,7 +996,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                   {/* Dimensioning / Ingrandimento Libero (Slider + Direct Input) */}
                   <div>
                     <div className="flex justify-between items-center text-[10px] font-black text-slate-700 uppercase mb-1">
-                      <span>Dimensione / Ingrandimento Grafica</span>
+                      <span>{ui('Größe / Skalierung', 'Dimensione / Ingrandimento Grafica')}</span>
                       <div className="flex items-center gap-1">
                         <input
                           type="number"
@@ -1214,7 +1217,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                           onClick={() => setActiveTab('content')}
                           className="text-[9px] font-bold text-[#0D4D5E] hover:underline bg-[#0D4D5E]/5 px-2 py-0.5 rounded border border-[#0D4D5E]/20"
                         >
-                          ✏️ Modifica Testi →
+                          {ui('✏️ Texte bearbeiten →', '✏️ Modifica Testi →')}
                         </button>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
@@ -1507,10 +1510,10 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 font-vietnam flex items-center gap-2">
                     <Type className="w-4 h-4 text-[#0D4D5E]" />
-                    Contenuti & Testi Volantino
+                    {ui('Flyer-Inhalte & Texte', 'Contenuti & Testi Volantino')}
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Modifica i testi nelle 3 lingue (DE / IT / EN), attiva/disattiva le sezioni e regolane l'ordinamento.
+                    {ui('Texte in DE / IT / EN bearbeiten, Bereiche ein-/ausblenden und ihre Reihenfolge festlegen.', 'Modifica i testi nelle 3 lingue (DE / IT / EN), attiva/disattiva le sezioni e regolane l\'ordinamento.')}
                   </p>
                 </div>
               </div>
@@ -1536,10 +1539,10 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Globe className="w-4 h-4 text-[#AAD0D1]" />
-                      <span className="font-bold text-xs tracking-wide">Compilazione Multilingua (3 Lingue)</span>
+                      <span className="font-bold text-xs tracking-wide">{ui('Mehrsprachige Bearbeitung (3 Sprachen)', 'Compilazione Multilingua (3 Lingue)')}</span>
                     </div>
                     <span className="text-[10px] bg-[#AAD0D1]/20 text-[#AAD0D1] font-bold px-2 py-0.5 rounded-full">
-                      Lingua Attiva: {activeLang.toUpperCase()}
+                      {ui('Aktive Sprache:', 'Lingua Attiva:')} {activeLang.toUpperCase()}
                     </span>
                   </div>
 
@@ -1573,7 +1576,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
               <div className="p-2.5 bg-[#0D4D5E]/10 rounded-xl border border-[#0D4D5E]/20 flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-[#0D4D5E]">
                   <Move className="w-4 h-4 text-[#0D4D5E]" />
-                  <span className="text-xs font-bold font-vietnam">Ordinamento Sezioni per Formato:</span>
+                  <span className="text-xs font-bold font-vietnam">{ui('Bereichsreihenfolge nach Format:', 'Ordinamento Sezioni per Formato:')}</span>
                 </div>
                 <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-slate-200">
                   <button
@@ -1612,7 +1615,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                       <span>Personalizzazione Digital Pass & Tabella Regioni</span>
                     </div>
                     <span className="text-[9px] font-black bg-[#0D4D5E] text-white px-2 py-0.5 rounded font-vietnam">
-                      Modello Digital Pass
+                      {ui('Digital-Pass-Vorlage', 'Modello Digital Pass')}
                     </span>
                   </div>
 
@@ -1624,7 +1627,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
 
                     {/* Preset Buttons */}
                     <div>
-                      <label className="block text-[9px] text-slate-500 font-bold mb-1">Seleziona Preset Modello Pass:</label>
+                      <label className="block text-[9px] text-slate-500 font-bold mb-1">{ui('Pass-Vorlage wählen:', 'Seleziona Preset Modello Pass:')}</label>
                       <div className="grid grid-cols-3 gap-1.5">
                         <button
                           type="button"
@@ -2053,14 +2056,14 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                               className="px-2.5 py-1 bg-[#0D4D5E] hover:bg-[#083845] text-white rounded text-[10px] font-bold shrink-0 flex items-center gap-1 transition-all shadow-2xs"
                             >
                               <Upload className="w-3 h-3 text-[#AAD0D1]" />
-                              <span>Carica</span>
+                              <span>{ui('Laden', 'Carica')}</span>
                             </button>
                           </div>
                         </div>
 
                         {/* Galleria rapida foto di esempio */}
                         <div>
-                          <label className="block text-[8.5px] font-bold text-slate-500 uppercase mb-1">Seleziona Immagine di Esempio:</label>
+                          <label className="block text-[8.5px] font-bold text-slate-500 uppercase mb-1">{ui('Beispielbild wählen:', 'Seleziona Immagine di Esempio:')}</label>
                           <div className="grid grid-cols-4 gap-1.5">
                             {STOCK_IMAGES.slice(0, 4).map((img, idx) => (
                               <button
@@ -2080,7 +2083,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                         {/* Controllo Altezza Personalizzata */}
                         <div>
                           <div className="flex justify-between text-[9px] font-bold text-slate-500 mb-0.5">
-                            <span>Altezza Immagine (Px):</span>
+                            <span>{ui('Bildhöhe (px):', 'Altezza Immagine (Px):')}</span>
                             <span className="text-[#0D4D5E]">
                               {content.heroImageHeightPx ? `${content.heroImageHeightPx} px` : 'Auto (Standard 120px)'}
                             </span>
@@ -2154,7 +2157,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                         </div>
 
                         <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 space-y-1.5">
-                          <span className="text-[9.5px] font-black text-[#0D4D5E] uppercase block">Dettagli Prezzo e Tariffa:</span>
+                          <span className="text-[9.5px] font-black text-[#0D4D5E] uppercase block">{ui('Preis- und Tarifdetails:', 'Dettagli Prezzo e Tariffa:')}</span>
                           <div className="grid grid-cols-4 gap-1.5">
                             <div>
                               <label className="block text-[8px] text-slate-500 font-bold">Prefisso</label>
@@ -2621,14 +2624,14 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                               className="px-2.5 py-1 bg-[#0D4D5E] hover:bg-[#083845] text-white rounded text-[10px] font-bold shrink-0 flex items-center gap-1 transition-all shadow-2xs"
                             >
                               <Upload className="w-3 h-3 text-[#AAD0D1]" />
-                              <span>Carica</span>
+                              <span>{ui('Laden', 'Carica')}</span>
                             </button>
                           </div>
                         </div>
 
                         {/* Galleria rapida foto di esempio */}
                         <div>
-                          <label className="block text-[8.5px] font-bold text-slate-500 uppercase mb-1">Seleziona Immagine di Esempio:</label>
+                          <label className="block text-[8.5px] font-bold text-slate-500 uppercase mb-1">{ui('Beispielbild wählen:', 'Seleziona Immagine di Esempio:')}</label>
                           <div className="grid grid-cols-4 gap-1.5">
                             {STOCK_IMAGES.slice(0, 4).map((img, idx) => (
                               <button
@@ -2648,7 +2651,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                         {/* Controllo Altezza Personalizzata */}
                         <div>
                           <div className="flex justify-between text-[9px] font-bold text-slate-500 mb-0.5">
-                            <span>Altezza Immagine (Px):</span>
+                            <span>{ui('Bildhöhe (px):', 'Altezza Immagine (Px):')}</span>
                             <span className="text-[#0D4D5E]">
                               {content.heroImageHeightPx ? `${content.heroImageHeightPx} px` : 'Auto (Standard 140px)'}
                             </span>
@@ -2690,7 +2693,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                         <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                           <div>
                             <span className="text-[10px] font-bold text-slate-700 block">
-                              Icone attive sul listino:
+                              {ui('Aktive Icons:', 'Icone attive sul listino:')}
                             </span>
                             <span className="text-[11px] font-black text-[#0D4D5E]">
                               {content.selectedSportsIcons?.length || 0} / 6 Selezionate
@@ -2702,7 +2705,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                             className="px-2.5 py-1.5 bg-[#0D4D5E] text-white rounded-xl text-[10px] font-bold hover:bg-[#072F3A] transition-colors flex items-center gap-1.5 shadow-xs"
                           >
                             <Dumbbell className="w-3.5 h-3.5" />
-                            <span>Gestisci Libreria Icone →</span>
+                            <span>{ui('Icon-Bibliothek verwalten →', 'Gestisci Libreria Icone →')}</span>
                           </button>
                         </div>
 
@@ -3191,7 +3194,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                               className="px-2 py-0.5 bg-[#0D4D5E] text-white rounded text-[9px] font-bold flex items-center gap-1 hover:bg-[#0D4D5E]/90 transition-colors"
                             >
                               <Plus className="w-3 h-3" />
-                              <span>Aggiungi Voce</span>
+                              <span>{ui('Eintrag hinzufügen', 'Aggiungi Voce')}</span>
                             </button>
                           </div>
 
@@ -3215,7 +3218,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                                       onChangeContent({ features: (content.features || []).filter(f => f.id !== feat.id) });
                                     }}
                                     className="p-1 text-red-500 hover:bg-red-50 rounded shrink-0"
-                                    title="Elimina voce"
+                                    title={ui('Eintrag löschen', 'Elimina voce')}
                                   >
                                     <Trash2 className="w-3 h-3" />
                                   </button>
@@ -3242,7 +3245,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                         <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                           <div>
                             <span className="text-[10px] font-bold text-slate-700 block">
-                              Icone attive sul listino:
+                              {ui('Aktive Icons:', 'Icone attive sul listino:')}
                             </span>
                             <span className="text-[11px] font-black text-[#0D4D5E]">
                               {content.selectedSportsIcons?.length || 0} / 6 Selezionate
@@ -3254,7 +3257,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                             className="px-2.5 py-1.5 bg-[#0D4D5E] text-white rounded-xl text-[10px] font-bold hover:bg-[#072F3A] transition-colors flex items-center gap-1.5 shadow-xs"
                           >
                             <Dumbbell className="w-3.5 h-3.5" />
-                            <span>Gestisci Libreria Icone →</span>
+                            <span>{ui('Icon-Bibliothek verwalten →', 'Gestisci Libreria Icone →')}</span>
                           </button>
                         </div>
 
@@ -3735,7 +3738,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                             </div>
                             <div className="flex-1 space-y-1">
                               <div className="flex items-center justify-between text-[9px] font-bold text-slate-500">
-                                <span>Altezza Foto:</span>
+                                <span>{ui('Fotohöhe:', 'Altezza Foto:')}</span>
                                 <span>{content.heroImageHeightPx || 125}px</span>
                               </div>
                               <input
@@ -3881,7 +3884,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                                   updateLangField('features', currentFeats);
                                 }}
                                 className="p-1 text-rose-500 hover:bg-rose-50 rounded"
-                                title="Elimina voce"
+                                title={ui('Eintrag löschen', 'Elimina voce')}
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>
@@ -3902,7 +3905,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                             className="w-full py-1 text-[10px] font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 hover:bg-[#0D4D5E]/20 rounded border border-[#0D4D5E]/20 flex items-center justify-center gap-1"
                           >
                             <Plus className="w-3 h-3" />
-                            <span>Aggiungi Servizio al Pacchetto</span>
+                            <span>{ui('Leistung hinzufügen', 'Aggiungi Servizio al Pacchetto')}</span>
                           </button>
                         </div>
                       </div>
@@ -3932,7 +3935,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                             onClick={() => setActiveTab('icons')}
                             className="px-2.5 py-1.5 bg-[#0D4D5E] text-white text-[10px] font-bold rounded-lg hover:bg-[#0D4D5E]/90 flex items-center gap-1 shrink-0 shadow-xs"
                           >
-                            <span>Gestisci Libreria Icone</span>
+                            <span>{ui('Icon-Bibliothek verwalten', 'Gestisci Libreria Icone')}</span>
                             <span>→</span>
                           </button>
                         </div>
@@ -4556,7 +4559,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                   className="px-3 py-1.5 bg-[#0D4D5E] hover:bg-[#083845] text-white rounded-lg text-[10.5px] font-bold shrink-0 flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
                 >
                   <Upload className="w-3.5 h-3.5 text-[#AAD0D1]" />
-                  <span>Carica PNG</span>
+                  <span>{ui('Laden', 'Carica')} PNG</span>
                 </button>
               </div>
               {content.customRegionalLogoUrl && (
@@ -4701,7 +4704,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                 Gestione Immagini & Upload
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                Carica foto personalizzate dal tuo dispositivo oppure scegli dalla galleria stock Dolomiti.
+                {ui('Laden', 'Carica')} foto personalizzate dal tuo dispositivo oppure scegli dalla galleria stock Dolomiti.
               </p>
             </div>
 
@@ -4740,7 +4743,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
               <label className="block text-slate-900 font-bold font-vietnam flex items-center gap-2">
                 <Upload className="w-4 h-4 text-[#0D4D5E]" />
-                Carica Immagine Locale
+                {ui('Laden', 'Carica')} Immagine Locale
               </label>
 
               <input
@@ -4764,7 +4767,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             {content.importedImages && content.importedImages.length > 0 && (
               <div className="space-y-2">
                 <label className="block text-slate-900 font-bold font-vietnam">
-                  Le Tue Immagini Caricate ({content.importedImages.length})
+                  Le Tue Immagini {ui('Laden', 'Carica')}te ({content.importedImages.length})
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {content.importedImages.map((imgUrl, idx) => (
@@ -4777,7 +4780,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
                     >
                       <img src={imgUrl} alt={`Custom upload ${idx}`} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-between p-2">
-                        <span className="text-[9px] font-bold text-white">Caricata</span>
+                        <span className="text-[9px] font-bold text-white">{ui('Laden', 'Carica')}ta</span>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

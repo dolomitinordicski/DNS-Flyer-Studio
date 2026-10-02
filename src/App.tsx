@@ -14,14 +14,14 @@ import { ExportModal } from './components/ExportModal';
 import { getContentForLanguage } from './utils/multilingual';
 import { optimizeLayout } from './utils/layoutOptimizer';
 import { probeDNSCoreHeader, type DNSCoreHeaderStatus } from './lib/dnsCoreHeader';
+import { getDNSFoundationRuntime } from './lib/foundationRuntime';
 
 export default function App() {
   // View mode: 'editor' | 'dashboard'
   const [activeView, setActiveView] = useState<'editor' | 'dashboard'>('editor');
   const [perfectToast, setPerfectToast] = useState<string | null>(null);
-  const [uiLanguage, setUiLanguage] = useState<'de' | 'it'>(() =>
-    localStorage.getItem('dns-flyer-ui-language') === 'de' ? 'de' : 'it',
-  );
+  const foundation = getDNSFoundationRuntime();
+  const [uiLanguage, setUiLanguageState] = useState<'de' | 'it'>(() => foundation.getLanguage());
   const [coreStatus, setCoreStatus] = useState<DNSCoreHeaderStatus>({ state: 'loading' });
 
   // Initial Flyer Content from Template 1 or LocalStorage
@@ -77,9 +77,11 @@ export default function App() {
     };
   });
 
-  useEffect(() => {
-    localStorage.setItem('dns-flyer-ui-language', uiLanguage);
-  }, [uiLanguage]);
+  useEffect(() => foundation.subscribeLanguage(setUiLanguageState), [foundation]);
+
+  const setUiLanguage = (language: 'de' | 'it') => {
+    foundation.setLanguage(language);
+  };
 
   useEffect(() => {
     void probeDNSCoreHeader().then(setCoreStatus);
@@ -442,6 +444,22 @@ export default function App() {
 
   const isOnlineTicketModel = content.graphicStyle === 'online_ticket_manifesto' || content.graphicStyle === 'online_ticket_manifesto_v1';
 
+  const uiCopy = uiLanguage === 'de'
+    ? {
+        format: 'Format',
+        saveOpen: 'Projekte speichern/öffnen',
+        rotate: 'Seite drehen',
+        crop: 'Beschnitt',
+        canvasHint: 'Inhalte und Gestaltung folgen dem Corporate Design von Dolomiti NordicSki (Be Vietnam Pro, Roboto, institutionelle Farbpalette).',
+      }
+    : {
+        format: 'Formato',
+        saveOpen: 'Salva/Apri Progetti',
+        rotate: 'Ruota Pagina',
+        crop: 'Rifilo',
+        canvasHint: 'I contenuti inseriti e la grafica rispettano il Corporate Identity Manual di Dolomiti NordicSki (Be Vietnam Pro, Roboto, Palette Istituzionale).',
+      };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-roboto select-none">
       
@@ -477,6 +495,7 @@ export default function App() {
       {/* Main View Switching */}
       {activeView === 'dashboard' ? (
         <FlyerDashboard 
+          uiLanguage={uiLanguage}
           onLoadFlyerIntoEditor={(loadedContent) => {
             setContent(loadedContent);
             setActiveView('editor');
@@ -488,6 +507,7 @@ export default function App() {
           
           {/* Left Sidebar Editor Controls */}
             <EditorPanel
+              uiLanguage={uiLanguage}
               content={content}
               onChangeContent={handleUpdateContent}
               onApplyTemplate={handleApplyTemplate}
@@ -505,7 +525,7 @@ export default function App() {
             <div className="w-full max-w-[650px] mb-3 flex items-center justify-between text-xs text-slate-600 no-print">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-white font-vietnam uppercase bg-[#0D4D5E] px-2.5 py-0.5 rounded-md shadow-xs">
-                  Formato {content.format}
+                  {uiCopy.format} {content.format}
                 </span>
                 <span>•</span>
                 <span className="capitalize font-medium text-slate-700">{content.orientation}</span>
@@ -517,21 +537,21 @@ export default function App() {
                   className="hover:text-slate-900 flex items-center gap-1 transition-all text-[#0D4D5E] font-bold"
                 >
                   <Cloud className="w-3.5 h-3.5 text-[#417483]" />
-                  <span>Salva/Apri Progetti</span>
+                  <span>{uiCopy.saveOpen}</span>
                 </button>
                 <button
                   onClick={handleToggleOrientation}
                   className="hover:text-slate-900 flex items-center gap-1 transition-all text-slate-600 font-medium"
                 >
                   <RotateCw className="w-3.5 h-3.5 text-[#417483]" />
-                  <span>Ruota Pagina</span>
+                  <span>{uiCopy.rotate}</span>
                 </button>
                 <button
                   onClick={handleToggleCropMarks}
                   className={`flex items-center gap-1 transition-all font-medium ${content.showCropMarks ? 'text-[#0D4D5E] font-bold' : 'text-slate-600 hover:text-slate-900'}`}
                 >
                   <Eye className="w-3.5 h-3.5 text-[#417483]" />
-                  <span>Rifilo</span>
+                  <span>{uiCopy.crop}</span>
                 </button>
               </div>
             </div>
@@ -545,7 +565,7 @@ export default function App() {
 
             {/* Bottom Hint */}
             <div className="mt-4 text-center text-xs text-slate-500 no-print max-w-md font-medium">
-              I contenuti inseriti e la grafica rispettano il Corporate Identity Manual di Dolomiti NordicSki (Be Vietnam Pro, Roboto, Palette Istituzionale).
+              {uiCopy.canvasHint}
             </div>
 
           </main>
@@ -553,8 +573,18 @@ export default function App() {
         </div>
       )}
 
+      <footer data-dns-tool-footer className="no-print">
+        <div className="dns-tool-footer-shell">
+          <div className="dns-tool-footer-primary">Dolomiti NordicSki · Flyer Studio</div>
+          <div className="dns-tool-footer-meta">
+            {uiLanguage === 'de' ? 'Gemeinsame DNS Foundation · Benutzeroberfläche DE / IT' : 'DNS Foundation condivisa · Interfaccia DE / IT'}
+          </div>
+        </div>
+      </footer>
+
       {/* Social Media Direct Sharing Modal */}
       <SocialShareModal
+        uiLanguage={uiLanguage}
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         content={content}
@@ -563,6 +593,7 @@ export default function App() {
 
       {/* Firebase Cloud Saved Designs Modal */}
       <SavedDesignsModal
+        uiLanguage={uiLanguage}
         isOpen={isSavedDesignsModalOpen}
         onClose={() => setIsSavedDesignsModalOpen(false)}
         currentContent={content}
@@ -571,6 +602,7 @@ export default function App() {
 
       {/* Multilingual Export & Print Modal */}
       <ExportModal
+        uiLanguage={uiLanguage}
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         format={content.format}

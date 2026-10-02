@@ -24,6 +24,7 @@ import {
 import { REGIONAL_LOGOS } from '../data/regionalLogos';
 
 interface SavedDesignsModalProps {
+  uiLanguage: 'de' | 'it';
   isOpen: boolean;
   onClose: () => void;
   currentContent: FlyerContent;
@@ -31,11 +32,13 @@ interface SavedDesignsModalProps {
 }
 
 export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
+  uiLanguage,
   isOpen,
   onClose,
   currentContent,
   onLoadDesign
 }) => {
+  const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [designs, setDesigns] = useState<SavedDesign[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -47,7 +50,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       fetchDesigns();
-      setDesignTitle(currentContent.title || 'Nuovo Flyer Dolomiti NordicSki');
+      setDesignTitle(currentContent.title || ui('Neuer Dolomiti NordicSki Flyer', 'Nuovo Flyer Dolomiti NordicSki'));
       setSaveSuccess(false);
       setErrorMessage(null);
     }
@@ -61,7 +64,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
       setDesigns(items);
     } catch (err: any) {
       console.error('Failed to load designs:', err);
-      setErrorMessage('Impossibile caricare i design salvati da Firestore.');
+      setErrorMessage(ui('Gespeicherte Designs konnten nicht geladen werden.', 'Impossibile caricare i design salvati da Firestore.'));
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +72,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
 
   const handleSaveCurrentDesign = async () => {
     if (!designTitle.trim()) {
-      alert('Inserisci un titolo per il tuo design.');
+      alert(ui('Bitte einen Titel für das Design eingeben.', 'Inserisci un titolo per il tuo design.'));
       return;
     }
 
@@ -110,7 +113,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
       await fetchDesigns();
     } catch (err: any) {
       console.error('Error saving design:', err);
-      setErrorMessage('Errore durante il salvataggio in Firebase: ' + (err.message || 'Riprova.'));
+      setErrorMessage(ui('Fehler beim Speichern: ', 'Errore durante il salvataggio in Firebase: ') + (err.message || 'Riprova.'));
     } finally {
       setIsSaving(false);
     }
@@ -175,7 +178,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-900 font-vietnam flex items-center gap-1.5">
                 <Save className="w-4 h-4 text-[#0D4D5E]" />
-                Salva Design Corrente
+                {ui('Aktuelles Design speichern', 'Salva Design Corrente')}
               </span>
               {saveSuccess && (
                 <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
@@ -189,7 +192,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
                 type="text"
                 value={designTitle}
                 onChange={(e) => setDesignTitle(e.target.value)}
-                placeholder="Titolo o nome del pacchetto..."
+                placeholder={ui('Titel oder Paketname...', 'Titolo o nome del pacchetto...')}
                 className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:border-[#0D4D5E]"
               />
               <button
@@ -205,7 +208,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
                 ) : (
                   <>
                     <Cloud className="w-3.5 h-3.5 text-[#AAD0D1]" />
-                    <span>Salva Ora</span>
+                    <span>{ui('Jetzt speichern', 'Salva Ora')}</span>
                   </>
                 )}
               </button>
@@ -293,12 +296,12 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
                           <button
                             onClick={(e) => handleDelete(item.id, e)}
                             className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                            title="Elimina design"
+                            title={ui('Design löschen', 'Elimina design')}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                           <span className="text-[10px] font-bold text-[#0D4D5E] group-hover:underline">
-                            Apri →
+                            {ui('Öffnen →', 'Apri →')}
                           </span>
                         </div>
                       </div>
@@ -317,7 +320,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold transition-all"
           >
-            Chiudi
+            {ui('Schließen', 'Chiudi')}
           </button>
         </div>
 

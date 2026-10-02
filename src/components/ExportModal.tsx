@@ -3,6 +3,7 @@ import { X, Printer, Download, FileText, Globe, Check, Layers, Loader2 } from 'l
 import { PaperFormat, LanguageCode } from '../types';
 
 interface ExportModalProps {
+  uiLanguage: 'de' | 'it';
   isOpen: boolean;
   onClose: () => void;
   format: PaperFormat;
@@ -17,6 +18,7 @@ interface ExportModalProps {
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
+  uiLanguage,
   isOpen,
   onClose,
   format,
@@ -29,6 +31,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   isExporting,
   isPriceTable = false
 }) => {
+  const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   if (!isOpen) return null;
 
   return (
@@ -43,9 +46,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold tracking-tight">
-                {isPriceTable ? 'Esportazione & Stampa Listino Ufficiale' : 'Esportazione & Stampa Multilingua'}
+                {isPriceTable ? ui('Offizielle Preisliste exportieren & drucken', 'Esportazione & Stampa Listino Ufficiale') : ui('Mehrsprachig exportieren & drucken', 'Esportazione & Stampa Multilingua')}
               </h3>
-              <p className="text-xs text-slate-300 font-medium">Formato Selezionato: <strong className="text-white">{format}</strong></p>
+              <p className="text-xs text-slate-300 font-medium">{ui('Gewähltes Format:', 'Formato Selezionato:')} <strong className="text-white">{format}</strong></p>
             </div>
           </div>
           <button
@@ -64,9 +67,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <div className="bg-[#0D4D5E]/10 border border-[#0D4D5E]/30 p-3.5 rounded-xl flex items-start gap-3 text-slate-900">
               <Globe className="w-5 h-5 text-[#0D4D5E] shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-xs text-[#0D4D5E] block">Modello Listino DNS e Regioni (Struttura Unificata)</span>
+                <span className="font-bold text-xs text-[#0D4D5E] block">{ui('DNS- und Gebiets-Preisliste (einheitliche Struktur)', 'Modello Listino DNS e Regioni (Struttura Unificata)')}</span>
                 <span className="text-[11px] text-slate-700 leading-relaxed block mt-0.5">
-                  La compilazione in 3 lingue separate è disattivata per questo modello. Verrà generata la versione ufficiale unica ad alta risoluzione pronta per la stampa tipografica.
+                  {ui('Für dieses Modell ist die Ausgabe in drei getrennten Sprachen deaktiviert. Es wird eine einzige offizielle hochauflösende Version erzeugt.', 'La compilazione in 3 lingue separate è disattivata per questo modello. Verrà generata la versione ufficiale unica ad alta risoluzione pronta per la stampa tipografica.')}
                 </span>
               </div>
             </div>
@@ -74,16 +77,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center gap-3">
               <Globe className="w-5 h-5 text-[#0D4D5E] shrink-0" />
               <div>
-                <span className="font-bold text-slate-900 block">3 Lingue Configurate (DE / IT / EN)</span>
+                <span className="font-bold text-slate-900 block">{ui('3 Sprachen konfiguriert (DE / IT / EN)', '3 Lingue Configurate (DE / IT / EN)')}</span>
                 <span className="text-[11px] text-slate-500">
-                  Puoi scaricare un singolo PDF trilingue con 3 pagine ordinate, 3 file distinti per ciascuna lingua, oppure solo la lingua attiva (<strong>{activeLanguage.toUpperCase()}</strong>).
+                  {ui('Du kannst ein dreisprachiges PDF mit 3 Seiten, 3 getrennte Dateien oder nur die aktive Sprache herunterladen', 'Puoi scaricare un singolo PDF trilingue con 3 pagine ordinate, 3 file distinti per ciascuna lingua, oppure solo la lingua attiva')} (<strong>{activeLanguage.toUpperCase()}</strong>).
                 </span>
               </div>
             </div>
           )}
 
           <div className="space-y-3 pt-1">
-            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Opzioni Esportazione PDF:</span>
+            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">{ui('PDF-Exportoptionen:', 'Opzioni Esportazione PDF:')}</span>
 
             {isPriceTable ? (
               <button
@@ -100,14 +103,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   </div>
                   <div>
                     <span className="font-bold text-slate-900 text-xs block group-hover:text-[#0D4D5E]">
-                      📄 Scarica PDF Listino Prezzi Ufficiale (300 DPI)
+                      {ui('📄 Offizielle Preisliste als PDF herunterladen (300 DPI)', '📄 Scarica PDF Listino Prezzi Ufficiale (300 DPI)')}
                     </span>
                     <span className="text-[11px] text-slate-500">
-                      Documento PDF vettoriale ad alta definizione per la stampa.
+                      {ui('Hochauflösendes PDF-Dokument für den Druck.', 'Documento PDF vettoriale ad alta definizione per la stampa.')}
                     </span>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 px-2.5 py-1 rounded-md shrink-0">Stampa HQ</span>
+                <span className="text-xs font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 px-2.5 py-1 rounded-md shrink-0">{ui('HQ-Druck', 'Stampa HQ')}</span>
               </button>
             ) : (
               <>
@@ -203,7 +206,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
 
           <div className="border-t border-slate-200 pt-3 space-y-2">
-            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Esportazione Immagine PNG:</span>
+            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">{ui('PNG-Bildexport:', 'Esportazione Immagine PNG:')}</span>
             
             <div className={isPriceTable ? "grid grid-cols-1" : "grid grid-cols-2 gap-2"}>
               {!isPriceTable && (
@@ -216,7 +219,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   className="py-2.5 px-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-2xs"
                 >
                   <Download className="w-4 h-4 text-emerald-600" />
-                  <span>3 Immagini PNG (DE, IT, EN)</span>
+                  <span>{ui('3 PNG-Bilder (DE, IT, EN)', '3 Immagini PNG (DE, IT, EN)')}</span>
                 </button>
               )}
 
@@ -229,7 +232,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 className="py-2.5 px-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-2xs"
               >
                 <Download className="w-4 h-4 text-[#0D4D5E]" />
-                <span>Scarica Immagine PNG Listino</span>
+                <span>{ui('Preisliste als PNG herunterladen', 'Scarica Immagine PNG Listino')}</span>
               </button>
             </div>
           </div>
@@ -241,10 +244,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           {isExporting ? (
             <div className="flex items-center gap-2 text-[#0D4D5E] font-bold">
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Generazione documenti in corso...</span>
+              <span>{ui('Dokumente werden erstellt...', 'Generazione documenti in corso...')}</span>
             </div>
           ) : (
-            <span>Pronto per l'esportazione tipografica</span>
+            <span>{ui('Bereit für den Export', "Pronto per l'esportazione tipografica")}</span>
           )}
 
           <button
@@ -252,7 +255,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             disabled={isExporting}
             className="px-4 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold transition-all"
           >
-            Annulla
+            {ui('Abbrechen', 'Annulla')}
           </button>
         </div>
 

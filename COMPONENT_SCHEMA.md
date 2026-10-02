@@ -71,3 +71,83 @@ In una fase successiva di sviluppo, l'utente potrà:
 2. Attivare/Disattivare i blocchi con switch ON/OFF.
 3. Riordinare la sequenza visiva dei blocchi (es. spostare il `CUSTOM_BANNER` in alto prima dei prezzi o sotto le immagini).
 4. Redigere direttamente i soli dati necessari per i blocchi attivi.
+
+
+---
+
+## 5. Runtime Block Engine (F4)
+
+A partire da F4 questo schema non è più solo descrittivo: è collegato al runtime tramite:
+
+- `src/components/blocks/BlockEngine.ts`
+- `src/components/blocks/BlockStackRenderer.tsx`
+- `src/components/blocks/BlockPresets.ts`
+
+### Registry canonico
+
+Ogni componente dispone ora di:
+- `componentId` canonico;
+- `sectionId` runtime, quando esiste;
+- label DE / IT / EN;
+- pannelli editor correlati;
+- campi obbligatori e opzionali;
+- stato `runtime` oppure `planned`;
+- renderer React, se implementato.
+
+### Componenti runtime attivi
+
+- BRAND_HEADER
+- BIG_TITLE
+- HERO_MEDIA
+- PRICE_CAROUSEL
+- PROMO_HERO
+- PRICE_TABLE
+- SERVICE_GRID
+- CUSTOM_BANNER
+- CALL_TO_ACTION
+- DISCLAIMER_LEGAL
+- BRAND_FOOTER
+
+### Componenti pianificati ma non ancora renderer runtime
+
+- INFO_SERVICES_BOX
+- EVENT_SCHEDULE
+- MAP_LOCATION_BLOCK
+- CUSTOM_TEXT_BLOCK
+- PARTNER_SPONSOR_GRID
+- SOCIAL_COMMUNITY_BAR
+- CONTACT_CARD_BOX
+
+Questi componenti sono registrati come `planned` e non vengono renderizzati finché non esiste un renderer esplicito.
+
+### Renderer comune
+
+Le varianti moderne non devono più interrogare direttamente un registry locale. Usano tutte:
+
+`BlockStackRenderer`
+
+che centralizza:
+- ordine blocchi;
+- visibilità;
+- lookup del renderer;
+- omissione sicura dei componenti non implementati;
+- contratto uniforme `BlockProps`.
+
+### Preset stack
+
+I preset dichiarati in `BlockPresets.ts` rappresentano la traduzione eseguibile della tabella del capitolo 3.
+
+F4 non cambia ancora automaticamente l'ordine dei flyer esistenti: i preset servono come fonte canonica per F5 e per i futuri modelli custom.
+
+### Regola di compatibilità
+
+F4 NON modifica:
+- `FlyerDocument v1`;
+- `FlyerContent`;
+- template visuali;
+- renderer legacy `*Variant1`;
+- hotel variants;
+- output PDF/PNG;
+- ordine personalizzato salvato dagli utenti.
+
+Le varianti legacy verranno migrate solo in F5 dopo confronto visuale.

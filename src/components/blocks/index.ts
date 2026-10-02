@@ -1,6 +1,3 @@
-import React from 'react';
-import { FlyerSectionId } from '../../types';
-import { BlockProps } from './BlockTypes';
 import { BrandHeaderBlock } from './BrandHeaderBlock';
 import { BigTitleBlock } from './BigTitleBlock';
 import { HeroMediaBlock } from './HeroMediaBlock';
@@ -26,17 +23,10 @@ export { CallToActionBlock } from './CallToActionBlock';
 export { DisclaimerBlock } from './DisclaimerBlock';
 export { BrandFooterBlock } from './BrandFooterBlock';
 
-export const BLOCK_REGISTRY: Partial<Record<FlyerSectionId, React.FC<BlockProps>>> = {
-  header: BrandHeaderBlock,
-  bigTitle: BigTitleBlock,
-  heroImage: HeroMediaBlock,
-  earlyBird: EarlyBirdBlock,
-  promotionBox: PromoHeroBlock,
-  priceTables: PriceTableBlock,
-  servicesBox: ServiceGridBlock,
-  ecoBanner: CustomBannerBlock,
-  qrCode: CallToActionBlock,
-  disclaimer: DisclaimerBlock,
-  footer: BrandFooterBlock,
-};
+export { BLOCK_DEFINITIONS, BLOCK_BY_COMPONENT_ID, BLOCK_BY_SECTION_ID, getRuntimeBlock, isBlockVisible, getEditorPanelsForSections } from './BlockEngine';
+export type { FlyerBlockDefinition, FlyerComponentId, BlockEditorPanel } from './BlockEngine';
+export { BlockStackRenderer } from './BlockStackRenderer';
 
+
+export { BLOCK_PRESETS, getBlockPresetForGraphicStyle } from './BlockPresets';
+export type { BlockPresetDefinition, BlockPresetId } from './BlockPresets';

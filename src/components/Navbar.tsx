@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, Eye, Printer, RotateCw, Share2 } from 'lucide-react';
+import { Download, Eye, LogIn, LogOut, Printer, RotateCw, Share2 } from 'lucide-react';
 import { formatDNSCoreHeaderStatus } from '@dolomitinordicski/dns-shared-data/ui/header-status';
 import { PaperFormat, PaperOrientation } from '../types';
 import type { DNSCoreHeaderStatus } from '../lib/dnsCoreHeader';
@@ -23,6 +23,9 @@ interface NavbarProps {
   uiLanguage: UILanguage;
   onUiLanguageChange: (language: UILanguage) => void;
   coreStatus: DNSCoreHeaderStatus;
+  coreUserEmail?: string | null;
+  onCoreSignIn: () => void;
+  onCoreSignOut: () => void;
 }
 
 const copy = {
@@ -36,6 +39,8 @@ const copy = {
     crop: 'Schnitt',
     share: 'Teilen',
     pdf: 'PDF',
+    signIn: 'Anmelden',
+    signOut: 'Abmelden',
   },
   it: {
     subtitle: 'Materiali grafici & layout',
@@ -47,6 +52,8 @@ const copy = {
     crop: 'Rifilo',
     share: 'Condividi',
     pdf: 'PDF',
+    signIn: 'Accedi',
+    signOut: 'Esci',
   },
 } as const;
 
@@ -67,6 +74,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   uiLanguage,
   onUiLanguageChange,
   coreStatus,
+  coreUserEmail,
+  onCoreSignIn,
+  onCoreSignOut,
 }) => {
   const t = copy[uiLanguage];
   const coreHeader = formatDNSCoreHeaderStatus(coreStatus, uiLanguage);
@@ -112,9 +122,31 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </div>
 
-            <div className="dns-tool-header-status" data-state={coreHeader.state} aria-live="polite">
-              <span className="dns-tool-header-status-dot" />
-              {coreHeader.text}
+            <div className="flex items-center gap-2">
+              <div className="dns-tool-header-status" data-state={coreHeader.state} aria-live="polite">
+                <span className="dns-tool-header-status-dot" />
+                {coreHeader.text}
+              </div>
+              {coreUserEmail ? (
+                <button
+                  type="button"
+                  onClick={onCoreSignOut}
+                  title={coreUserEmail}
+                  className="inline-flex items-center gap-1 rounded border border-white/20 px-2 py-1 text-[9px] font-bold text-white/80 hover:bg-white/10 hover:text-white"
+                >
+                  <LogOut className="h-3 w-3" />
+                  {t.signOut}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onCoreSignIn}
+                  className="inline-flex items-center gap-1 rounded bg-white px-2 py-1 text-[9px] font-bold text-[#0D4D5E]"
+                >
+                  <LogIn className="h-3 w-3" />
+                  {t.signIn}
+                </button>
+              )}
             </div>
           </div>
         </div>

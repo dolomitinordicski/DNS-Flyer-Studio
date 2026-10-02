@@ -41,7 +41,7 @@ export function TemplatesEditorTab(props: TemplatesEditorTabProps) {
                       </span>
                     </h3>
                     <p className="text-xs text-slate-500 mt-1">
-                      {ui('Wähle eine offizielle Vorlage, erstelle eine neue oder dupliziere die aktive. Speichern und synchronisieren über Firebase.', 'Seleziona uno dei listini o documenti ufficiali, crea un nuovo modello o duplica quello attivo. Salva e sincronizza su Firebase.')}
+                      {ui('Wähle eine offizielle Vorlage, erstelle eine neue oder dupliziere die aktive. Speichern und synchronisieren über Firebase.', 'Seleziona uno dei listini o documenti ufficiali, crea un nuovo modello o duplica quello attivo. Salva e sincronizza su DNS Core.')}
                     </p>
                   </div>
       
@@ -82,7 +82,7 @@ export function TemplatesEditorTab(props: TemplatesEditorTabProps) {
                       onClick={handleSaveModelToFirebase}
                       disabled={isSavingToFirebase}
                       className="flex flex-col items-center justify-center p-2 bg-[#0D4D5E] hover:bg-[#083845] text-white rounded-lg text-[10px] font-bold transition-all shadow-2xs disabled:opacity-50 group"
-                      title={ui('Vorlage speichern', 'Salva modello nel Database Firebase Cloud')}
+                      title={ui('Vorlage speichern', 'Salva modello in DNS Core')}
                     >
                       {isSavingToFirebase ? (
                         <Loader2 className="w-4 h-4 mb-1 animate-spin text-[#AAD0D1]" />
@@ -134,7 +134,7 @@ export function TemplatesEditorTab(props: TemplatesEditorTabProps) {
                       <div className="flex items-center justify-between">
                         <h4 className="text-xs font-bold text-[#0D4D5E] uppercase tracking-wider font-vietnam flex items-center gap-1.5">
                           <Cloud className="w-3.5 h-3.5 text-[#417483]" />
-                          {ui('Gespeicherte Vorlagen', 'I Miei Modelli Salvati in Firebase')} ({firebaseSavedModels.length})
+                          {ui('Gespeicherte Vorlagen', 'I Miei Modelli Salvati')} ({firebaseSavedModels.length})
                         </h4>
                         <button
                           onClick={onOpenSavedDesignsModal}

@@ -16,6 +16,7 @@ import { optimizeLayout } from './utils/layoutOptimizer';
 import { probeDNSCoreHeader, type DNSCoreHeaderStatus } from './lib/dnsCoreHeader';
 import { getDNSFoundationRuntime } from './lib/foundationRuntime';
 import { createFlyerDocumentV1, normalizeFlyerContent } from './model/flyerDocument';
+import { signInDNSCore, signOutDNSCore, subscribeDNSCoreUser } from './lib/dnsCore';
 
 export default function App() {
   // View mode: 'editor' | 'dashboard'
@@ -24,6 +25,7 @@ export default function App() {
   const foundation = getDNSFoundationRuntime();
   const [uiLanguage, setUiLanguageState] = useState<'de' | 'it'>(() => foundation.getLanguage());
   const [coreStatus, setCoreStatus] = useState<DNSCoreHeaderStatus>({ state: 'loading' });
+  const [coreUserEmail, setCoreUserEmail] = useState<string | null>(null);
 
   // Initial Flyer Content from Template 1 or LocalStorage
   const [content, setContent] = useState<FlyerContent>(() => {
@@ -88,7 +90,24 @@ export default function App() {
 
   useEffect(() => {
     void probeDNSCoreHeader().then(setCoreStatus);
+    return subscribeDNSCoreUser(user => setCoreUserEmail(user?.email ?? null));
   }, []);
+
+  const handleCoreSignIn = async () => {
+    try {
+      await signInDNSCore();
+    } catch (error) {
+      console.error('DNS Core sign-in failed:', error);
+    }
+  };
+
+  const handleCoreSignOut = async () => {
+    try {
+      await signOutDNSCore();
+    } catch (error) {
+      console.error('DNS Core sign-out failed:', error);
+    }
+  };
 
   // Save to localStorage whenever content changes
   React.useEffect(() => {

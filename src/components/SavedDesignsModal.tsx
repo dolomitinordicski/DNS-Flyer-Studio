@@ -24,6 +24,7 @@ import {
 import { REGIONAL_LOGOS } from '../data/regionalLogos';
 
 interface SavedDesignsModalProps {
+  uiLanguage: 'de' | 'it';
   isOpen: boolean;
   onClose: () => void;
   currentContent: FlyerContent;
@@ -31,11 +32,13 @@ interface SavedDesignsModalProps {
 }
 
 export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
+  uiLanguage,
   isOpen,
   onClose,
   currentContent,
   onLoadDesign
 }) => {
+  const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [designs, setDesigns] = useState<SavedDesign[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -47,7 +50,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       fetchDesigns();
-      setDesignTitle(currentContent.title || 'Nuovo Flyer Dolomiti NordicSki');
+      setDesignTitle(currentContent.title || ui('Neuer Dolomiti NordicSki Flyer', 'Nuovo Flyer Dolomiti NordicSki'));
       setSaveSuccess(false);
       setErrorMessage(null);
     }
@@ -61,7 +64,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
       setDesigns(items);
     } catch (err: any) {
       console.error('Failed to load designs:', err);
-      setErrorMessage('Impossibile caricare i design salvati da Firestore.');
+      setErrorMessage(ui('Gespeicherte Designs konnten nicht geladen werden.', 'Impossibile caricare i design salvati da Firestore.'));
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +72,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
 
   const handleSaveCurrentDesign = async () => {
     if (!designTitle.trim()) {
-      alert('Inserisci un titolo per il tuo design.');
+      alert(ui('Bitte einen Titel für das Design eingeben.', 'Inserisci un titolo per il tuo design.'));
       return;
     }
 
@@ -110,7 +113,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
       await fetchDesigns();
     } catch (err: any) {
       console.error('Error saving design:', err);
-      setErrorMessage('Errore durante il salvataggio in Firebase: ' + (err.message || 'Riprova.'));
+      setErrorMessage(ui('Fehler beim Speichern: ', 'Errore durante il salvataggio in Firebase: ') + (err.message || 'Riprova.'));
     } finally {
       setIsSaving(false);
     }

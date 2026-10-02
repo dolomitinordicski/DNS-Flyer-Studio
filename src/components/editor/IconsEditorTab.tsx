@@ -65,10 +65,10 @@ export function IconsEditorTab({
         <div className="font-extrabold text-slate-900 flex items-center justify-between text-xs">
           <span className="flex items-center gap-1.5">
             <Upload className="w-4 h-4 text-[#0D4D5E]" />
-            Aggiungi Icona dal PC (Database Firestore)
+            Aggiungi Icona dal PC (Libreria locale)
           </span>
           <span className="text-[9px] uppercase font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
-            Firestore DB
+            Locale
           </span>
         </div>
 
@@ -138,7 +138,7 @@ export function IconsEditorTab({
             className="w-full py-2 px-3 bg-[#0D4D5E] hover:bg-[#072F3A] text-white font-extrabold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>{isUploadingCustomIcon ? 'Salvataggio in Firestore...' : 'Salva Nuova Icona nel Database Firestore'}</span>
+            <span>{isUploadingCustomIcon ? 'Salvataggio...' : 'Salva Nuova Icona nella Libreria Locale'}</span>
           </button>
         </div>
       </div>
@@ -201,7 +201,7 @@ export function IconsEditorTab({
                       e.stopPropagation();
                       onDeleteCustomIcon(icon.id);
                     }}
-                    title="Elimina da Firestore"
+                    title="Elimina dalla libreria locale"
                     className="absolute bottom-2 right-2 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

@@ -17,6 +17,7 @@ import {
   type FlyerDocumentV1,
 } from '../model/flyerDocument';
 import { dnsCoreDb, getDNSCoreUser } from '../lib/dnsCore';
+import { toCanonicalReportingAreaId } from './canonicalRegionIds';
 
 export type FlyerScopeType = 'network' | 'reportingArea' | 'organization';
 
@@ -75,10 +76,11 @@ export function requireDNSCoreUser() {
 }
 
 export function scopeFromContent(content: FlyerContent): { scopeType: FlyerScopeType; scopeId: string } {
-  if (!content.regionId || content.regionId === 'dns_central') {
+  const reportingAreaId = toCanonicalReportingAreaId(content.regionId);
+  if (!reportingAreaId) {
     return { scopeType: 'network', scopeId: 'dolomiti-nordicski' };
   }
-  return { scopeType: 'reportingArea', scopeId: content.regionId };
+  return { scopeType: 'reportingArea', scopeId: reportingAreaId };
 }
 
 export function seasonIdFromContent(content: FlyerContent): string {

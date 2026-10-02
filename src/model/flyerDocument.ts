@@ -10,7 +10,7 @@ import type {
   SectionVisibility,
 } from '../types';
 import type { BlockDataBinding } from './blockDataContract';
-import { createInlineBlockBindings } from './blockDataContract';
+import { createDefaultBlockBindings } from './blockDataContract';
 
 export const FLYER_DOCUMENT_SCHEMA = 'dns.flyer-document' as const;
 export const FLYER_DOCUMENT_VERSION = 1 as const;
@@ -131,7 +131,7 @@ export function createFlyerDocumentV1(
       visibility: cloned.sectionVisibility ?? cloned.visibility,
       orderPortrait: cloned.sectionOrderPortrait,
       orderLandscape: cloned.sectionOrderLandscape,
-      bindings: createInlineBlockBindings(cloned),
+      bindings: createDefaultBlockBindings(cloned),
     },
     assets: {
       heroImageUrl: cloned.heroImageUrl,

@@ -17,6 +17,7 @@ import { probeDNSCoreHeader, type DNSCoreHeaderStatus } from './lib/dnsCoreHeade
 import { getDNSFoundationRuntime } from './lib/foundationRuntime';
 import { createFlyerDocumentV1, normalizeFlyerContent } from './model/flyerDocument';
 import { signInDNSCore, signOutDNSCore, subscribeDNSCoreUser } from './lib/dnsCore';
+import { hydratePriceTableFromDNSCore, shouldHydratePriceTableFromDNSCore } from './data/priceTableDnsCoreResolver';
 
 export default function App() {
   // View mode: 'editor' | 'dashboard'
@@ -113,6 +114,38 @@ export default function App() {
   React.useEffect(() => {
     localStorage.setItem('dns_active_flyer', JSON.stringify(createFlyerDocumentV1(content, { source: 'editor' })));
   }, [content]);
+
+  const [resolvedContent, setResolvedContent] = useState<FlyerContent>(content);
+  const [exportPreviewContent, setExportPreviewContent] = useState<FlyerContent | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveRuntimeContent = async () => {
+      if (!coreUserEmail || !shouldHydratePriceTableFromDNSCore(content)) {
+        if (!cancelled) setResolvedContent(content);
+        return;
+      }
+
+      try {
+        const hydrated = await hydratePriceTableFromDNSCore(content);
+        if (!cancelled) setResolvedContent(hydrated);
+      } catch (error) {
+        console.warn('DNS Core block hydration failed; inline content retained.', error);
+        if (!cancelled) setResolvedContent(content);
+      }
+    };
+
+    void resolveRuntimeContent();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    content,
+    coreUserEmail,
+  ]);
+
+  const canvasContent = exportPreviewContent ?? resolvedContent;
 
   const [activeTemplateId, setActiveTemplateId] = useState<LayoutTemplateId>(() => {
     const savedId = localStorage.getItem('dns_active_template_id');
@@ -307,28 +340,28 @@ export default function App() {
     const flyerElement = flyerRef.current;
     if (!flyerElement) return null;
 
-    const langContent = getContentForLanguage(content, lang);
-    setContent(langContent);
-    // Wait for React re-render tick
-    await new Promise(r => setTimeout(r, 450));
+    const langContent = getContentForLanguage(resolvedContent, lang);
+    setExportPreviewContent(langContent);
+    // Wait only for the runtime preview to switch language; no document mutation.
+    await new Promise(r => setTimeout(r, 120));
 
-    const canvas = await html2canvas(flyerElement, {
-      scale: 3, // 300 DPI clarity
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false
-    });
-
-    return canvas;
+    try {
+      return await html2canvas(flyerElement, {
+        scale: 3, // 300 DPI clarity
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+    } finally {
+      setExportPreviewContent(null);
+    }
   };
 
   // 1. Export PDF Bundle (3 Pages: DE, IT, EN)
   const handleExportPdfBundle = async () => {
     if (!flyerRef.current) return;
     setIsExporting(true);
-    const originalContent = { ...content };
-
     try {
       const doc = new jsPDF({
         orientation: content.orientation,
@@ -354,7 +387,6 @@ export default function App() {
       console.error('Error exporting PDF bundle:', err);
       window.print();
     } finally {
-      setContent(originalContent);
       setIsExporting(false);
     }
   };
@@ -363,8 +395,6 @@ export default function App() {
   const handleExportPdfSeparate = async () => {
     if (!flyerRef.current) return;
     setIsExporting(true);
-    const originalContent = { ...content };
-
     try {
       const languages: LanguageCode[] = ['de', 'it', 'en'];
       for (const lang of languages) {
@@ -383,7 +413,6 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting separate PDFs:', err);
     } finally {
-      setContent(originalContent);
       setIsExporting(false);
     }
   };
@@ -392,8 +421,6 @@ export default function App() {
   const handleExportPdfSingle = async (lang: LanguageCode) => {
     if (!flyerRef.current) return;
     setIsExporting(true);
-    const originalContent = { ...content };
-
     try {
       const canvas = await renderCanvasForLang(lang);
       if (!canvas) return;
@@ -409,7 +436,6 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting single PDF:', err);
     } finally {
-      setContent(originalContent);
       setIsExporting(false);
     }
   };
@@ -418,8 +444,6 @@ export default function App() {
   const handleExportPngSeparate = async () => {
     if (!flyerRef.current) return;
     setIsExporting(true);
-    const originalContent = { ...content };
-
     try {
       const languages: LanguageCode[] = ['de', 'it', 'en'];
       for (const lang of languages) {
@@ -435,7 +459,6 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting separate PNGs:', err);
     } finally {
-      setContent(originalContent);
       setIsExporting(false);
     }
   };
@@ -444,8 +467,6 @@ export default function App() {
   const handleExportPngSingle = async (lang: LanguageCode) => {
     if (!flyerRef.current) return;
     setIsExporting(true);
-    const originalContent = { ...content };
-
     try {
       const canvas = await renderCanvasForLang(lang);
       if (!canvas) return;
@@ -457,7 +478,6 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting single PNG:', err);
     } finally {
-      setContent(originalContent);
       setIsExporting(false);
     }
   };
@@ -503,6 +523,9 @@ export default function App() {
         uiLanguage={uiLanguage}
         onUiLanguageChange={setUiLanguage}
         coreStatus={coreStatus}
+        coreUserEmail={coreUserEmail}
+        onCoreSignIn={handleCoreSignIn}
+        onCoreSignOut={handleCoreSignOut}
       />
 
       {/* Make It Perfect Floating Toast Notification */}
@@ -581,7 +604,7 @@ export default function App() {
             {/* The WYSIWYG Flyer Canvas */}
             <FlyerCanvas
               ref={flyerRef}
-              content={content}
+              content={canvasContent}
               scale={scale}
             />
 
@@ -609,7 +632,7 @@ export default function App() {
         uiLanguage={uiLanguage}
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
-        content={content}
+        content={resolvedContent}
         onDownloadPng={handleExportPng}
       />
 

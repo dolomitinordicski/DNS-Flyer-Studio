@@ -130,3 +130,36 @@ export function lockContentToProduct(
     },
   };
 }
+
+
+export type FlyerOverrides = Partial<FlyerContent>;
+
+export function extractFlyerOverrides(
+  content: FlyerContent,
+  product: FlyerProductDefinition,
+): FlyerOverrides {
+  const overrides: FlyerOverrides = {};
+  for (const field of product.editableFields) {
+    if (!Object.prototype.hasOwnProperty.call(content, field)) continue;
+    (overrides as Record<string, unknown>)[field] =
+      structuredCloneValue((content as unknown as Record<string, unknown>)[field]);
+  }
+  return overrides;
+}
+
+export function applyFlyerOverrides(
+  base: FlyerContent,
+  product: FlyerProductDefinition,
+  overrides: FlyerOverrides,
+): FlyerContent {
+  const allowed = new Set(product.editableFields);
+  const safeOverrides = Object.fromEntries(
+    Object.entries(overrides).filter(([field]) => allowed.has(field)),
+  ) as Partial<FlyerContent>;
+  return lockContentToProduct({ ...base, ...safeOverrides }, product);
+}
+
+function structuredCloneValue<T>(value: T): T {
+  if (typeof structuredClone === 'function') return structuredClone(value);
+  return JSON.parse(JSON.stringify(value)) as T;
+}

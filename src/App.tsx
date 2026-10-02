@@ -230,8 +230,11 @@ export default function App() {
               || prev.regionId
               || 'dns_central'),
 
-          // Explicitly clear stale translation sets so fresh translations are initialized
-          translations: undefined,
+          // Canonical monolingual ticket templates carry their approved DE/IT/EN
+          // text sets; other products continue to initialize translations lazily.
+          translations: product?.dataPolicy.languageMode === 'monolingual'
+            ? template.defaultContent.translations
+            : undefined,
 
           sectionVisibility: defaultVis,
           visibility: defaultVis,

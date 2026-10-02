@@ -57,7 +57,7 @@ export function EditorChrome({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Cloud className="w-4 h-4 text-[#AAD0D1] animate-pulse" />
-            <span className="text-xs font-bold font-vietnam">Database Cloud Firebase</span>
+            <span className="text-xs font-bold font-vietnam">DNS Core · Flyer Studio</span>
           </div>
           <button
             onClick={onOpenSavedDesignsModal}

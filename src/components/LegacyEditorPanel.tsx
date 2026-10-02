@@ -112,61 +112,21 @@ export const LegacyEditorPanel: React.FC<LegacyEditorPanelProps> = ({
   };
 
   const handleSaveCustomIcon = async () => {
-    if (!newIconName.trim()) {
-      alert('Inserisci un nome per l\'icona.');
-      return;
-    }
-    if (!newIconImageBase64) {
-      alert(ui('Bitte ein Bild oder Symbol für das Icon auswählen.', 'Seleziona un\'immagine o simbolo icona dal PC.'));
-      return;
-    }
-
-    setIsUploadingCustomIcon(true);
-    try {
-      const created = await saveCustomIconToFirebase({
-        name: newIconName.trim(),
-        nameIt: newIconName.trim(),
-        category: newIconCategory,
-        lucideIconName: 'Sparkles',
-        customIconUrl: newIconImageBase64,
-        isCustom: true
-      });
-
-      setCustomFirestoreIcons(prev => [created, ...prev]);
-      if (!content.selectedSportsIcons.includes(created.id)) {
-        onChangeContent({
-          selectedSportsIcons: [...content.selectedSportsIcons, created.id]
-        });
-      }
-
-      setNewIconName('');
-      setNewIconImageBase64('');
-      if (customIconFileInputRef.current) customIconFileInputRef.current.value = '';
-
-      setIconToast(ui('Neues Icon zur Bibliothek hinzugefügt.', 'Nuova icona aggiunta al Database Firestore!'));
-      setTimeout(() => setIconToast(null), 4000);
-    } catch (err) {
-      console.error('Save custom icon failed:', err);
-      alert('Errore durante il salvataggio dell\'icona in Firestore.');
-    } finally {
-      setIsUploadingCustomIcon(false);
-    }
+    setIconToast(ui(
+      'Legacy-Prüfmodus: Änderungen an der Icon-Bibliothek sind deaktiviert.',
+      'Modalità Legacy di revisione: modifiche alla libreria icone disabilitate.'
+    ));
+    setTimeout(() => setIconToast(null), 4000);
   };
 
-  const handleDeleteCustomIcon = async (iconId: string) => {
-    if (!confirm('Eliminare questa icona dal database Firestore?')) return;
-    try {
-      await deleteCustomIconFromFirebase(iconId);
-      setCustomFirestoreIcons(prev => prev.filter(i => i.id !== iconId));
-      if (content.selectedSportsIcons.includes(iconId)) {
-        onChangeContent({
-          selectedSportsIcons: content.selectedSportsIcons.filter(id => id !== iconId)
-        });
-      }
-    } catch (err) {
-      console.error('Delete custom icon failed:', err);
-    }
+  const handleDeleteCustomIcon = async () => {
+    setIconToast(ui(
+      'Legacy-Prüfmodus: Löschen ist deaktiviert.',
+      'Modalità Legacy di revisione: eliminazione disabilitata.'
+    ));
+    setTimeout(() => setIconToast(null), 4000);
   };
+
 
   // Helper 1: Add a New Custom Model
   const handleCreateNewModel = () => {
@@ -204,24 +164,11 @@ export const LegacyEditorPanel: React.FC<LegacyEditorPanelProps> = ({
 
   // Helper 3: Save Model Directly to Firebase
   const handleSaveModelToFirebase = async () => {
-    setIsSavingToFirebase(true);
-    try {
-      await saveDesignToFirebase(
-        null,
-        content.title || 'Modello Dolomiti NordicSki',
-        content,
-        content.graphicStyle || 'classic_corporate',
-        content.heroImageUrl
-      );
-      
-      await fetchSavedModels();
-      setSaveToast(ui('Vorlage erfolgreich gespeichert.', 'Modello salvato con successo su Firebase Cloud!'));
-      setTimeout(() => setSaveToast(null), 4000);
-    } catch (err: any) {
-      alert('Errore durante il salvataggio su Firebase: ' + (err.message || 'Riprova.'));
-    } finally {
-      setIsSavingToFirebase(false);
-    }
+    setSaveToast(ui(
+      'Legacy-Prüfmodus: Cloud-Speichern ist deaktiviert.',
+      'Modalità Legacy di revisione: salvataggio cloud disabilitato.'
+    ));
+    setTimeout(() => setSaveToast(null), 4000);
   };
 
   // Handle local image file upload & conversion to Data URL

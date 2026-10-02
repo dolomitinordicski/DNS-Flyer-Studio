@@ -20,6 +20,7 @@ interface EditorPanelProps {
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
   onOpenSavedDesignsModal: () => void;
   onMakeItPerfect?: () => void;
+  isDNSAdmin?: boolean;
 }
 
 export const EditorPanel: React.FC<EditorPanelProps> = ({
@@ -28,6 +29,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onChangeContent,
   onApplyTemplate,
   onOpenSavedDesignsModal,
+  isDNSAdmin = false,
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [activeTab, setActiveTab] = useState<EditorTabId>('templates');
@@ -92,6 +94,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             onApplyTemplate={onApplyTemplate}
             onSave={saveDraft}
             onOpenSavedDesignsModal={onOpenSavedDesignsModal}
+            isDNSAdmin={isDNSAdmin}
             onLoadSaved={saved => {
               const savedProduct = getFlyerProductByTemplate(saved.layoutTemplateId);
               onChangeContent(savedProduct ? lockContentToProduct(saved, savedProduct) : saved);

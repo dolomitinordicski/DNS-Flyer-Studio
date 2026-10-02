@@ -58,6 +58,7 @@ import { DEFAULT_SECTION_ORDER } from './flyer-variants/VariantTypes';
 import { LANGUAGE_OPTIONS, getInitialTranslations, getContentForLanguage } from '../utils/multilingual';
 
 interface EditorPanelProps {
+  uiLanguage: 'de' | 'it';
   content: FlyerContent;
   onChangeContent: (updated: Partial<FlyerContent>) => void;
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
@@ -75,12 +76,14 @@ const STOCK_IMAGES = [
 ];
 
 export const EditorPanel: React.FC<EditorPanelProps> = ({
+  uiLanguage,
   content,
   onChangeContent,
   onApplyTemplate,
   onOpenSavedDesignsModal,
   onMakeItPerfect
 }) => {
+  const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [activeTab, setActiveTab] = useState<'templates' | 'style_variant' | 'graphic_elements' | 'content' | 'region' | 'images' | 'style' | 'icons' | 'qr'>('templates');
   const [activeOrderOrientation, setActiveOrderOrientation] = useState<'portrait' | 'landscape'>(content.orientation || 'portrait');
 
@@ -368,7 +371,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 rounded-xl text-xs font-black shadow-md transition-all border border-amber-300 transform active:scale-98"
           >
             <Sparkles className="w-4 h-4 text-slate-950 animate-bounce" />
-            <span>MAKE IT PERFECT (Perfeziona Grafica)</span>
+            <span>{ui('LAYOUT OPTIMIEREN', 'PERFEZIONA GRAFICA')}</span>
           </button>
         )}
       </div>
@@ -376,14 +379,14 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
       {/* Navigation Tabs Header - 3 Column Grid ensuring ALL tabs including Colori are visible on all screen sizes */}
       <div className="grid grid-cols-3 gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200">
         {[
-          { id: 'templates', label: 'Modelli', icon: LayoutTemplate },
-          { id: 'style_variant', label: 'Stile', icon: Layout },
-          { id: 'graphic_elements', label: 'Graphic Elements', icon: Sparkles },
-          { id: 'content', label: 'Testi', icon: Type },
-          { id: 'region', label: 'Regione', icon: MapPin },
-          { id: 'images', label: 'Immagini', icon: ImageIcon },
-          { id: 'style', label: 'Colori', icon: Palette },
-          { id: 'icons', label: 'Icone', icon: Dumbbell },
+          { id: 'templates', label: ui('Vorlagen', 'Modelli'), icon: LayoutTemplate },
+          { id: 'style_variant', label: ui('Layout', 'Stile'), icon: Layout },
+          { id: 'graphic_elements', label: ui('Grafikelemente', 'Elementi grafici'), icon: Sparkles },
+          { id: 'content', label: ui('Texte', 'Testi'), icon: Type },
+          { id: 'region', label: ui('Gebiet', 'Regione'), icon: MapPin },
+          { id: 'images', label: ui('Bilder', 'Immagini'), icon: ImageIcon },
+          { id: 'style', label: ui('Farben', 'Colori'), icon: Palette },
+          { id: 'icons', label: ui('Icons', 'Icone'), icon: Dumbbell },
           { id: 'qr', label: 'QR Code', icon: QrCode }
         ].map((tab) => {
           const Icon = tab.icon;
@@ -416,14 +419,14 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
               <h3 className="text-sm font-bold text-slate-900 font-vietnam flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <LayoutTemplate className="w-4 h-4 text-[#0D4D5E]" />
-                  Modelli Documenti Dolomiti NordicSki
+                  {ui('Dolomiti NordicSki Dokumentvorlagen', 'Modelli Documenti Dolomiti NordicSki')}
                 </span>
                 <span className="text-[10px] font-bold bg-[#0D4D5E]/10 text-[#0D4D5E] px-2 py-0.5 rounded-full font-vietnam">
-                  9 Ufficiali
+                  {ui('9 offiziell', '9 Ufficiali')}
                 </span>
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                Seleziona uno dei listini o documenti ufficiali, crea un nuovo modello o duplica quello attivo. Salva e sincronizza su Firebase.
+                {ui('Wähle eine offizielle Vorlage, erstelle eine neue oder dupliziere die aktive. Speichern und synchronisieren über Firebase.', 'Seleziona uno dei listini o documenti ufficiali, crea un nuovo modello o duplica quello attivo. Salva e sincronizza su Firebase.')}
               </p>
             </div>
 

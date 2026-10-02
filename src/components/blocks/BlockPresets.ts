@@ -1,5 +1,5 @@
 import type { FlyerSectionId, GraphicStyle } from '../../types';
-import type { FlyerComponentId } from './BlockEngine';
+import type { FlyerComponentId } from '../../model/blockDataContract';
 
 export type BlockPresetId =
   | 'classic'

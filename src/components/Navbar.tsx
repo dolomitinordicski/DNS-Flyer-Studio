@@ -1,9 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Download, Eye, Printer, RotateCw, Share2 } from 'lucide-react';
-import { initDNSToolChromeRuntime } from '@dolomitinordicski/dns-shared-data/ui/tool-chrome';
 import { formatDNSCoreHeaderStatus } from '@dolomitinordicski/dns-shared-data/ui/header-status';
 import { PaperFormat, PaperOrientation } from '../types';
-import { AccessibilityMount } from './AccessibilityMount';
 import type { DNSCoreHeaderStatus } from '../lib/dnsCoreHeader';
 
 type UILanguage = 'de' | 'it';
@@ -72,10 +70,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const t = copy[uiLanguage];
   const coreHeader = formatDNSCoreHeaderStatus(coreStatus, uiLanguage);
-  useEffect(() => {
-    const runtime = initDNSToolChromeRuntime();
-    return () => runtime.disconnect();
-  }, []);
 
   return (
     <>
@@ -99,7 +93,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <div className="dns-tool-header-actions">
             <div className="dns-tool-header-controls">
-              <AccessibilityMount language={uiLanguage} />
+              <div data-dns-accessibility-mount className="flex items-center" />
               <div className="dns-tool-header-language">
                 {(['de', 'it'] as const).map(language => (
                   <button

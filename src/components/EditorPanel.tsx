@@ -21,6 +21,7 @@ interface EditorPanelProps {
   onOpenSavedDesignsModal: () => void;
   onMakeItPerfect?: () => void;
   isDNSAdmin?: boolean;
+  onOpenLegacy?: () => void;
 }
 
 export const EditorPanel: React.FC<EditorPanelProps> = ({
@@ -30,6 +31,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onApplyTemplate,
   onOpenSavedDesignsModal,
   isDNSAdmin = false,
+  onOpenLegacy,
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [activeTab, setActiveTab] = useState<EditorTabId>('templates');
@@ -82,6 +84,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onOpenSavedDesignsModal={onOpenSavedDesignsModal}
+        onOpenLegacy={onOpenLegacy}
       />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">

@@ -20,6 +20,7 @@ interface EditorChromeProps {
   activeTab: EditorTabId;
   onTabChange: (tab: EditorTabId) => void;
   onOpenSavedDesignsModal: () => void;
+  onOpenLegacy?: () => void;
 }
 
 export function EditorChrome({
@@ -27,6 +28,7 @@ export function EditorChrome({
   activeTab,
   onTabChange,
   onOpenSavedDesignsModal,
+  onOpenLegacy,
 }: EditorChromeProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const tabs = [
@@ -49,12 +51,24 @@ export function EditorChrome({
             </div>
           </div>
         </div>
-        <button
-          onClick={onOpenSavedDesignsModal}
-          className="px-2.5 py-1 bg-white/15 hover:bg-white/25 rounded-lg text-[11px] font-bold text-white border border-white/20 transition-all"
-        >
-          {ui('Meine Flyer', 'I miei flyer')}
-        </button>
+        <div className="flex items-center gap-1.5">
+          {onOpenLegacy && (
+            <button
+              type="button"
+              onClick={onOpenLegacy}
+              className="px-2.5 py-1 bg-amber-300 text-slate-950 hover:bg-amber-200 rounded-lg text-[10px] font-black transition-all"
+              title={ui('Altes Studio zum Vergleich öffnen', 'Apri il vecchio Studio per confronto')}
+            >
+              LEGACY
+            </button>
+          )}
+          <button
+            onClick={onOpenSavedDesignsModal}
+            className="px-2.5 py-1 bg-white/15 hover:bg-white/25 rounded-lg text-[11px] font-bold text-white border border-white/20 transition-all"
+          >
+            {ui('Meine Flyer', 'I miei flyer')}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-5 gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200">

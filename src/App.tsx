@@ -15,6 +15,7 @@ import { getContentForLanguage } from './utils/multilingual';
 import { optimizeLayout } from './utils/layoutOptimizer';
 import { probeDNSCoreHeader, type DNSCoreHeaderStatus } from './lib/dnsCoreHeader';
 import { getDNSFoundationRuntime } from './lib/foundationRuntime';
+import { createFlyerDocumentV1, normalizeFlyerContent } from './model/flyerDocument';
 
 export default function App() {
   // View mode: 'editor' | 'dashboard'
@@ -31,7 +32,9 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        const isPriceTable = parsed.graphicStyle === 'official_price_table' || parsed.graphicStyle === 'official_price_table_v1';
+        const normalized = normalizeFlyerContent(parsed);
+        if (!normalized) throw new Error('Unsupported active flyer payload');
+        const isPriceTable = normalized.graphicStyle === 'official_price_table' || normalized.graphicStyle === 'official_price_table_v1';
         if (isPriceTable) {
           const vis = {
             header: true,
@@ -40,17 +43,17 @@ export default function App() {
             qrCode: true,
             disclaimer: true,
             footer: true,
-            ...parsed.sectionVisibility,
-            ...parsed.visibility
+            ...normalized.sectionVisibility,
+            ...normalized.visibility
           };
           return {
-            ...parsed,
-            features: parsed.features || [],
+            ...normalized,
+            features: normalized.features || [],
             sectionVisibility: vis,
             visibility: vis
           };
         }
-        return parsed;
+        return normalized;
       } catch (e) {
         console.error('Failed to parse saved flyer', e);
       }
@@ -89,7 +92,7 @@ export default function App() {
 
   // Save to localStorage whenever content changes
   React.useEffect(() => {
-    localStorage.setItem('dns_active_flyer', JSON.stringify(content));
+    localStorage.setItem('dns_active_flyer', JSON.stringify(createFlyerDocumentV1(content, { source: 'editor' })));
   }, [content]);
 
   const [activeTemplateId, setActiveTemplateId] = useState<LayoutTemplateId>(() => {

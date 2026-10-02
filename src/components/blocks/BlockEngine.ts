@@ -1,19 +1,17 @@
 import type React from 'react';
 import type { FlyerContent, FlyerSectionId, SectionVisibility } from '../../types';
 import type { BlockProps } from './BlockTypes';
-import {
-  BrandHeaderBlock,
-  BigTitleBlock,
-  HeroMediaBlock,
-  PromoHeroBlock,
-  EarlyBirdBlock,
-  PriceTableBlock,
-  ServiceGridBlock,
-  CustomBannerBlock,
-  CallToActionBlock,
-  DisclaimerBlock,
-  BrandFooterBlock,
-} from './index';
+import { BrandHeaderBlock } from './BrandHeaderBlock';
+import { BigTitleBlock } from './BigTitleBlock';
+import { HeroMediaBlock } from './HeroMediaBlock';
+import { PromoHeroBlock } from './PromoHeroBlock';
+import { EarlyBirdBlock } from './EarlyBirdBlock';
+import { PriceTableBlock } from './PriceTableBlock';
+import { ServiceGridBlock } from './ServiceGridBlock';
+import { CustomBannerBlock } from './CustomBannerBlock';
+import { CallToActionBlock } from './CallToActionBlock';
+import { DisclaimerBlock } from './DisclaimerBlock';
+import { BrandFooterBlock } from './BrandFooterBlock';
 
 export type FlyerComponentId =
   | 'BRAND_HEADER'

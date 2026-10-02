@@ -140,34 +140,16 @@ export function LayoutVariantsEditorTab({ uiLanguage, content, onChangeContent, 
                         badge: 'Standard Ufficiale'
                       },
                       {
-                        id: 'classic_corporate_v1',
-                        name: '1b. Classico Corporate Alpine (Stile Precedente)',
-                        desc: 'Versione classica precedente senza sistema a blocchi rigido, con markup originale.',
-                        badge: 'Stile Precedente'
-                      },
-                      {
                         id: 'modern_glacier',
                         name: '2. Modern Glacier Carousel (Blocchi)',
                         desc: 'Layout contemporaneo con blocco azzurro ghiacciaio in alto, ampia foto panoramica split e card fluttuanti.',
                         badge: 'Stile Carosello'
                       },
                       {
-                        id: 'modern_glacier_v1',
-                        name: '2b. Modern Glacier Carousel (Stile Precedente)',
-                        desc: 'Versione carosello ghiacciaio precedente con layout flessibile originale.',
-                        badge: 'Stile Precedente'
-                      },
-                      {
                         id: 'nordic_modern',
                         name: '3. Nordic Modern High-Contrast (Blocchi)',
                         desc: 'Stile moderno scuro ad alto contrasto con dettagli cyan, gradienti sportivi e grafica dinamica.',
                         badge: 'Modern Dark'
-                      },
-                      {
-                        id: 'nordic_modern_v1',
-                        name: '3b. Nordic Modern High-Contrast (Stile Precedente)',
-                        desc: 'Versione nordic modern scura originale ad alto contrasto.',
-                        badge: 'Stile Precedente'
                       },
                       {
                         id: 'official_price_table',
@@ -180,12 +162,6 @@ export function LayoutVariantsEditorTab({ uiLanguage, content, onChangeContent, 
                         name: '5. Manifesto & Ticket Voucher (Blocchi)',
                         desc: 'Frame e bordi istituzionali stile attestato/locandina reception hotel, griglia dati e bollini di garanzia.',
                         badge: 'Stile Manifesto'
-                      },
-                      {
-                        id: 'manifesto_voucher_v1',
-                        name: '5b. Manifesto & Ticket Voucher (Stile Precedente)',
-                        desc: 'Versione manifesto voucher originale.',
-                        badge: 'Stile Precedente'
                       },
                       {
                         id: 'classic_official',
@@ -210,12 +186,6 @@ export function LayoutVariantsEditorTab({ uiLanguage, content, onChangeContent, 
                         name: '9. Biglietto Stampa Online Manifesto (Blocchi)',
                         desc: 'Base monolingua stile manifesto per la stampa di biglietti online (Giornaliero, Settimanale Area e DNS) con Barcode e QR Code.',
                         badge: 'Biglietto Stampa'
-                      },
-                      {
-                        id: 'online_ticket_manifesto_v1',
-                        name: '9b. Biglietto Stampa Online Manifesto (Stile Precedente)',
-                        desc: 'Versione biglietto stampa online originale.',
-                        badge: 'Stile Precedente'
                       },
                       {
                         id: 'hotel_skipass_package',

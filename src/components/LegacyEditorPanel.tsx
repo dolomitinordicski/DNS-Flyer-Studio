@@ -1,11 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { FlyerContent, LayoutTemplateId, SportsIcon } from '../types';
 import {
-  deleteCustomIconFromFirebase,
   loadCustomIconsFromFirebase,
   loadDesignsFromFirebase,
-  saveCustomIconToFirebase,
-  saveDesignToFirebase,
   type SavedDesign,
 } from '../lib/firebase';
 import { LegacyEditorChrome, type LegacyEditorTabId } from './editor/LegacyEditorChrome';
@@ -63,12 +60,12 @@ export const LegacyEditorPanel: React.FC<LegacyEditorPanelProps> = ({
 
   // Firebase saved designs local state
   const [firebaseSavedModels, setFirebaseSavedModels] = useState<SavedDesign[]>([]);
-  const [isSavingToFirebase, setIsSavingToFirebase] = useState(false);
+  const [isSavingToFirebase] = useState(false);
   const [saveToast, setSaveToast] = useState<string | null>(null);
 
   // Custom Icons state from Firestore
   const [customFirestoreIcons, setCustomFirestoreIcons] = useState<SportsIcon[]>([]);
-  const [isUploadingCustomIcon, setIsUploadingCustomIcon] = useState(false);
+  const [isUploadingCustomIcon] = useState(false);
   const [newIconName, setNewIconName] = useState('');
   const [newIconCategory, setNewIconCategory] = useState<'Nordic Skiing' | 'Services' | 'Accommodation' | 'Events' | 'Custom'>('Custom');
   const [newIconImageBase64, setNewIconImageBase64] = useState<string>('');

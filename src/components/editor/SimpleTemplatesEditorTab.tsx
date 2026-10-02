@@ -14,6 +14,7 @@ interface SimpleTemplatesEditorTabProps {
   onSave: () => void;
   onOpenSavedDesignsModal: () => void;
   onLoadSaved: (content: FlyerContent) => void;
+  isDNSAdmin: boolean;
 }
 
 export function SimpleTemplatesEditorTab({
@@ -25,12 +26,16 @@ export function SimpleTemplatesEditorTab({
   onSave,
   onOpenSavedDesignsModal,
   onLoadSaved,
+  isDNSAdmin,
 }: SimpleTemplatesEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
-  const templates = FLYER_PRODUCTS.map(product => ({
-    product,
-    template: FLYER_TEMPLATES.find(item => item.id === product.templateId),
-  })).filter(item => item.template);
+  const templates = FLYER_PRODUCTS
+    .filter(product => isDNSAdmin || product.dataPolicy.access !== 'dns-only')
+    .map(product => ({
+      product,
+      template: FLYER_TEMPLATES.find(item => item.id === product.templateId),
+    }))
+    .filter(item => item.template);
 
   return (
     <div className="space-y-5">

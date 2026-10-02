@@ -2,11 +2,28 @@ import type { FlyerContent, GraphicStyle, LayoutTemplateId } from '../types';
 import type { FlyerSectionId } from '../types';
 
 export type FlyerProductType =
-  | 'price_list'
-  | 'digital_pass'
+  | 'dns_price_list'
+  | 'regional_price_list'
+  | 'ticket_weekly_dns'
+  | 'ticket_weekly_area'
+  | 'ticket_daily_area'
   | 'hotel_package'
   | 'voucher'
   | 'promotion';
+
+export type FlyerAccessMode = 'dns-only' | 'area';
+export type FlyerLanguageMode = 'monolingual' | 'trilingual';
+
+export interface FlyerDataPolicy {
+  access: FlyerAccessMode;
+  languageMode: FlyerLanguageMode;
+  pricing?: {
+    dnsPrices?: 'data-entry';
+    regionalFromPrices?: 'dns-manual';
+    regionalPrices?: 'data-entry';
+  };
+  ticketType?: 'weekly_dns' | 'weekly_area' | 'daily_area';
+}
 
 export interface FlyerProductDefinition {
   type: FlyerProductType;
@@ -15,13 +32,14 @@ export interface FlyerProductDefinition {
   graphicStyle: GraphicStyle;
   blockStack: FlyerSectionId[];
   editableFields: readonly (keyof FlyerContent | string)[];
+  dataPolicy: FlyerDataPolicy;
 }
 
 export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
   {
-    type: 'price_list',
-    templateId: 'regional_price_list',
-    label: { de: 'Preisliste', it: 'Listino prezzi', en: 'Price list' },
+    type: 'dns_price_list',
+    templateId: 'official_price_list',
+    label: { de: 'DNS Gesamtpreisliste', it: 'Listino generale DNS', en: 'DNS general price list' },
     graphicStyle: 'official_price_table',
     blockStack: ['header', 'bigTitle', 'heroImage', 'priceTables', 'servicesBox', 'qrCode', 'disclaimer', 'footer'],
     editableFields: [
@@ -30,18 +48,79 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
       'priceListTexts',
     ],
+    dataPolicy: {
+      access: 'dns-only',
+      languageMode: 'trilingual',
+      pricing: {
+        dnsPrices: 'data-entry',
+        regionalFromPrices: 'dns-manual',
+      },
+    },
   },
   {
-    type: 'digital_pass',
-    templateId: 'ticket_digital_pass',
-    label: { de: 'Digital Pass', it: 'Digital Pass', en: 'Digital Pass' },
+    type: 'regional_price_list',
+    templateId: 'regional_price_list',
+    label: { de: 'Regionale Preisliste', it: 'Listino regionale', en: 'Regional price list' },
+    graphicStyle: 'official_price_table',
+    blockStack: ['header', 'bigTitle', 'heroImage', 'priceTables', 'servicesBox', 'qrCode', 'disclaimer', 'footer'],
+    editableFields: [
+      'title', 'subtitle', 'validityPeriod', 'heroImageUrl',
+      'customPrimaryColor', 'customAccentColor',
+      'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
+    ],
+    dataPolicy: {
+      access: 'area',
+      languageMode: 'trilingual',
+      pricing: {
+        regionalPrices: 'data-entry',
+        dnsPrices: 'data-entry',
+      },
+    },
+  },
+  {
+    type: 'ticket_weekly_dns',
+    templateId: 'ticket_online_weekly_dns',
+    label: { de: 'DNS Wochenkarte', it: 'Settimanale DNS', en: 'DNS weekly ticket' },
     graphicStyle: 'online_ticket_manifesto',
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
     editableFields: [
-      'title', 'subtitle', 'validityPeriod', 'heroImageUrl',
-      'priceAmount', 'priceNote', 'customPrimaryColor', 'customAccentColor',
-      'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
+      'heroImageUrl', 'customPrimaryColor', 'customAccentColor', 'qrCode',
     ],
+    dataPolicy: {
+      access: 'area',
+      languageMode: 'monolingual',
+      ticketType: 'weekly_dns',
+    },
+  },
+  {
+    type: 'ticket_weekly_area',
+    templateId: 'ticket_online_weekly_area',
+    label: { de: 'Gebiets-Wochenkarte', it: 'Settimanale area', en: 'Area weekly ticket' },
+    graphicStyle: 'online_ticket_manifesto',
+    blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
+    editableFields: [
+      'heroImageUrl', 'customPrimaryColor', 'customAccentColor', 'qrCode',
+    ],
+    dataPolicy: {
+      access: 'area',
+      languageMode: 'monolingual',
+      ticketType: 'weekly_area',
+    },
+  },
+  {
+    type: 'ticket_daily_area',
+    templateId: 'ticket_online_daily',
+    label: { de: 'Tageskarte', it: 'Giornaliero', en: 'Daily ticket' },
+    graphicStyle: 'online_ticket_manifesto',
+    blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
+    editableFields: [
+      'heroImageUrl', 'customPrimaryColor', 'customAccentColor', 'qrCode',
+    ],
+    dataPolicy: {
+      access: 'area',
+      languageMode: 'monolingual',
+      ticketType: 'daily_area',
+    },
   },
   {
     type: 'hotel_package',
@@ -55,6 +134,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode', 'features',
     ],
+    dataPolicy: { access: 'area', languageMode: 'monolingual' },
   },
   {
     type: 'voucher',
@@ -67,6 +147,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       'priceAmount', 'priceNote', 'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
     ],
+    dataPolicy: { access: 'area', languageMode: 'monolingual' },
   },
   {
     type: 'promotion',
@@ -80,6 +161,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
     ],
+    dataPolicy: { access: 'area', languageMode: 'monolingual' },
   },
 ] as const;
 

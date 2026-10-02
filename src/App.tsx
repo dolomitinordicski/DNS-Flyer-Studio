@@ -29,6 +29,7 @@ export default function App() {
   const [coreStatus, setCoreStatus] = useState<DNSCoreHeaderStatus>({ state: 'loading' });
   const [coreUserEmail, setCoreUserEmail] = useState<string | null>(null);
   const [currentReportingAreaId, setCurrentReportingAreaId] = useState<string | null>(null);
+  const [isDNSAdmin, setIsDNSAdmin] = useState(false);
 
   // Initial Flyer Content from Template 1 or LocalStorage
   const [content, setContent] = useState<FlyerContent>(() => {
@@ -97,13 +98,18 @@ export default function App() {
       setCoreUserEmail(user?.email ?? null);
       if (!user) {
         setCurrentReportingAreaId(null);
+        setIsDNSAdmin(false);
         return;
       }
       void loadCurrentFlyerAccess()
-        .then(access => setCurrentReportingAreaId(access.reportingAreaId ?? null))
+        .then(access => {
+          setCurrentReportingAreaId(access.reportingAreaId ?? null);
+          setIsDNSAdmin(access.isAdmin);
+        })
         .catch(error => {
           console.error('Failed to resolve DNS Core Flyer access:', error);
           setCurrentReportingAreaId(null);
+          setIsDNSAdmin(false);
         });
     });
   }, []);
@@ -190,6 +196,10 @@ export default function App() {
   const handleApplyTemplate = (templateId: LayoutTemplateId) => {
     const template = FLYER_TEMPLATES.find(t => t.id === templateId);
     if (template && template.defaultContent) {
+      const selectedProduct = getFlyerProductByTemplate(templateId);
+      if (selectedProduct?.dataPolicy.access === 'dns-only' && !isDNSAdmin) {
+        return;
+      }
       setActiveTemplateId(templateId);
       setContent(prev => {
         const defaultVis = template.defaultContent.sectionVisibility || {
@@ -213,13 +223,18 @@ export default function App() {
           ...template.defaultContent,
 
           layoutTemplateId: templateId,
-          regionId: currentReportingAreaId
-            || template.defaultContent.regionId
-            || prev.regionId
-            || 'dns_central',
+          regionId: product?.dataPolicy.access === 'dns-only'
+            ? 'dns_central'
+            : (currentReportingAreaId
+              || template.defaultContent.regionId
+              || prev.regionId
+              || 'dns_central'),
 
-          // Explicitly clear stale translation sets so fresh translations are initialized
-          translations: undefined,
+          // Canonical monolingual ticket templates carry their approved DE/IT/EN
+          // text sets; other products continue to initialize translations lazily.
+          translations: product?.dataPolicy.languageMode === 'monolingual'
+            ? template.defaultContent.translations
+            : undefined,
 
           sectionVisibility: defaultVis,
           visibility: defaultVis,
@@ -558,6 +573,7 @@ export default function App() {
               onApplyTemplate={handleApplyTemplate}
               onOpenSavedDesignsModal={() => setIsSavedDesignsModalOpen(true)}
               onMakeItPerfect={handleMakeItPerfect}
+              isDNSAdmin={isDNSAdmin}
             />
 
           {/* Center / Right Canvas Live Preview Area */}

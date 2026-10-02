@@ -1,5 +1,6 @@
 import React from 'react';
-import type { FlyerContent } from '../../types';
+import type { FlyerContent, LanguageCode } from '../../types';
+import { getContentForLanguage } from '../../utils/multilingual';
 import type { FlyerProductDefinition } from '../../model/flyerProductModel';
 
 interface SimpleContentEditorTabProps {
@@ -58,6 +59,33 @@ export function SimpleContentEditorTab({
           )}
         </p>
       </div>
+
+      {product?.dataPolicy.languageMode === 'monolingual' && (
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
+            {ui('Dokumentsprache', 'Lingua documento')}
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {(['de', 'it', 'en'] as LanguageCode[]).map(lang => (
+              <button
+                key={lang}
+                type="button"
+                onClick={() => onChangeContent(getContentForLanguage(content, lang))}
+                className={`py-2 rounded-lg border text-xs font-bold transition-all ${
+                  (content.activeLanguage || 'de') === lang
+                    ? 'bg-[#0D4D5E] text-white border-[#0D4D5E]'
+                    : 'bg-white text-slate-700 border-slate-200'
+                }`}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <p className="text-[10px] text-slate-500">
+            {ui('Das Ticket wird jeweils in einer einzigen Sprache ausgegeben.', 'Il ticket viene prodotto in una sola lingua alla volta.')}
+          </p>
+        </div>
+      )}
 
       {field('title', 'Titel', 'Titolo')}
       {field('subtitle', 'Untertitel', 'Sottotitolo', true)}

@@ -4,6 +4,7 @@ import { jsPDF } from 'jspdf';
 import { Navbar } from './components/Navbar';
 import { FlyerCanvas } from './components/FlyerCanvas';
 import { EditorPanel } from './components/EditorPanel';
+import { LegacyEditorPanel } from './components/LegacyEditorPanel';
 import { SocialShareModal } from './components/SocialShareModal';
 import { SavedDesignsModal } from './components/SavedDesignsModal';
 import { FlyerDashboard } from './components/FlyerDashboard';
@@ -30,6 +31,8 @@ export default function App() {
   const [coreUserEmail, setCoreUserEmail] = useState<string | null>(null);
   const [currentReportingAreaId, setCurrentReportingAreaId] = useState<string | null>(null);
   const [isDNSAdmin, setIsDNSAdmin] = useState(false);
+  const [hasDNSNetworkAccess, setHasDNSNetworkAccess] = useState(false);
+  const [isLegacyMode, setIsLegacyMode] = useState(() => new URLSearchParams(window.location.search).get('legacy') === '1');
 
   // Initial Flyer Content from Template 1 or LocalStorage
   const [content, setContent] = useState<FlyerContent>(() => {
@@ -99,17 +102,20 @@ export default function App() {
       if (!user) {
         setCurrentReportingAreaId(null);
         setIsDNSAdmin(false);
+        setHasDNSNetworkAccess(false);
         return;
       }
       void loadCurrentFlyerAccess()
         .then(access => {
           setCurrentReportingAreaId(access.reportingAreaId ?? null);
           setIsDNSAdmin(access.isAdmin);
+          setHasDNSNetworkAccess(access.hasNetworkAccess);
         })
         .catch(error => {
           console.error('Failed to resolve DNS Core Flyer access:', error);
           setCurrentReportingAreaId(null);
           setIsDNSAdmin(false);
+          setHasDNSNetworkAccess(false);
         });
     });
   }, []);
@@ -128,6 +134,14 @@ export default function App() {
     } catch (error) {
       console.error('DNS Core sign-out failed:', error);
     }
+  };
+
+  const setLegacyReviewMode = (enabled: boolean) => {
+    const url = new URL(window.location.href);
+    if (enabled) url.searchParams.set('legacy', '1');
+    else url.searchParams.delete('legacy');
+    window.history.replaceState({}, '', url);
+    setIsLegacyMode(enabled);
   };
 
   // Save to localStorage whenever content changes
@@ -197,7 +211,7 @@ export default function App() {
     const template = FLYER_TEMPLATES.find(t => t.id === templateId);
     if (template && template.defaultContent) {
       const selectedProduct = getFlyerProductByTemplate(templateId);
-      if (selectedProduct?.dataPolicy.access === 'dns-only' && !isDNSAdmin) {
+      if (selectedProduct?.dataPolicy.access === 'dns-only' && !(isDNSAdmin || hasDNSNetworkAccess)) {
         return;
       }
       setActiveTemplateId(templateId);
@@ -566,15 +580,28 @@ export default function App() {
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           
           {/* Left Sidebar Editor Controls */}
-            <EditorPanel
-              uiLanguage={uiLanguage}
-              content={content}
-              onChangeContent={handleUpdateContent}
-              onApplyTemplate={handleApplyTemplate}
-              onOpenSavedDesignsModal={() => setIsSavedDesignsModalOpen(true)}
-              onMakeItPerfect={handleMakeItPerfect}
-              isDNSAdmin={isDNSAdmin}
-            />
+            {isLegacyMode ? (
+              <LegacyEditorPanel
+                uiLanguage={uiLanguage}
+                content={content}
+                onChangeContent={handleUpdateContent}
+                onApplyTemplate={handleApplyTemplate}
+                onOpenSavedDesignsModal={() => setIsSavedDesignsModalOpen(true)}
+                onMakeItPerfect={handleMakeItPerfect}
+                onExitLegacy={() => setLegacyReviewMode(false)}
+              />
+            ) : (
+              <EditorPanel
+                uiLanguage={uiLanguage}
+                content={content}
+                onChangeContent={handleUpdateContent}
+                onApplyTemplate={handleApplyTemplate}
+                onOpenSavedDesignsModal={() => setIsSavedDesignsModalOpen(true)}
+                onMakeItPerfect={handleMakeItPerfect}
+                isDNSAdmin={isDNSAdmin || hasDNSNetworkAccess}
+                onOpenLegacy={() => setLegacyReviewMode(true)}
+              />
+            )}
 
           {/* Center / Right Canvas Live Preview Area */}
           <main 

@@ -221,16 +221,34 @@ export async function deleteDesignFromFirebase(id: string): Promise<boolean> {
 const REGISTRY_COLLECTION = 'flyer_registry';
 const LOCAL_REGISTRY_KEY = 'dns_flyer_registry_items';
 
+function normalizeFlyerRecord(item: FlyerRecord): FlyerRecord {
+  const document = isFlyerDocumentV1(item.document) ? item.document : undefined;
+  const content = document ? flyerDocumentToContent(document) : item.content;
+  return {
+    ...item,
+    content,
+    document: document ?? (content ? createFlyerDocumentV1(content, {
+      id: item.id,
+      title: item.title,
+      source: 'legacy',
+      status: item.status,
+      publishDate: item.publishDate,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    }) : undefined),
+  };
+}
+
 function getLocalRegistry(): FlyerRecord[] {
   try {
     const raw = localStorage.getItem(LOCAL_REGISTRY_KEY);
     if (!raw) {
       localStorage.setItem(LOCAL_REGISTRY_KEY, JSON.stringify(INITIAL_FLYER_REGISTRY));
-      return INITIAL_FLYER_REGISTRY;
+      return INITIAL_FLYER_REGISTRY.map(normalizeFlyerRecord);
     }
     const items: FlyerRecord[] = JSON.parse(raw);
     // Remove old removed mock pseudo-flyers (flyer_rec_02 to flyer_rec_10)
-    const filtered = items.filter(item => {
+    const filtered = items.map(normalizeFlyerRecord).filter(item => {
       if (item.id && /^flyer_rec_0[2-9]|^flyer_rec_10/.test(item.id)) {
         return false;
       }
@@ -238,11 +256,11 @@ function getLocalRegistry(): FlyerRecord[] {
     });
     // Ensure flyer_rec_01 exists if registry is empty
     if (filtered.length === 0) {
-      return INITIAL_FLYER_REGISTRY;
+      return INITIAL_FLYER_REGISTRY.map(normalizeFlyerRecord);
     }
     return filtered;
   } catch {
-    return INITIAL_FLYER_REGISTRY;
+    return INITIAL_FLYER_REGISTRY.map(normalizeFlyerRecord);
   }
 }
 
@@ -281,7 +299,20 @@ export async function loadFlyerRecordsFromFirebase(): Promise<FlyerRecord[]> {
             category: data.category || 'general',
             priceInfo: data.priceInfo || '',
             targetAudience: data.targetAudience || '',
-            content: data.content as FlyerContent,
+            content: isFlyerDocumentV1(data.document)
+              ? flyerDocumentToContent(data.document)
+              : data.content as FlyerContent,
+            document: isFlyerDocumentV1(data.document)
+              ? data.document
+              : createFlyerDocumentV1(data.content as FlyerContent, {
+                  id: docSnap.id,
+                  title: data.title,
+                  source: 'legacy',
+                  status: data.status,
+                  publishDate: data.publishDate,
+                  createdAt: data.createdAt,
+                  updatedAt: data.updatedAt,
+                }),
             thumbnailUrl: data.thumbnailUrl || '',
             createdByRegion: data.createdByRegion || '',
             createdAt: data.createdAt || new Date().toISOString(),
@@ -320,6 +351,15 @@ export async function saveFlyerRecordToFirebase(record: Partial<FlyerRecord>): P
     priceInfo: record.priceInfo || (record.content ? `${record.content.pricePrefix || ''} ${record.content.priceAmount}${record.content.priceCurrency}` : ''),
     targetAudience: record.targetAudience || '',
     content: record.content as FlyerContent,
+    document: record.document ?? createFlyerDocumentV1(record.content as FlyerContent, {
+      id: docId,
+      title: record.title,
+      source: 'registry',
+      status: record.status || 'issued',
+      publishDate: record.publishDate || new Date().toISOString().split('T')[0],
+      createdAt: record.createdAt || nowIso,
+      updatedAt: nowIso,
+    }),
     thumbnailUrl: record.thumbnailUrl || record.content?.heroImageUrl || '',
     createdByRegion: record.createdByRegion || record.regionName || 'Organizzazione',
     createdAt: record.createdAt || nowIso,

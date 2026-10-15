@@ -303,11 +303,20 @@ export interface FlyerContent {
   promoBannerTitle?: string;
   promoBannerText?: string;
   promoBannerBadge?: string;
-  
+  promoBannerIcon?: string;
+  promoBannerBgColor?: string;
+  promoBannerTextColor?: string;
+
   ecoBannerEnabled?: boolean;
   ecoBannerTitle?: string;
   ecoBannerText?: string;
   ecoBannerTagline?: string;
+  ecoBannerIcon?: string;
+  ecoBannerBgColor?: string;
+  ecoBannerTextColor?: string;
+  validityTitle?: string;
+  customBanner?: PriceListTexts['customBanner'];
+  activeSportsIcons?: string[];
 
   // Brand Header & Regional Logo Customization
   regionId: string;

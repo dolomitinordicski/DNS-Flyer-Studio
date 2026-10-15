@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import type {
   FlyerContent,
+  SportsIcon,
   FlyerSectionId,
   LanguageCode,
   MultilingualTextSet,
@@ -35,10 +36,12 @@ import {
 } from '../../utils/multilingual';
 import { WireframeIcon } from '../WireframeIcon';
 import { STOCK_IMAGES } from './editorAssets';
+import { getAllSportsIcons, getSportsIconName } from '../../data/sportsIcons';
 
 interface ContentEditorTabProps {
   uiLanguage: 'de' | 'it';
   content: FlyerContent;
+  customFirestoreIcons: SportsIcon[];
   onChangeContent: (updated: Partial<FlyerContent>) => void;
   activeOrderOrientation: 'portrait' | 'landscape';
   setActiveOrderOrientation: React.Dispatch<React.SetStateAction<'portrait' | 'landscape'>>;
@@ -52,6 +55,7 @@ interface ContentEditorTabProps {
 export function ContentEditorTab({
   uiLanguage,
   content,
+  customFirestoreIcons,
   onChangeContent,
   activeOrderOrientation,
   setActiveOrderOrientation,
@@ -2008,7 +2012,7 @@ export function ContentEditorTab({
                             <button
                               type="button"
                               onClick={() => {
-                                const newFeat = { id: Date.now().toString(), text: 'Nuova voce / servizio' };
+                                const newFeat = { id: Date.now().toString(), icon: '', text: 'Nuova voce / servizio' };
                                 onChangeContent({ features: [...(content.features || []), newFeat] });
                               }}
                               className="px-2 py-0.5 bg-[#0D4D5E] text-white rounded text-[9px] font-bold flex items-center gap-1 hover:bg-[#0D4D5E]/90 transition-colors"
@@ -2719,7 +2723,7 @@ export function ContentEditorTab({
                                   ? content.translations?.[activeLang]?.features
                                   : (content.features || []))
                               ];
-                              currentFeats.push({ id: `f_${Date.now()}`, text: 'Nuovo servizio incluso', highlight: false });
+                              currentFeats.push({ id: `f_${Date.now()}`, icon: '', text: 'Nuovo servizio incluso', highlight: false });
                               updateLangField('features', currentFeats);
                             }}
                             className="w-full py-1 text-[10px] font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 hover:bg-[#0D4D5E]/20 rounded border border-[#0D4D5E]/20 flex items-center justify-center gap-1"
@@ -2849,7 +2853,7 @@ export function ContentEditorTab({
                               value={content.qrCode?.url ?? content.websiteUrl ?? 'www.hotelpartner.com'}
                               onChange={(e) => onChangeContent({
                                 qrCode: {
-                                  ...(content.qrCode || {}),
+                                  ...content.qrCode,
                                   url: e.target.value
                                 }
                               })}
@@ -2863,7 +2867,7 @@ export function ContentEditorTab({
                               value={content.qrCode?.label ?? 'INFO & PRENOTAZIONI'}
                               onChange={(e) => onChangeContent({
                                 qrCode: {
-                                  ...(content.qrCode || {}),
+                                  ...content.qrCode,
                                   label: e.target.value
                                 }
                               })}

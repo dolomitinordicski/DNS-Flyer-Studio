@@ -370,7 +370,7 @@ export function GraphicElementsEditorTab({ uiLanguage, content, currentVis, onCh
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
-                                onClick={() => setActiveTab('content')}
+                                onClick={() => setActiveTab()}
                                 className="text-[9px] font-bold text-[#0D4D5E] hover:underline bg-[#0D4D5E]/5 px-2 py-0.5 rounded border border-[#0D4D5E]/20"
                               >
                                 {ui('✏️ Texte bearbeiten →', '✏️ Modifica Testi →')}

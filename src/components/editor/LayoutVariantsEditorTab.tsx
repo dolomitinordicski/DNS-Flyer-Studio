@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle2, Layout, ShieldCheck, Sparkles, Square } from 'lucide-react';
-import type { FlyerContent } from '../../types';
+import type { FlyerContent, GraphicStyle } from '../../types';
 
 interface LayoutVariantsEditorTabProps {
   uiLanguage: 'de' | 'it';

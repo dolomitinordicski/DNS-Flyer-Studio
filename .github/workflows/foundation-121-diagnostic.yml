@@ -1,0 +1,41 @@
+name: Diagnose Foundation 1.2.1 compatibility
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/foundation-121-diagnostic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install current locked baseline
+        run: npm ci
+      - name: Capture baseline TypeScript errors
+        run: |
+          npm run lint > baseline-typescript.log 2>&1 || true
+          cat baseline-typescript.log
+      - name: Test Foundation 1.2.1 without changing tracked files
+        run: |
+          npm pkg set 'dependencies.@dolomitinordicski/dns-shared-data=github:dolomitinordicski/dns-shared-data#foundation-v1.2.1'
+          npm install --package-lock-only
+          npm ci
+          npm run lint > target-typescript.log 2>&1 || true
+          cat target-typescript.log
+      - name: Upload comparison logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flyer-foundation-121-typecheck
+          path: |
+            baseline-typescript.log
+            target-typescript.log

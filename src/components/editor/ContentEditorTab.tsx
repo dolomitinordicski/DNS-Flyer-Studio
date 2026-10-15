@@ -35,6 +35,7 @@ import {
 } from '../../utils/multilingual';
 import { WireframeIcon } from '../WireframeIcon';
 import { STOCK_IMAGES } from './editorAssets';
+import { getAllSportsIcons, getSportsIconName } from '../../data/sportsIcons';
 
 interface ContentEditorTabProps {
   uiLanguage: 'de' | 'it';
@@ -1533,7 +1534,7 @@ export function ContentEditorTab({
                         {content.selectedSportsIcons && content.selectedSportsIcons.length > 0 ? (
                           <div className="flex items-center gap-1.5 flex-wrap pt-1">
                             {content.selectedSportsIcons.map(iconId => {
-                              const iconObj = getAllSportsIcons(customFirestoreIcons).find(i => i.id === iconId);
+                              const iconObj = getAllSportsIcons([]).find(i => i.id === iconId);
                               if (!iconObj) return null;
                               return (
                                 <span key={iconId} className="px-2 py-1 bg-slate-100 text-slate-800 rounded-lg text-[10px] font-bold flex items-center gap-1.5 border border-slate-200">
@@ -2008,7 +2009,7 @@ export function ContentEditorTab({
                             <button
                               type="button"
                               onClick={() => {
-                                const newFeat = { id: Date.now().toString(), text: 'Nuova voce / servizio' };
+                                const newFeat = { id: Date.now().toString(), icon: '', text: 'Nuova voce / servizio' };
                                 onChangeContent({ features: [...(content.features || []), newFeat] });
                               }}
                               className="px-2 py-0.5 bg-[#0D4D5E] text-white rounded text-[9px] font-bold flex items-center gap-1 hover:bg-[#0D4D5E]/90 transition-colors"
@@ -2085,7 +2086,7 @@ export function ContentEditorTab({
                         {content.selectedSportsIcons && content.selectedSportsIcons.length > 0 ? (
                           <div className="flex items-center gap-1.5 flex-wrap pt-1">
                             {content.selectedSportsIcons.map(iconId => {
-                              const iconObj = getAllSportsIcons(customFirestoreIcons).find(i => i.id === iconId);
+                              const iconObj = getAllSportsIcons([]).find(i => i.id === iconId);
                               if (!iconObj) return null;
                               return (
                                 <span key={iconId} className="px-2 py-1 bg-slate-100 text-slate-800 rounded-lg text-[10px] font-bold flex items-center gap-1.5 border border-slate-200">
@@ -2719,7 +2720,7 @@ export function ContentEditorTab({
                                   ? content.translations?.[activeLang]?.features
                                   : (content.features || []))
                               ];
-                              currentFeats.push({ id: `f_${Date.now()}`, text: 'Nuovo servizio incluso', highlight: false });
+                              currentFeats.push({ id: `f_${Date.now()}`, icon: '', text: 'Nuovo servizio incluso', highlight: false });
                               updateLangField('features', currentFeats);
                             }}
                             className="w-full py-1 text-[10px] font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 hover:bg-[#0D4D5E]/20 rounded border border-[#0D4D5E]/20 flex items-center justify-center gap-1"
@@ -2849,7 +2850,7 @@ export function ContentEditorTab({
                               value={content.qrCode?.url ?? content.websiteUrl ?? 'www.hotelpartner.com'}
                               onChange={(e) => onChangeContent({
                                 qrCode: {
-                                  ...(content.qrCode || {}),
+                                  ...content.qrCode,
                                   url: e.target.value
                                 }
                               })}
@@ -2863,7 +2864,7 @@ export function ContentEditorTab({
                               value={content.qrCode?.label ?? 'INFO & PRENOTAZIONI'}
                               onChange={(e) => onChangeContent({
                                 qrCode: {
-                                  ...(content.qrCode || {}),
+                                  ...content.qrCode,
                                   label: e.target.value
                                 }
                               })}

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import type {
   FlyerContent,
+  SportsIcon,
   FlyerSectionId,
   LanguageCode,
   MultilingualTextSet,
@@ -40,6 +41,7 @@ import { getAllSportsIcons, getSportsIconName } from '../../data/sportsIcons';
 interface ContentEditorTabProps {
   uiLanguage: 'de' | 'it';
   content: FlyerContent;
+  customFirestoreIcons: SportsIcon[];
   onChangeContent: (updated: Partial<FlyerContent>) => void;
   activeOrderOrientation: 'portrait' | 'landscape';
   setActiveOrderOrientation: React.Dispatch<React.SetStateAction<'portrait' | 'landscape'>>;
@@ -53,6 +55,7 @@ interface ContentEditorTabProps {
 export function ContentEditorTab({
   uiLanguage,
   content,
+  customFirestoreIcons,
   onChangeContent,
   activeOrderOrientation,
   setActiveOrderOrientation,
@@ -1534,7 +1537,7 @@ export function ContentEditorTab({
                         {content.selectedSportsIcons && content.selectedSportsIcons.length > 0 ? (
                           <div className="flex items-center gap-1.5 flex-wrap pt-1">
                             {content.selectedSportsIcons.map(iconId => {
-                              const iconObj = getAllSportsIcons([]).find(i => i.id === iconId);
+                              const iconObj = getAllSportsIcons(customFirestoreIcons).find(i => i.id === iconId);
                               if (!iconObj) return null;
                               return (
                                 <span key={iconId} className="px-2 py-1 bg-slate-100 text-slate-800 rounded-lg text-[10px] font-bold flex items-center gap-1.5 border border-slate-200">
@@ -2086,7 +2089,7 @@ export function ContentEditorTab({
                         {content.selectedSportsIcons && content.selectedSportsIcons.length > 0 ? (
                           <div className="flex items-center gap-1.5 flex-wrap pt-1">
                             {content.selectedSportsIcons.map(iconId => {
-                              const iconObj = getAllSportsIcons([]).find(i => i.id === iconId);
+                              const iconObj = getAllSportsIcons(customFirestoreIcons).find(i => i.id === iconId);
                               if (!iconObj) return null;
                               return (
                                 <span key={iconId} className="px-2 py-1 bg-slate-100 text-slate-800 rounded-lg text-[10px] font-bold flex items-center gap-1.5 border border-slate-200">

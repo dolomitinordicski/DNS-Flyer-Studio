@@ -300,6 +300,7 @@ export const LegacyEditorPanel: React.FC<LegacyEditorPanelProps> = ({
           <ContentEditorTab
             uiLanguage={uiLanguage}
             content={content}
+            customFirestoreIcons={customFirestoreIcons}
             onChangeContent={onChangeContent}
             activeOrderOrientation={activeOrderOrientation}
             setActiveOrderOrientation={setActiveOrderOrientation}

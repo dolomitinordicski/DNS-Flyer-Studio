@@ -31,6 +31,23 @@ jobs:
           npm ci
           npm run lint > target-typescript.log 2>&1 || true
           cat target-typescript.log
+      - name: Summarize compiler diagnostics
+        if: always()
+        shell: bash
+        run: |
+          echo "### Flyer Studio Foundation typecheck comparison" >> "$GITHUB_STEP_SUMMARY"
+          for name in baseline target; do
+            file="${name}-typescript.log"
+            echo "#### ${name}" >> "$GITHUB_STEP_SUMMARY"
+            if [ -f "$file" ]; then
+              echo '~~~text' >> "$GITHUB_STEP_SUMMARY"
+              grep -E 'error TS[0-9]+' "$file" | head -60 >> "$GITHUB_STEP_SUMMARY" || echo 'No TypeScript errors' >> "$GITHUB_STEP_SUMMARY"
+              echo '~~~' >> "$GITHUB_STEP_SUMMARY"
+              echo "error count: $(grep -cE 'error TS[0-9]+' "$file" || true)" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo 'Diagnostic did not finish' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
       - name: Upload comparison logs
         if: always()
         uses: actions/upload-artifact@v4

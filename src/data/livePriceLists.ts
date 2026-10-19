@@ -35,8 +35,15 @@ export async function loadOfficialPriceTexts(
     )?.unitPrice);
 
   const network = 'dolomiti-nordicski';
+  const officialWeekly = rows.find(row => row.scopeType === 'network' && row.scopeId === network &&
+    row.productCode === 'wk-dns' && row.salesChannel === 'official' && row.salesPeriod === 'regular')?.unitPrice;
+  const trackWeekly = rows.find(row => row.scopeType === 'network' && row.scopeId === network &&
+    row.productCode === 'wk-dns' && row.salesChannel === 'track' && row.salesPeriod === 'regular')?.unitPrice;
+  const trackSupplement = typeof officialWeekly === 'number' && typeof trackWeekly === 'number'
+    ? format(trackWeekly - officialWeekly) : '—';
   const result: Partial<PriceListTexts> = {
     carouselWeekPrice: price('network', network, 'wk-dns'),
+    carouselWeekTrackSupplement: trackSupplement,
     carouselSeasonPrice: price('network', network, 'sk-dns'),
   };
 

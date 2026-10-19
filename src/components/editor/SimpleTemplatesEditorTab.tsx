@@ -30,7 +30,6 @@ export function SimpleTemplatesEditorTab({
 }: SimpleTemplatesEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const templates = FLYER_PRODUCTS
-    .filter(product => isDNSAdmin || product.dataPolicy.access !== 'dns-only')
     .map(product => ({
       product,
       template: FLYER_TEMPLATES.find(item => item.id === product.templateId),
@@ -60,21 +59,28 @@ export function SimpleTemplatesEditorTab({
       )}
 
       <div className="grid grid-cols-1 gap-2.5">
-        {templates.map(({ product, template }) => (
+        {templates.map(({ product, template }) => {
+          const restricted = product.dataPolicy.access === 'dns-only' && !isDNSAdmin;
+          const isPriceList = product.type === 'dns_price_list' || product.type === 'regional_price_list';
+          return (
           <button
             key={product.type}
             type="button"
-            onClick={() => onApplyTemplate(product.templateId)}
-            className="p-3 rounded-xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-[#0D4D5E] text-left transition-all shadow-2xs"
+            onClick={() => { if (!restricted) onApplyTemplate(product.templateId); }}
+            disabled={restricted}
+            aria-label={`${product.label[uiLanguage]}${restricted ? ' — DNS Core access required' : ''}`}
+            className={`p-3 rounded-xl border text-left transition-all shadow-2xs ${isPriceList ? "bg-[#EDF5F5] border-[#AAD0D1]" : "bg-slate-50 border-slate-200"} ${restricted ? "cursor-not-allowed opacity-65" : "hover:bg-white hover:border-[#0D4D5E]"}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-[9px] font-extrabold uppercase tracking-wider text-[#0D4D5E]">
                   {product.label[uiLanguage]}
                 </div>
+                {isPriceList && <div className="text-[10px] font-black text-[#0D4D5E] mt-1">{product.type === "dns_price_list" ? ui("Gesamtnetz · 2 Preistabellen nebeneinander", "Tutta la rete · 2 tabelle affiancate") : ui("Gebiet · Lokale Preise im Vordergrund", "Singola area · Prezzi regionali in primo piano")}</div>}
                 <div className="text-xs font-bold text-slate-900 mt-1 font-vietnam">
                   {template!.name.replace(/^\d+\.\s*/, '')}
                 </div>
+                {restricted && <p className="text-[10px] font-bold text-amber-800 mt-1">{ui("Nur mit DNS-Zentralberechtigung verfügbar", "Disponibile con autorizzazione DNS centrale")}</p>}
                 <p className="text-[11px] text-slate-600 mt-1 line-clamp-2">
                   {template!.description}
                 </p>
@@ -85,7 +91,8 @@ export function SimpleTemplatesEditorTab({
               />
             </div>
           </button>
-        ))}
+          );
+        })}
       </div>
 
       <button

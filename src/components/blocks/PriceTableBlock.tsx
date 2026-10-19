@@ -116,8 +116,8 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
           </div>
           <div className={`${isA5 ? 'p-1.5 space-y-0.5' : isA3 ? 'p-3.5 space-y-2' : 'p-2 space-y-1'}`}>
             {[
-              { title: plt.carouselWeekTitle, sub: plt.carouselWeekSub, price: plt.carouselWeekPrice },
-              { title: plt.carouselSeasonTitle, sub: plt.carouselSeasonSub, price: plt.carouselSeasonPrice }
+              { title: plt.carouselWeekTitle, sub: plt.carouselWeekSub, price: plt.carouselWeekPrice, supplement: isDNSList ? plt.carouselWeekTrackSupplement : undefined },
+              { title: plt.carouselSeasonTitle, sub: plt.carouselSeasonSub, price: plt.carouselSeasonPrice, supplement: undefined as string | undefined }
             ].map((item, idx) => (
               <div key={idx} className="flex justify-between items-center py-0.5 border-b border-slate-100 last:border-0 gap-1.5">
                 <div className="min-w-0 flex-1">
@@ -140,6 +140,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                     }
                     return <span className="font-black break-words">{item.price}</span>;
                   })()}
+                  {item.supplement && <span className="font-medium text-[6.5px] sm:text-[7px] text-slate-600 mt-0.5 leading-tight">{content.activeLanguage === 'de' ? 'Aufpreis auf der Loipe' : content.activeLanguage === 'en' ? 'On-track surcharge' : 'Supplemento in pista'}: {item.supplement}</span>}
                 </div>
               </div>
             ))}

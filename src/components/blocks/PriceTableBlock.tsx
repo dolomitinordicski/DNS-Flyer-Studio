@@ -140,7 +140,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                     }
                     return <span className="font-black break-words">{item.price}</span>;
                   })()}
-                  {item.supplement && <span className="font-medium text-[6.5px] sm:text-[7px] text-slate-600 mt-0.5 leading-tight">{content.activeLanguage === 'de' ? 'Aufpreis auf der Loipe' : content.activeLanguage === 'en' ? 'On-track surcharge' : 'Supplemento in pista'}: {item.supplement}</span>}
+                  {item.supplement && <span className="font-medium text-[6.5px] sm:text-[7px] text-slate-600 mt-0.5 leading-tight">Aufpreis Loipe / Supplemento pista / Track surcharge: {item.supplement}</span>}
                 </div>
               </div>
             ))}

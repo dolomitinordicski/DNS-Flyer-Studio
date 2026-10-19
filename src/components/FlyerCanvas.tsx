@@ -75,7 +75,12 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
     carouselWeekPrice: '—', carouselSeasonPrice: '—',
     ...(isNetworkPriceList ? {} : { regionalDayPrice: '—', regionalWeekPrice: '—', regionalSeasonPrice: '—' }),
   } : {};
-  const plt = { ...DEFAULT_PRICE_LIST_TEXTS, ...localizedContent.priceListTexts, ...missingOfficialPrices, ...officialPrices };
+  const editorialFromPrices: Partial<PriceListTexts> = isNetworkPriceList ? {
+    regionalDayPrice: content.priceListTexts?.regionalDayPrice ?? localizedContent.priceListTexts?.regionalDayPrice,
+    regionalWeekPrice: content.priceListTexts?.regionalWeekPrice ?? localizedContent.priceListTexts?.regionalWeekPrice,
+    regionalSeasonPrice: content.priceListTexts?.regionalSeasonPrice ?? localizedContent.priceListTexts?.regionalSeasonPrice,
+  } : {};
+  const plt = { ...DEFAULT_PRICE_LIST_TEXTS, ...localizedContent.priceListTexts, ...editorialFromPrices, ...missingOfficialPrices, ...officialPrices };
 
   // Visibility Configuration
   const v1 = content.sectionVisibility || {};

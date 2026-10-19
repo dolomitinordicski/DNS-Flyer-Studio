@@ -404,6 +404,10 @@ export default function App() {
   // 1. Export PDF Bundle (3 Pages: DE, IT, EN)
   const handleExportPdfBundle = async () => {
     if (!flyerRef.current) return;
+    if (flyerRef.current.dataset.pricingState !== 'ready') {
+      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili. Attendi il caricamento o verifica l’accesso a DNS Core prima di esportare.');
+      return;
+    }
     setIsExporting(true);
     const originalContent = { ...content };
 
@@ -440,6 +444,10 @@ export default function App() {
   // 2. Export 3 Separate PDF Files
   const handleExportPdfSeparate = async () => {
     if (!flyerRef.current) return;
+    if (flyerRef.current.dataset.pricingState !== 'ready') {
+      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili. Attendi il caricamento o verifica l’accesso a DNS Core prima di esportare.');
+      return;
+    }
     setIsExporting(true);
     const originalContent = { ...content };
 
@@ -469,6 +477,10 @@ export default function App() {
   // 3. Export Single Language PDF
   const handleExportPdfSingle = async (lang: LanguageCode) => {
     if (!flyerRef.current) return;
+    if (flyerRef.current.dataset.pricingState !== 'ready') {
+      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili. Attendi il caricamento o verifica l’accesso a DNS Core prima di esportare.');
+      return;
+    }
     setIsExporting(true);
     const originalContent = { ...content };
 
@@ -495,6 +507,10 @@ export default function App() {
   // 4. Export 3 Separate PNG Files
   const handleExportPngSeparate = async () => {
     if (!flyerRef.current) return;
+    if (flyerRef.current.dataset.pricingState !== 'ready') {
+      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili. Attendi il caricamento o verifica l’accesso a DNS Core prima di esportare.');
+      return;
+    }
     setIsExporting(true);
     const originalContent = { ...content };
 
@@ -521,6 +537,10 @@ export default function App() {
   // 5. Export Single Language PNG
   const handleExportPngSingle = async (lang: LanguageCode) => {
     if (!flyerRef.current) return;
+    if (flyerRef.current.dataset.pricingState !== 'ready') {
+      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili. Attendi il caricamento o verifica l’accesso a DNS Core prima di esportare.');
+      return;
+    }
     setIsExporting(true);
     const originalContent = { ...content };
 

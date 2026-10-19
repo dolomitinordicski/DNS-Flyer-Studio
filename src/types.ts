@@ -167,6 +167,7 @@ export interface PriceListTexts {
   carouselWeekTitle?: string;
   carouselWeekSub?: string;
   carouselWeekPrice?: string;
+  carouselWeekTrackSupplement?: string;
   carouselSeasonTitle?: string;
   carouselSeasonSub?: string;
   carouselSeasonPrice?: string;

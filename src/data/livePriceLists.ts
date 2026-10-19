@@ -45,7 +45,7 @@ export async function loadOfficialPriceTexts(
   if (!isNetworkList) {
     result.regionalDayPrice = price('reportingArea', regionId, 'day');
     result.regionalWeekPrice = price('reportingArea', regionId, 'wk-area');
-    result.regionalSeasonPrice = price('reportingArea', regionId, 'sk-area');
+    result.regionalSeasonPrice = price('network', network, 'sk-area');
   }
   return result;
 }

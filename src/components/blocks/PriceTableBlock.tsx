@@ -103,7 +103,9 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
           </div>
         </div>
 
-        {/* DNS network rates: primary comparison on central list, secondary information on regional list. */}
+        {!isRegionalList && (
+          <>
+        {/* DNS network rates: shown on the DNS-wide list; regional flyers remain region-only. */}
         <div 
           className={`border bg-white/95 overflow-hidden flex flex-col shadow-xs ${isRegionalList ? "rounded-md" : "rounded-xl"}`} 
           style={{ borderColor: `${accentColor}80` }}
@@ -145,6 +147,8 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
             ))}
           </div>
         </div>
+          </>
+        )}
       </div>
       {plt.regionalNote && (
         <p className={`${isA3 ? 'text-xs' : 'text-[7.5px]'} text-slate-400 italic px-1 leading-relaxed text-center font-bold tracking-tight`}>

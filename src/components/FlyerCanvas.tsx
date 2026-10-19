@@ -319,6 +319,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
   return (
     <div 
       ref={ref}
+      data-pricing-state={isPriceList ? priceLoadState : 'ready'}
       className="bg-white shadow-2xl overflow-hidden relative select-none shrink-0"
       style={{
         ...dimensions,

@@ -87,6 +87,37 @@ export function SimpleContentEditorTab({
         </div>
       )}
 
+      {product?.type === 'dns_price_list' && (
+        <section className="p-3 rounded-xl border border-[#AAD0D1] bg-[#EDF5F5] space-y-3">
+          <h4 className="text-xs font-bold text-[#0D4D5E]">
+            {ui('Gebietstarife ab — frei editierbar', 'Tariffe regionali «a partire da» — testo libero')}
+          </h4>
+          {([
+            ['regionalDayPrice', 'Tageskarte ab', 'Giornaliero da'],
+            ['regionalWeekPrice', 'Wochenkarte ab', 'Settimanale da'],
+            ['regionalSeasonPrice', 'Saisonkarte ab', 'Stagionale da'],
+          ] as const).map(([key, de, it]) => (
+            <label key={key} className="block space-y-1">
+              <span className="text-[10px] font-bold text-slate-600">{ui(de, it)}</span>
+              <input
+                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs"
+                value={content.priceListTexts?.[key] ?? ''}
+                onChange={event => onChangeContent({
+                  priceListTexts: { ...content.priceListTexts, [key]: event.target.value },
+                })}
+              />
+            </label>
+          ))}
+          <p className="text-[10px] text-slate-600">
+            {ui('DNS-Netzpreise werden automatisch aus Data Entry übernommen.', 'I prezzi DNS sono importati automaticamente da Data Entry.')}
+          </p>
+        </section>
+      )}
+      {product?.type === 'regional_price_list' && (
+        <p className="p-3 rounded-xl bg-slate-50 text-[11px] text-slate-600 border border-slate-200">
+          {ui('Gebietstarife und DNS-Netzpreise werden aus Data Entry geladen; hier nicht bearbeitbar.', 'Le tariffe della regione e quelle DNS provengono da Data Entry e non sono modificabili qui.')}
+        </p>
+      )}
       {field('title', 'Titel', 'Titolo')}
       {field('subtitle', 'Untertitel', 'Sottotitolo', true)}
       {field('validityPeriod', 'Gültigkeit', 'Validità')}

@@ -14,6 +14,8 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
   if (visibility && visibility.priceTables === false) return null;
   if (!plt) return null;
 
+  const isRegionalList = content.layoutTemplateId === 'regional_price_list';
+  const isDNSList = content.layoutTemplateId === 'official_price_list';
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
@@ -23,12 +25,12 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
   const accentColor = theme.accentHex || '#3399FF';
 
   return (
-    <div className="space-y-1 shrink-0 min-w-0 w-full">
-      <div className={`grid grid-cols-2 ${isA5 ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}>
-        {/* REGIONAL AREA */}
+    <div className="space-y-1 shrink-0 min-w-0 w-full" data-price-list-variant={isRegionalList ? "regional" : isDNSList ? "dns" : "legacy"}>
+      <div className={`grid ${isRegionalList ? "grid-cols-1" : "grid-cols-2"} ${isA5 ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}>
+        {/* Regional rates: main section for area flyers, comparative section on network flyers. */}
         <div 
-          className="border rounded-xl bg-white/95 overflow-hidden flex flex-col shadow-xs" 
-          style={{ borderColor: `${accentColor}80` }}
+          className={`border bg-white/95 overflow-hidden flex flex-col shadow-xs ${isRegionalList ? "rounded-md border-2" : "rounded-xl"}`} 
+          style={{ borderColor: isRegionalList ? primaryColor : `${accentColor}80` }}
         >
           <div 
             className={`text-white ${isA5 ? 'p-1.5' : isA3 ? 'p-3' : 'p-2'} flex items-center justify-between uppercase shrink-0`} 
@@ -101,16 +103,16 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
           </div>
         </div>
 
-        {/* CAROUSEL AREA */}
+        {/* DNS network rates: primary comparison on central list, secondary information on regional list. */}
         <div 
-          className="border rounded-xl bg-white/95 overflow-hidden flex flex-col shadow-xs" 
+          className={`border bg-white/95 overflow-hidden flex flex-col shadow-xs ${isRegionalList ? "rounded-md" : "rounded-xl"}`} 
           style={{ borderColor: `${accentColor}80` }}
         >
           <div 
             className={`text-white font-black ${isA5 ? 'text-[8.5px] p-1.5' : isA3 ? 'text-sm p-3' : 'text-[10px] p-2'} text-center uppercase tracking-widest flex-1 flex items-center justify-center`} 
             style={{ backgroundColor: secondaryColor }}
           >
-            {plt.carouselHeader}
+            {isRegionalList ? `DNS · ${plt.carouselHeader}` : plt.carouselHeader}
           </div>
           <div className={`${isA5 ? 'p-1.5 space-y-0.5' : isA3 ? 'p-3.5 space-y-2' : 'p-2 space-y-1'}`}>
             {[

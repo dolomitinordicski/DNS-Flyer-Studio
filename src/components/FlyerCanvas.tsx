@@ -1,8 +1,10 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { FlyerContent } from '../types';
 import { REGIONAL_LOGOS } from '../data/regionalLogos';
 import { SPORTS_ICONS, getAllSportsIcons } from '../data/sportsIcons';
 import { DEFAULT_PRICE_LIST_TEXTS } from '../data/templates';
+import { loadOfficialPriceTexts } from '../data/livePriceLists';
+import type { PriceListTexts } from '../types';
 import { getContentForLanguage } from '../utils/multilingual';
 import { 
   DolomitiSkierTrackEmblem, 
@@ -51,8 +53,29 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
   // Graphic Style choice
   const graphicStyle = content.graphicStyle || 'classic_official';
 
-  // Price List Texts with defaults
-  const plt = { ...DEFAULT_PRICE_LIST_TEXTS, ...localizedContent.priceListTexts };
+  // The network/area rates are authoritative DNS Core data, not template constants.
+  const isPriceList = content.layoutTemplateId === 'official_price_list' || content.layoutTemplateId === 'regional_price_list';
+  const isNetworkPriceList = content.layoutTemplateId === 'official_price_list';
+  const seasonId = /^\\d{4}[/-]\\d{2}$/.test(content.validityPeriod || '')
+    ? content.validityPeriod.replace('/', '-') : '2026-27';
+  const [officialPrices, setOfficialPrices] = useState<Partial<PriceListTexts>>({});
+  const [priceLoadState, setPriceLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
+  useEffect(() => {
+    if (!isPriceList) return;
+    let cancelled = false;
+    setOfficialPrices({});
+    setPriceLoadState('loading');
+    void loadOfficialPriceTexts(seasonId, content.regionId, isNetworkPriceList)
+      .then(prices => { if (!cancelled) { setOfficialPrices(prices); setPriceLoadState('ready'); } })
+      .catch(error => { if (!cancelled) { console.error('DNS tariff lookup failed:', error); setPriceLoadState('error'); } });
+    return () => { cancelled = true; };
+  }, [isPriceList, isNetworkPriceList, seasonId, content.regionId]);
+
+  const missingOfficialPrices: Partial<PriceListTexts> = isPriceList ? {
+    carouselWeekPrice: '—', carouselSeasonPrice: '—',
+    ...(isNetworkPriceList ? {} : { regionalDayPrice: '—', regionalWeekPrice: '—', regionalSeasonPrice: '—' }),
+  } : {};
+  const plt = { ...DEFAULT_PRICE_LIST_TEXTS, ...localizedContent.priceListTexts, ...missingOfficialPrices, ...officialPrices };
 
   // Visibility Configuration
   const v1 = content.sectionVisibility || {};
@@ -318,6 +341,11 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
         </div>
       )}
 
+      {isPriceList && priceLoadState !== 'ready' && (
+        <div className="absolute top-0 right-0 z-50 bg-amber-100 text-amber-900 text-[8px] p-1" role="status">
+          {priceLoadState === 'loading' ? 'DNS: tariffe in caricamento' : 'DNS: tariffe non disponibili'}
+        </div>
+      )}
       {/* Render selected Variant */}
       {(() => {
         let effectiveGraphicStyle = graphicStyle;

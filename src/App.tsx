@@ -30,6 +30,7 @@ export default function App() {
   const [uiLanguage, setUiLanguageState] = useState<'de' | 'it'>(() => foundation.getLanguage());
   const [coreStatus, setCoreStatus] = useState<DNSCoreHeaderStatus>({ state: 'loading' });
   const [coreUserEmail, setCoreUserEmail] = useState<string | null>(null);
+  const [coreAuthError, setCoreAuthError] = useState<string | null>(null);
   const [currentReportingAreaId, setCurrentReportingAreaId] = useState<string | null>(null);
   const [isDNSAdmin, setIsDNSAdmin] = useState(false);
   const [hasDNSNetworkAccess, setHasDNSNetworkAccess] = useState(false);
@@ -122,10 +123,18 @@ export default function App() {
   }, []);
 
   const handleCoreSignIn = async () => {
+    setCoreAuthError(null);
     try {
       await signInDNSCore();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('DNS Core sign-in failed:', error);
+      const code = (error as { code?: string })?.code;
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return;
+      setCoreAuthError(code === 'auth/unauthorized-domain'
+        ? 'Dominio non autorizzato in Firebase Authentication (dns-core).'
+        : code === 'auth/popup-blocked'
+          ? 'Il browser ha bloccato la finestra di accesso. Consenti i popup per Flyer Studio.'
+          : `Accesso DNS Core non riuscito${code ? ` (${code})` : ''}.`);
     }
   };
 
@@ -572,7 +581,16 @@ export default function App() {
         uiLanguage={uiLanguage}
         onUiLanguageChange={setUiLanguage}
         coreStatus={coreStatus}
+        coreUserEmail={coreUserEmail}
+        onCoreSignIn={handleCoreSignIn}
+        onCoreSignOut={handleCoreSignOut}
       />
+      {coreAuthError && (
+        <div role="alert" className="bg-red-50 border-b border-red-200 text-red-800 px-4 py-2 text-sm flex items-center justify-between gap-4 no-print">
+          <span>{coreAuthError}</span>
+          <button type="button" className="font-bold underline" onClick={() => setCoreAuthError(null)}>Chiudi</button>
+        </div>
+      )}
 
       {/* Make It Perfect Floating Toast Notification */}
       {perfectToast && (

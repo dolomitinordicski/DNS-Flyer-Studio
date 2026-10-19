@@ -66,6 +66,15 @@ export interface FlyerTemplateRecord {
 const DOCUMENTS = 'flyerDocuments';
 const PUBLICATIONS = 'flyerPublications';
 
+/**
+ * FlyerDocumentV1 has optional nested fields. Firestore rejects `undefined`
+ * even in nested maps (e.g. document.meta.createdAt). Remove absent values
+ * before persisting without changing the editor's in-memory document.
+ */
+function firestoreSafeDocument(document: FlyerDocumentV1): FlyerDocumentV1 {
+  return JSON.parse(JSON.stringify(document)) as FlyerDocumentV1;
+}
+
 export function requireDNSCoreUser() {
   const user = getDNSCoreUser();
   if (!user) {
@@ -101,11 +110,11 @@ export async function saveFlyerDocument(
   const id = options.id ?? `flyer_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const scope = scopeFromContent(content);
   const seasonId = seasonIdFromContent(content);
-  const flyerDocument = createFlyerDocumentV1(content, {
+  const flyerDocument = firestoreSafeDocument(createFlyerDocumentV1(content, {
     id,
     title: options.title,
     source: 'saved-design',
-  });
+  }));
 
   const record: FlyerDocumentRecord = {
     id,
@@ -164,7 +173,7 @@ export async function publishFlyerDocument(
     scopeType: documentRecord.scopeType,
     scopeId: documentRecord.scopeId,
     seasonId: documentRecord.seasonId,
-    snapshot: documentRecord.document,
+    snapshot: firestoreSafeDocument(documentRecord.document),
     publishedBy: user.uid,
   };
 

@@ -393,11 +393,11 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       })()}
 
       {/* Nordic Swoosh Overlay */}
-      {!isNetworkPriceList && <NordicSwooshOverlay config={content.nordicSwoosh} />}
+      {!isPriceList && <NordicSwooshOverlay config={content.nordicSwoosh} />}
       {renderDNSCornerSkier()}
 
       {/* Global Ornaments */}
-      {!isNetworkPriceList && renderOrnament()}
+      {!isPriceList && renderOrnament()}
     </div>
   );
 });

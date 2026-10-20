@@ -13,6 +13,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
 }) => {
   if (visibility && visibility.header === false) return null;
 
+  const isDNSList = content.layoutTemplateId === 'official_price_list';
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
@@ -29,7 +30,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
 
   return (
     <header 
-      className={`${isA5 ? 'px-3 py-2' : 'px-4 sm:px-8 py-3.5 sm:py-5'} shadow-md relative overflow-hidden z-10 shrink-0 ${theme.headerTextColor}`}
+      className={`${isDNSList ? 'px-4 sm:px-8 py-3' : isA5 ? 'px-3 py-2' : 'px-4 sm:px-8 py-3.5 sm:py-5'} ${isDNSList ? '' : 'shadow-md'} relative overflow-hidden z-10 shrink-0 ${theme.headerTextColor}`}
       style={theme.headerBgStyle}
     >
       <div className={`flex flex-col ${isA5 ? 'gap-1.5' : 'gap-2 sm:gap-3'} relative z-10 w-full min-w-0`}>
@@ -97,7 +98,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
         </div>
 
         {/* Sub-row: Header Tagline / Region Subtitle & Badge */}
-        {(taglineText || showBadge) && (
+        {!isDNSList && (taglineText || showBadge) && (
           <div className={`flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 border-t border-white/20 ${isA5 ? 'pt-1 text-[8.5px]' : 'pt-1.5 sm:pt-2 text-[10px] sm:text-xs'}`}>
             <span className={`font-semibold tracking-wider uppercase break-words whitespace-normal leading-snug flex-1 min-w-[180px] ${theme.headerTextColor}`}>
               {taglineText}

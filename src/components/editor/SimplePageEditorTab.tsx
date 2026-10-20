@@ -45,6 +45,27 @@ export function SimplePageEditorTab({
               ))}
             </div>
           )}
+          {product.type === 'dns_price_list' && (
+            <div className="border-t border-slate-200 pt-4 space-y-2">
+              <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Grafikelement · Langläufer', 'Elemento grafico · Sciatore')}</h4>
+              <p className="text-[11px] text-slate-500">{ui('Position des optionalen DNS-Langläufers.', 'Posizione dello sciatore DNS opzionale.')}</p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  ['none', ui('Ausblenden', 'Nascondi')],
+                  ['top_left', ui('Oben links', 'Alto sinistra')],
+                  ['top_right', ui('Oben rechts', 'Alto destra')],
+                  ['bottom_left', ui('Unten links', 'Basso sinistra')],
+                  ['bottom_right', ui('Unten rechts', 'Basso destra')],
+                ] as const).map(([position, label]) => (
+                  <button key={position} type="button" aria-pressed={(content.dnsSkierCorner ?? 'none') === position}
+                    onClick={() => onChangeContent({ dnsSkierCorner: position })}
+                    className={`border rounded px-2 py-2 text-[11px] font-bold ${(content.dnsSkierCorner ?? 'none') === position ? 'bg-[#0D4D5E] border-[#0D4D5E] text-white' : 'bg-white border-slate-200 text-slate-700'}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {product.pagePolicy.magicLayout && (
             <button type="button" onClick={onMakeItPerfect} disabled={!onMakeItPerfect}
               className="w-full inline-flex items-center justify-center gap-2 bg-[#0D4D5E] text-white rounded px-3 py-2.5 text-xs font-bold disabled:opacity-50">

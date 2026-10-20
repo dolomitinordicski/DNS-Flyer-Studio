@@ -209,7 +209,7 @@ export function measureFlyerLayout(canvas: HTMLElement): FlyerLayoutMeasurement 
   for (const block of blocks) {
     const extra = Math.max(0, block.scrollHeight - block.clientHeight);
     const beyondPage = Math.max(0, block.offsetTop + block.offsetHeight -
-      (variant.offsetTop + variant.clientHeight));
+      variant.clientHeight);
     if (extra > 2 || beyondPage > 2) overflowingBlocks++;
     overflowPx = Math.max(overflowPx, extra, beyondPage);
   }

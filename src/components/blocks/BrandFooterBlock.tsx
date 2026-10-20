@@ -118,7 +118,7 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
                 }`}
                 style={{ backgroundColor: isDNSList ? "transparent" : primaryColor, color: isDNSList ? primaryColor : "#FFFFFF", borderColor: primaryColor }}
               >
-                {isDNSList ? "BUY ONLINE" : ticketBadge}
+                {isDNSList || isRegionalList ? "BUY ONLINE" : ticketBadge}
               </span>
             </div>
 
@@ -160,7 +160,7 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
               <span className={`font-black uppercase tracking-wider text-center mt-0.5 ${
                 isA3 ? 'text-[8.5px]' : isA5 ? 'text-[6px]' : 'text-[7px] sm:text-[7.5px]'
               }`} style={{ color: primaryColor }}>
-                {isDNSList ? "SCAN" : qrScanLabel}
+                {isDNSList || isRegionalList ? "SCAN" : qrScanLabel}
               </span>
             </div>
           )}

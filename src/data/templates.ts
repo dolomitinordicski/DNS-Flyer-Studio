@@ -313,7 +313,7 @@ export const FLYER_TEMPLATES: FlyerTemplate[] = [
         bigTitle: true,
         heroImage: true,
         earlyBird: false,
-        promotionBox: true,
+        promotionBox: false,
         priceTables: true,
         servicesBox: true,
         sportsIcons: true,

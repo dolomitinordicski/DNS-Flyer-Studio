@@ -54,7 +54,7 @@ export function useFlyerAutosave(
   const saveNow = useCallback((snapshot: FlyerContent, title?: string): Promise<void> => {
     if (!userRef.current) {
       setStatus('local');
-      return Promise.resolve();
+      return Promise.reject(new Error('DNS_CORE_AUTH_REQUIRED'));
     }
     const epoch = epochRef.current;
     const owner = userRef.current;

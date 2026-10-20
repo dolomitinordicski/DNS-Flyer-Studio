@@ -1,7 +1,7 @@
 import React from 'react';
 import { BlockProps } from './BlockTypes';
 import { OFFICIAL_ASSET_PATHS } from '../CorporateVectors';
-import { isSvgUrl } from '../../utils/logoUtils';
+import { getPriceTablePresentation } from './priceTablePresentation';
 
 export const PriceTableBlock: React.FC<BlockProps> = ({
   content,
@@ -14,19 +14,19 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
   if (visibility && visibility.priceTables === false) return null;
   if (!plt) return null;
 
-  const isRegionalList = content.layoutTemplateId === 'regional_price_list';
-  const isDNSList = content.layoutTemplateId === 'official_price_list';
+  const presentation = getPriceTablePresentation(content, plt);
+  const isRegionalList = presentation.singleColumn;
+  const isDNSList = presentation.networkEmphasis;
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
 
-  const dnsCentral = isDNSList && content.regionId === 'dns_central';
   const primaryColor = theme.primaryHex || '#004B87';
   const secondaryColor = theme.secondaryHex || '#003366';
   const accentColor = theme.accentHex || '#3399FF';
 
   return (
-    <div className="space-y-1 shrink-0 min-w-0 w-full" data-price-list-variant={isRegionalList ? "regional" : isDNSList ? "dns" : "legacy"}>
+    <div className="space-y-1 shrink-0 min-w-0 w-full" data-price-list-variant={presentation.kind}>
       <div className={`grid ${isRegionalList ? "grid-cols-1" : "grid-cols-2"} ${isA5 ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}>
         {/* Regional rates: main section for area flyers, comparative section on network flyers. */}
         <div 
@@ -39,10 +39,10 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
           >
             <div className="min-w-0 flex flex-col">
               <span className={`${isA5 ? 'text-[6.5px]' : isA3 ? 'text-xs' : 'text-[7.5px]'} font-bold opacity-80 tracking-widest leading-none`}>
-                {dnsCentral ? 'GEBIETSPREISE · PREZZI DELLE AREE · AREA PRICES' : plt.regionalHeader}
+                {presentation.areaHeader}
               </span>
               <span className={`${isA5 ? 'text-[9.5px]' : isA3 ? 'text-base' : 'text-[11px]'} font-black tracking-tight leading-tight truncate`}>
-                {dnsCentral ? '8 GEBIETE · 8 AREE · 8 AREAS' : content.customRegionName || (regionLogo?.id === 'dns_central' ? regionLogo.regionName : regionLogo?.regionName || regionLogo?.name) || 'REGIONAL AREA'}
+                {presentation.areaName || (regionLogo?.id === 'dns_central' ? regionLogo.regionName : regionLogo?.regionName || regionLogo?.name) || 'REGIONAL AREA'}
               </span>
             </div>
             {regionLogo && regionLogo.id !== 'dns_central' && (
@@ -113,11 +113,11 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
             className={`text-white font-black ${isA5 ? 'text-[8.5px] p-1.5' : isA3 ? 'text-sm p-3' : 'text-[10px] p-2'} text-center uppercase tracking-widest flex-1 flex items-center justify-center`} 
             style={{ backgroundColor: secondaryColor }}
           >
-            {isDNSList ? "DOLOMITI NORDICSKI · 8 GEBIETE / AREE / AREAS" : plt.carouselHeader}
+            {presentation.networkHeader}
           </div>
           <div className={`${isA5 ? 'p-1.5 space-y-0.5' : isA3 ? 'p-3.5 space-y-2' : 'p-2 space-y-1'}`}>
             {[
-              { title: plt.carouselWeekTitle, sub: plt.carouselWeekSub, price: plt.carouselWeekPrice, supplement: isDNSList ? plt.carouselWeekTrackSupplement : undefined },
+              { title: plt.carouselWeekTitle, sub: plt.carouselWeekSub, price: plt.carouselWeekPrice, supplement: presentation.weeklyTrackSupplement },
               { title: plt.carouselSeasonTitle, sub: plt.carouselSeasonSub, price: plt.carouselSeasonPrice, supplement: undefined as string | undefined }
             ].map((item, idx) => (
               <div key={idx} className="flex justify-between items-center py-0.5 border-b border-slate-100 last:border-0 gap-1.5">

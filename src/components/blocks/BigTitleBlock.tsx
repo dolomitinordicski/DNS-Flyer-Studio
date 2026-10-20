@@ -29,6 +29,7 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
     : (content.badgeText || plt?.bannerTitle);
 
   const isDNSList = content.layoutTemplateId === 'official_price_list';
+  const isRegionalList = content.layoutTemplateId === 'regional_price_list';
   const titleText = isPriceTable
     ? (plt?.mainTitle || content.title)
     : (content.title || plt?.mainTitle);
@@ -41,8 +42,8 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
     ? (plt?.seasonYear || content.validityPeriod)
     : (content.validityPeriod || plt?.seasonYear);
 
-  const safeTitleText = isDNSList ? (content.title ?? 'PRICES & INFORMATION') : titleText;
-  const safeSubtitleText = isDNSList ? (content.subtitle ?? '') : subtitleText;
+  const safeTitleText = (isDNSList || isRegionalList) ? (content.title ?? 'PRICES & INFORMATION') : titleText;
+  const safeSubtitleText = (isDNSList || isRegionalList) ? (content.subtitle ?? '') : subtitleText;
   const titleSize = isA5 
     ? 'text-2xl sm:text-3xl' 
     : isA3 
@@ -57,7 +58,7 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
 
   return (
     <div className="space-y-1.5 w-full min-w-0">
-      {!isDNSList && badgeText && (
+      {!isDNSList && !isRegionalList && badgeText && (
         <div className="inline-block mb-0.5">
           <span 
             className="px-2.5 py-0.5 rounded-full text-[9px] sm:text-[11px] font-black uppercase tracking-widest shadow-md font-vietnam"
@@ -69,7 +70,7 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
       )}
 
       <h2 
-        className={`${isDNSList ? 'text-2xl sm:text-3xl' : isLandscape ? (isA5 ? 'text-lg' : isA3 ? 'text-4xl' : 'text-2xl sm:text-3xl') : titleSize} font-black leading-[1.1] tracking-tight break-words`}
+        className={`${isDNSList || isRegionalList ? 'text-2xl sm:text-3xl' : isLandscape ? (isA5 ? 'text-lg' : isA3 ? 'text-4xl' : 'text-2xl sm:text-3xl') : titleSize} font-black leading-[1.1] tracking-tight break-words`}
         style={{ 
           color: content.heroImagePosition === 'background' ? '#FFFFFF' : theme.textColorHex,
           fontFamily: content.headingFont === 'Be Vietnam Pro' ? "'Be Vietnam Pro', sans-serif" : "'Roboto', sans-serif" 
@@ -80,7 +81,7 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
       
       {safeSubtitleText && (
         <p 
-          className={`mt-0.5 ${isDNSList ? 'text-sm sm:text-base' : isLandscape ? (isA5 ? 'text-xs' : isA3 ? 'text-base' : 'text-sm') : subtitleSize} font-semibold leading-relaxed max-w-2xl break-words`}
+          className={`mt-0.5 ${isDNSList || isRegionalList ? 'text-sm sm:text-base' : isLandscape ? (isA5 ? 'text-xs' : isA3 ? 'text-base' : 'text-sm') : subtitleSize} font-semibold leading-relaxed max-w-2xl break-words`}
           style={{ color: content.heroImagePosition === 'background' ? '#E2E8F0' : `${theme.textColorHex}CC` }}
         >
           {safeSubtitleText}
@@ -88,7 +89,7 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
       )}
 
       {/* Validity & Location */}
-      {isDNSList && (visibility?.heroImage === false || content.heroImagePosition === "background") ? (
+      {(isDNSList || isRegionalList) && (visibility?.heroImage === false || content.heroImagePosition === "background") ? (
         <span className="block text-xs font-semibold tracking-[0.18em] uppercase mt-1" style={{ color: theme.primaryHex }}>{validityText}</span>
       ) : (content.validityPeriod || content.location || plt?.seasonYear) && (
         <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs font-bold">

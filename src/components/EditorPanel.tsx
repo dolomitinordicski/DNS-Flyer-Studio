@@ -122,7 +122,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             isDNSAdmin={isDNSAdmin}
             activeDraftId={activeDraftId}
             onLoadSaved={saved => {
-              const savedProduct = getFlyerProductByTemplate(saved.layoutTemplateId);
+              const savedProduct = getFlyerProductByTemplate(saved.content.layoutTemplateId);
               onOpenSavedDraft(savedProduct ? lockContentToProduct(saved.content, savedProduct) : saved.content, saved.id);
             }}
           />

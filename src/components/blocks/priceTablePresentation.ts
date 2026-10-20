@@ -12,11 +12,11 @@ export function getPriceTablePresentation(content: FlyerContent, texts: PriceLis
 
   return {
     kind: isRegional ? 'regional' : isDNS ? 'dns' : 'legacy',
-    singleColumn: isRegional,
+    singleColumn: false,
     networkEmphasis: isDNS,
-    areaHeader: isNetwork ? 'AREA PRICES' : texts.regionalHeader,
-    areaName: isNetwork ? 'Individual ski areas' : content.customRegionName,
-    networkHeader: isDNS ? 'DOLOMITI NORDICSKI' : texts.carouselHeader,
-    weeklyTrackSupplement: isDNS ? texts.carouselWeekTrackSupplement : undefined,
+    areaHeader: isNetwork ? 'AREA PRICES' : isRegional ? 'AREA PRICES' : texts.regionalHeader,
+    areaName: isNetwork ? 'Individual ski areas' : (content.customRegionName || undefined),
+    networkHeader: (isDNS || isRegional) ? 'DOLOMITI NORDICSKI' : texts.carouselHeader,
+    weeklyTrackSupplement: (isDNS || isRegional) ? texts.carouselWeekTrackSupplement : undefined,
   } as const;
 }

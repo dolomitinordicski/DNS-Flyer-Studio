@@ -28,6 +28,7 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
     ? (plt?.bannerTitle || content.badgeText)
     : (content.badgeText || plt?.bannerTitle);
 
+  const isDNSList = content.layoutTemplateId === 'official_price_list';
   const titleText = isPriceTable
     ? (plt?.mainTitle || content.title)
     : (content.title || plt?.mainTitle);
@@ -40,6 +41,8 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
     ? (plt?.seasonYear || content.validityPeriod)
     : (content.validityPeriod || plt?.seasonYear);
 
+  const safeTitleText = isDNSList && titleText === 'PRICES & INFORMATION' ? 'PREISE · PREZZI · PRICES' : titleText;
+  const safeSubtitleText = isDNSList && subtitleText?.includes('Schneegarantie in allen 8 Gebieten') ? '8 Langlaufgebiete · 8 aree per lo sci di fondo · 8 cross-country ski areas' : subtitleText;
   const titleSize = isA5 
     ? 'text-2xl sm:text-3xl' 
     : isA3 
@@ -66,21 +69,21 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
       )}
 
       <h2 
-        className={`${isLandscape ? (isA5 ? 'text-lg' : isA3 ? 'text-4xl' : 'text-2xl sm:text-3xl') : titleSize} font-black leading-[1.1] tracking-tight break-words`}
+        className={`${isDNSList ? 'text-2xl sm:text-3xl' : isLandscape ? (isA5 ? 'text-lg' : isA3 ? 'text-4xl' : 'text-2xl sm:text-3xl') : titleSize} font-black leading-[1.1] tracking-tight break-words`}
         style={{ 
           color: content.heroImagePosition === 'background' ? '#FFFFFF' : theme.textColorHex,
           fontFamily: content.headingFont === 'Be Vietnam Pro' ? "'Be Vietnam Pro', sans-serif" : "'Roboto', sans-serif" 
         }}
       >
-        {titleText}
+        {safeTitleText}
       </h2>
       
-      {subtitleText && (
+      {safeSubtitleText && (
         <p 
           className={`mt-0.5 ${isLandscape ? (isA5 ? 'text-xs' : isA3 ? 'text-base' : 'text-sm') : subtitleSize} font-semibold leading-relaxed max-w-2xl break-words`}
           style={{ color: content.heroImagePosition === 'background' ? '#E2E8F0' : `${theme.textColorHex}CC` }}
         >
-          {subtitleText}
+          {safeSubtitleText}
         </p>
       )}
 

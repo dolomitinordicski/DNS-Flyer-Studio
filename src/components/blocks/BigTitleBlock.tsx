@@ -89,8 +89,10 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
       )}
 
       {/* Validity & Location */}
-      {(isDNSList || isRegionalList) && (visibility?.heroImage === false || content.heroImagePosition === "background") ? (
-        <span className="block text-xs font-semibold tracking-[0.18em] uppercase mt-1" style={{ color: theme.primaryHex }}>{validityText}</span>
+      {(isDNSList || isRegionalList) ? (
+        (visibility?.heroImage === false || content.heroImagePosition === 'background') && (
+          <span className="block text-xs font-semibold tracking-[0.18em] uppercase mt-1" style={{ color: theme.primaryHex }}>{content.validityPeriod}</span>
+        )
       ) : (content.validityPeriod || content.location || plt?.seasonYear) && (
         <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs font-bold">
           {(content.validityPeriod || plt?.seasonYear) && (

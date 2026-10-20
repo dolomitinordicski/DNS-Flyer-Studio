@@ -30,7 +30,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
       <div className={`grid ${isRegionalList ? "grid-cols-1" : "grid-cols-2"} ${isA5 ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}>
         {/* Regional rates: main section for area flyers, comparative section on network flyers. */}
         <div 
-          className={`border bg-white/95 overflow-hidden flex flex-col shadow-xs ${isRegionalList ? "rounded-md border-2" : "rounded-xl"}`} 
+          className={`border bg-white/95 overflow-hidden flex flex-col ${isDNSList ? "rounded-sm" : isRegionalList ? "rounded-md border-2 shadow-xs" : "rounded-xl shadow-xs"}`} 
           style={{ borderColor: isRegionalList ? primaryColor : `${accentColor}80` }}
         >
           <div 
@@ -82,7 +82,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                   <span className={`font-black ${isA5 ? 'text-[8px]' : isA3 ? 'text-sm' : 'text-[9.5px]'} block leading-tight break-words`} style={{ color: primaryColor }}>{item.title}</span>
                   {item.sub && <span className={`${isA3 ? 'text-[10px]' : 'text-[7px]'} text-slate-500 block leading-tight font-medium mt-0.5 uppercase tracking-tight opacity-90 break-words`}>{item.sub}</span>}
                 </div>
-                <div className={`${isA5 ? 'text-[8px] px-1 py-0.5' : isA3 ? 'text-sm px-2.5 py-1' : isDNSList ? 'text-[12px] px-2 py-1' : 'text-[9.5px] px-1.5 py-0.5'} shrink-0 bg-slate-50 rounded border border-slate-100 flex flex-col items-end text-right leading-tight max-w-[155px]`} style={{ color: primaryColor }}>
+                <div className={`${isA5 ? 'text-[8px] px-1 py-0.5' : isA3 ? 'text-sm px-2.5 py-1' : isDNSList ? 'text-[12px] px-1 py-1' : 'text-[9.5px] px-1.5 py-0.5'} shrink-0 ${isDNSList ? "" : "bg-slate-50 rounded border border-slate-100"} flex flex-col items-end text-right leading-tight max-w-[155px]`} style={{ color: primaryColor }}>
                   {(() => {
                     if (!item.price) return null;
                     const match = item.price.match(/^([^(]+)(\(.+\))$/);
@@ -125,7 +125,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                   <span className={`font-black ${isA5 ? 'text-[8px]' : isA3 ? 'text-sm' : 'text-[9.5px]'} block leading-tight break-words`} style={{ color: primaryColor }}>{item.title}</span>
                   {item.sub && <span className={`${isA3 ? 'text-[10px]' : 'text-[7px]'} text-slate-500 block leading-tight font-medium mt-0.5 uppercase tracking-tight opacity-90 break-words`}>{item.sub}</span>}
                 </div>
-                <div className={`${isA5 ? 'text-[8px] px-1 py-0.5' : isA3 ? 'text-sm px-2.5 py-1' : 'text-[9.5px] px-1.5 py-0.5'} shrink-0 bg-slate-50 rounded border border-slate-100 flex flex-col items-end text-right leading-tight max-w-[120px]`} style={{ color: primaryColor }}>
+                <div className={`${isA5 ? 'text-[8px] px-1 py-0.5' : isA3 ? 'text-sm px-2.5 py-1' : isDNSList ? 'text-[13px] px-1 py-1' : 'text-[9.5px] px-1.5 py-0.5'} shrink-0 ${isDNSList ? "" : "bg-slate-50 rounded border border-slate-100"} flex flex-col items-end text-right leading-tight ${isDNSList ? "max-w-[150px]" : "max-w-[120px]"}`} style={{ color: primaryColor }}>
                   {(() => {
                     if (!item.price) return null;
                     const match = item.price.match(/^([^(]+)(\(.+\))$/);
@@ -141,7 +141,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                     }
                     return <span className="font-black break-words">{item.price}</span>;
                   })()}
-                  {item.supplement && <span className="font-medium text-[8px] text-slate-600 mt-1 leading-snug max-w-[135px]">Aufpreis Loipe / Supplemento pista / Track surcharge: {item.supplement}</span>}
+                  {item.supplement && <span className="font-medium text-[8px] text-slate-600 mt-1 leading-snug max-w-[135px]">Aufpreis Loipe · Supplemento pista · Track surcharge: {item.supplement}</span>}
                 </div>
               </div>
             ))}

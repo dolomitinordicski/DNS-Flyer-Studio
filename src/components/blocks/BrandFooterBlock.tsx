@@ -85,8 +85,8 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
     <footer className="w-full shrink-0 space-y-1 font-vietnam mt-auto pt-1">
       {/* 1. UPPER FOOTER CONTAINER (Rounded card with contact, ticket badge & integrated QR code) */}
       <div 
-        className={`relative overflow-hidden rounded-2xl border transition-all ${
-          isA3 ? 'p-3.5 sm:p-4' : isA5 ? 'p-1.5' : 'p-2.5 sm:p-3'
+        className={`relative overflow-hidden ${isDNSList ? "rounded-sm" : "rounded-2xl"} border transition-all ${
+          isDNSList ? 'p-2 sm:p-2.5' : isA3 ? 'p-3.5 sm:p-4' : isA5 ? 'p-1.5' : 'p-2.5 sm:p-3'
         } ${
           isBackground 
             ? 'bg-slate-900/80 text-white border-white/20 backdrop-blur-md' 
@@ -94,9 +94,9 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
         }`}
       >
         {/* Subtle Skier/Swoosh Background Watermark Graphic on the Right */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none opacity-20 overflow-hidden flex items-center justify-end pr-6">
+        {!isDNSList && <div className="absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none opacity-20 overflow-hidden flex items-center justify-end pr-6">
           <DolomitiCurvesVector className="w-full h-full text-[#0D4D5E] object-cover scale-125 translate-x-6" />
-        </div>
+        </div>}
 
         <div className="relative z-10 flex items-center justify-between gap-2.5">
           {/* Left Column: Ticket Badge, Main URL, Contacts */}
@@ -104,12 +104,12 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
             {/* Pill Badge */}
             <div className="inline-block">
               <span 
-                className={`font-black uppercase tracking-wide rounded-md px-2 py-0.5 inline-flex items-center gap-1 shadow-2xs ${
+                className={`font-black uppercase tracking-wide ${isDNSList ? "border-b pb-0.5" : "rounded-md px-2 py-0.5 shadow-2xs"} inline-flex items-center gap-1 ${
                   isA3 ? 'text-xs' : isA5 ? 'text-[6.5px]' : 'text-[8px] sm:text-[8.5px]'
                 }`}
-                style={{ backgroundColor: primaryColor, color: '#FFFFFF' }}
+                style={{ backgroundColor: isDNSList ? "transparent" : primaryColor, color: isDNSList ? primaryColor : "#FFFFFF", borderColor: primaryColor }}
               >
-                {isDNSList && ticketBadge === "ACQUISTA IL BIGLIETTO DIGITALE ONLINE" ? "ONLINE KAUFEN · ACQUISTA ONLINE · BUY ONLINE" : ticketBadge}
+                {isDNSList ? "BUY ONLINE" : ticketBadge}
               </span>
             </div>
 
@@ -141,7 +141,7 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
 
           {/* Right Column: Embedded QR Code Container */}
           {embedQrCode && (
-            <div className={`shrink-0 flex flex-col items-center bg-white ${isA5 ? 'p-1' : 'p-1.5 sm:p-2'} rounded-xl border border-slate-200/90 shadow-2xs z-20`}>
+            <div className={`shrink-0 flex flex-col items-center bg-white ${isDNSList ? "p-1" : isA5 ? "p-1" : "p-1.5 sm:p-2"} ${isDNSList ? "" : "rounded-xl border border-slate-200/90 shadow-2xs"} z-20`}>
               <QRCodeSVG 
                 value={qrUrl} 
                 size={isA3 ? 72 : isA5 ? 38 : 52} 
@@ -151,7 +151,7 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
               <span className={`font-black uppercase tracking-wider text-center mt-0.5 ${
                 isA3 ? 'text-[8.5px]' : isA5 ? 'text-[6px]' : 'text-[7px] sm:text-[7.5px]'
               }`} style={{ color: primaryColor }}>
-                {isDNSList && qrScanLabel === "SCANSIONA PER..." ? "SCAN · SCANSIONA · SCAN" : qrScanLabel}
+                {isDNSList ? "SCAN" : qrScanLabel}
               </span>
             </div>
           )}
@@ -178,14 +178,14 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
         </div>
 
         {/* Center: Network Slogan */}
-        <div className="font-black text-center flex-1 px-1 opacity-90 leading-tight">
+        {!isDNSList && <div className="font-black text-center flex-1 px-1 opacity-90 leading-tight">
           {isDNSList && networkSlogan === "8 GEBIETE / AREE = 1 NETWORK" ? "8 GEBIETE · 8 AREE · 8 AREAS — 1 NETZWERK · 1 RETE · 1 NETWORK" : networkSlogan}
-        </div>
+        </div>}
 
         {/* Far Right: Areas List */}
-        <div className="text-right font-semibold opacity-80 max-w-[45%] whitespace-normal break-words leading-tight">
+        {!isDNSList && <div className="text-right font-semibold opacity-80 max-w-[45%] whitespace-normal break-words leading-tight">
           {networkAreasList}
-        </div>
+        </div>}
       </div>
     </footer>
   );

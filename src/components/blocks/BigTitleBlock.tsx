@@ -41,8 +41,8 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
     ? (plt?.seasonYear || content.validityPeriod)
     : (content.validityPeriod || plt?.seasonYear);
 
-  const safeTitleText = isDNSList && titleText === 'PRICES & INFORMATION' ? 'PREISE · PREZZI · PRICES' : titleText;
-  const safeSubtitleText = isDNSList && subtitleText?.includes('Schneegarantie in allen 8 Gebieten') ? '8 Langlaufgebiete · 8 aree per lo sci di fondo · 8 cross-country ski areas' : subtitleText;
+  const safeTitleText = isDNSList ? 'PRICES & INFORMATION' : titleText;
+  const safeSubtitleText = isDNSList ? '' : subtitleText;
   const titleSize = isA5 
     ? 'text-2xl sm:text-3xl' 
     : isA3 
@@ -57,7 +57,7 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
 
   return (
     <div className="space-y-1.5 w-full min-w-0">
-      {badgeText && (
+      {!isDNSList && badgeText && (
         <div className="inline-block mb-0.5">
           <span 
             className="px-2.5 py-0.5 rounded-full text-[9px] sm:text-[11px] font-black uppercase tracking-widest shadow-md font-vietnam"
@@ -88,7 +88,9 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
       )}
 
       {/* Validity & Location */}
-      {(content.validityPeriod || content.location || plt?.seasonYear) && (
+      {isDNSList ? (
+        <span className="block text-xs font-semibold tracking-[0.18em] uppercase mt-1" style={{ color: theme.primaryHex }}>{validityText}</span>
+      ) : (content.validityPeriod || content.location || plt?.seasonYear) && (
         <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs font-bold">
           {(content.validityPeriod || plt?.seasonYear) && (
             <span 

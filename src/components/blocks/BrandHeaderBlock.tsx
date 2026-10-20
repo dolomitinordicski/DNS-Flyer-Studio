@@ -14,6 +14,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
   if (visibility && visibility.header === false) return null;
 
   const isDNSList = content.layoutTemplateId === 'official_price_list';
+  const isRegionalList = content.layoutTemplateId === 'regional_price_list';
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
@@ -30,7 +31,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
 
   return (
     <header 
-      className={`${isDNSList ? 'px-4 sm:px-8 py-3' : isA5 ? 'px-3 py-2' : 'px-4 sm:px-8 py-3.5 sm:py-5'} ${isDNSList ? '' : 'shadow-md'} relative overflow-hidden z-10 shrink-0 ${theme.headerTextColor}`}
+      className={`${isDNSList || isRegionalList ? 'px-4 sm:px-8 py-3' : isA5 ? 'px-3 py-2' : 'px-4 sm:px-8 py-3.5 sm:py-5'} ${isDNSList || isRegionalList ? '' : 'shadow-md'} relative overflow-hidden z-10 shrink-0 ${theme.headerTextColor}`}
       style={theme.headerBgStyle}
     >
       <div className={`flex flex-col ${isA5 ? 'gap-1.5' : 'gap-2 sm:gap-3'} relative z-10 w-full min-w-0`}>
@@ -44,7 +45,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
               <DolomitiFullLogo 
                 variant={content.logoVariant} 
                 isDarkHeader={!theme.isHeaderLight}
-                className={`${isDNSList ? 'h-14 sm:h-16' : isA5 ? 'h-7' : isA3 ? 'h-14 sm:h-18' : 'h-10 sm:h-12'} max-w-full object-contain shrink min-w-0`} 
+                className={`${isDNSList ? 'h-14 sm:h-16' : isRegionalList ? 'h-11 sm:h-14' : isA5 ? 'h-7' : isA3 ? 'h-14 sm:h-18' : 'h-10 sm:h-12'} max-w-full object-contain shrink min-w-0`} 
                 customPrimary={theme.primaryHex}
                 customAccent={theme.accentHex}
                 cornerStyle={content.logoCornerStyle}
@@ -88,7 +89,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
               )}
               <div className="text-right min-w-0 flex-1">
                 <div className={`${isA5 ? 'text-[8px]' : 'text-[9px] sm:text-[11px]'} font-black uppercase leading-tight font-vietnam break-words whitespace-normal ${theme.isBadgeLight ? 'text-slate-900' : theme.headerTextColor}`}>
-                  {content.customRegionName || regionLogo.name}
+                  {content.customRegionName || regionLogo.regionName || regionLogo.name}
                 </div>
                 <div className={`${isA5 ? 'text-[7px]' : 'text-[8px] sm:text-[9.5px]'} font-bold tracking-wide uppercase ${theme.isBadgeLight ? 'text-[#0D4D5E] font-extrabold' : theme.headerAccentColor}`}>REGIONAL PARTNER</div>
               </div>
@@ -98,7 +99,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
         </div>
 
         {/* Sub-row: Header Tagline / Region Subtitle & Badge */}
-        {!isDNSList && (taglineText || showBadge) && (
+        {!isDNSList && !isRegionalList && (taglineText || showBadge) && (
           <div className={`flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 border-t border-white/20 ${isA5 ? 'pt-1 text-[8.5px]' : 'pt-1.5 sm:pt-2 text-[10px] sm:text-xs'}`}>
             <span className={`font-semibold tracking-wider uppercase break-words whitespace-normal leading-snug flex-1 min-w-[180px] ${theme.headerTextColor}`}>
               {taglineText}

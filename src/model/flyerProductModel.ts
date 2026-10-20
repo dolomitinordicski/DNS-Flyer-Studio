@@ -44,7 +44,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     graphicStyle: 'official_price_table',
     blockStack: ['header', 'bigTitle', 'heroImage', 'priceTables', 'earlyBird', 'servicesBox', 'qrCode', 'disclaimer', 'footer'],
     editableFields: [
-      'title', 'subtitle', 'validityPeriod', 'heroImageUrl', 'format', 'orientation', 'heroImageFocusX', 'heroImageFocusY',
+      'title', 'subtitle', 'validityPeriod', 'heroImageUrl', 'format', 'orientation', 'heroImageFocusX', 'heroImageFocusY', 'dnsSkierCorner',
       'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
       'priceListTexts', 'format', 'orientation', 'heroImageFocusX', 'heroImageFocusY',

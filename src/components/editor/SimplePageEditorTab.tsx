@@ -6,6 +6,7 @@ import type { FlyerProductDefinition } from '../../model/flyerProductModel';
 interface SimplePageEditorTabProps {
   uiLanguage: 'de' | 'it';
   content: FlyerContent;
+  onChangeContent: (updated: Partial<FlyerContent>) => void;
   product?: FlyerProductDefinition;
   onChangeFormat?: (format: FlyerContent['format']) => void;
   onToggleOrientation?: () => void;
@@ -13,7 +14,7 @@ interface SimplePageEditorTabProps {
 }
 
 export function SimplePageEditorTab({
-  uiLanguage, content, product, onChangeFormat, onToggleOrientation, onMakeItPerfect,
+  uiLanguage, content, product, onChangeContent, onChangeFormat, onToggleOrientation, onMakeItPerfect,
 }: SimplePageEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   return (
@@ -43,6 +44,27 @@ export function SimplePageEditorTab({
                   {orientation === 'portrait' ? ui('Hochformat', 'Verticale') : ui('Querformat', 'Orizzontale')}
                 </button>
               ))}
+            </div>
+          )}
+          {product.type === 'dns_price_list' && (
+            <div className="border-t border-slate-200 pt-4 space-y-2">
+              <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Grafikelement · Langläufer', 'Elemento grafico · Sciatore')}</h4>
+              <p className="text-[11px] text-slate-500">{ui('Position des optionalen DNS-Langläufers.', 'Posizione dello sciatore DNS opzionale.')}</p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  ['none', ui('Ausblenden', 'Nascondi')],
+                  ['top_left', ui('Oben links', 'Alto sinistra')],
+                  ['top_right', ui('Oben rechts', 'Alto destra')],
+                  ['bottom_left', ui('Unten links', 'Basso sinistra')],
+                  ['bottom_right', ui('Unten rechts', 'Basso destra')],
+                ] as const).map(([position, label]) => (
+                  <button key={position} type="button" aria-pressed={(content.dnsSkierCorner ?? 'none') === position}
+                    onClick={() => onChangeContent({ dnsSkierCorner: position })}
+                    className={`border rounded px-2 py-2 text-[11px] font-bold ${(content.dnsSkierCorner ?? 'none') === position ? 'bg-[#0D4D5E] border-[#0D4D5E] text-white' : 'bg-white border-slate-200 text-slate-700'}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
           {product.pagePolicy.magicLayout && (

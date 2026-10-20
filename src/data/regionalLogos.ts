@@ -137,3 +137,17 @@ export const REGIONAL_LOGOS: RegionalLogo[] = [
     ]
   }
 ];
+
+/** DNS Core uses canonical reporting-area IDs; preserve old Flyer Studio aliases. */
+export const REGIONAL_AREA_ALIASES: Record<string, string> = {
+  'antholzertal': 'anterselva',
+  'gsiesertal-welsberg-taisten': 'gsiesertal',
+  'drei-zinnen': '3_zinnen',
+  'val-comelico': 'comelico',
+  'cortina-d-ampezzo': 'cortina',
+  'seiser-alm-dolomites-val-gardena': 'seiser_alm_val_gardena',
+};
+export function findReportingAreaLogo(areaId: string) {
+  const id = REGIONAL_AREA_ALIASES[areaId] || areaId;
+  return REGIONAL_LOGOS.find(area => area.id === id) || REGIONAL_LOGOS[0];
+}

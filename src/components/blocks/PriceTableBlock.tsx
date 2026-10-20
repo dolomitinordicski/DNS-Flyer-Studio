@@ -17,6 +17,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
   const presentation = getPriceTablePresentation(content, plt);
   const isRegionalList = presentation.singleColumn;
   const isDNSList = presentation.networkEmphasis;
+  const isRegionalProduct = content.layoutTemplateId === 'regional_price_list';
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
@@ -30,7 +31,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
       <div className={`grid ${isRegionalList ? "grid-cols-1" : "grid-cols-2"} ${isA5 ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}>
         {/* Regional rates: main section for area flyers, comparative section on network flyers. */}
         <div 
-          className={`border bg-white/95 overflow-hidden flex flex-col ${isDNSList ? "rounded-sm" : isRegionalList ? "rounded-md border-2 shadow-xs" : "rounded-xl shadow-xs"}`} 
+          className={`border bg-white/95 overflow-hidden flex flex-col ${isRegionalProduct ? "order-2" : "order-1"} ${isDNSList ? "rounded-sm" : isRegionalList ? "rounded-md border-2 shadow-xs" : "rounded-xl shadow-xs"}`} 
           style={{ borderColor: isRegionalList ? primaryColor : `${accentColor}80` }}
         >
           <div 
@@ -41,7 +42,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
               <span className={`${isA5 ? 'text-[6.5px]' : isA3 ? 'text-xs' : 'text-[7.5px]'} font-bold opacity-80 tracking-widest leading-none`}>
                 {presentation.areaHeader}
               </span>
-              <span className={`${isA5 ? 'text-[9.5px]' : isA3 ? 'text-base' : 'text-[11px]'} font-black tracking-tight leading-tight truncate`}>
+              <span className={`${isA5 ? 'text-[9.5px]' : isA3 ? 'text-base' : 'text-[11px]'} font-black tracking-tight leading-tight break-words`}>
                 {presentation.areaName || (regionLogo?.id === 'dns_central' ? regionLogo.regionName : regionLogo?.regionName || regionLogo?.name) || 'REGIONAL AREA'}
               </span>
             </div>
@@ -82,7 +83,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                   <span className={`font-black ${isA5 ? 'text-[8px]' : isA3 ? 'text-sm' : 'text-[9.5px]'} block leading-tight break-words`} style={{ color: primaryColor }}>{item.title}</span>
                   {item.sub && <span className={`${isA3 ? 'text-[10px]' : 'text-[7px]'} text-slate-500 block leading-tight font-medium mt-0.5 uppercase tracking-tight opacity-90 break-words`}>{item.sub}</span>}
                 </div>
-                <div className={`${isA5 ? 'text-[8px] px-1 py-0.5' : isA3 ? 'text-sm px-2.5 py-1' : isDNSList ? 'text-[12px] px-1 py-1' : 'text-[9.5px] px-1.5 py-0.5'} shrink-0 ${isDNSList ? "" : "bg-slate-50 rounded border border-slate-100"} flex flex-col items-end text-right leading-tight max-w-[155px]`} style={{ color: primaryColor }}>
+                <div className={`${isA5 ? 'text-[8px] px-1 py-0.5' : isA3 ? 'text-sm px-2.5 py-1' : isDNSList || isRegionalProduct ? 'text-[12px] px-1 py-1' : 'text-[9.5px] px-1.5 py-0.5'} shrink-0 ${isDNSList ? "" : "bg-slate-50 rounded border border-slate-100"} flex flex-col items-end text-right leading-tight max-w-[155px]`} style={{ color: primaryColor }}>
                   {(() => {
                     if (!item.price) return null;
                     const match = item.price.match(/^([^(]+)(\(.+\))$/);
@@ -106,7 +107,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
 
         {!isRegionalList && (
         <div 
-          className="border rounded-xl bg-white/95 overflow-hidden flex flex-col shadow-xs" 
+          className={`border bg-white/95 overflow-hidden flex flex-col ${isRegionalProduct ? "order-1 rounded-sm" : "order-2 rounded-xl"} shadow-xs`} 
           style={{ borderColor: isDNSList ? secondaryColor : `${accentColor}80`, borderWidth: isDNSList ? 2 : 1 }}
         >
           <div 
@@ -125,7 +126,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                   <span className={`font-black ${isA5 ? 'text-[8px]' : isA3 ? 'text-sm' : 'text-[9.5px]'} block leading-tight break-words`} style={{ color: primaryColor }}>{item.title}</span>
                   {item.sub && <span className={`${isA3 ? 'text-[10px]' : 'text-[7px]'} text-slate-500 block leading-tight font-medium mt-0.5 uppercase tracking-tight opacity-90 break-words`}>{item.sub}</span>}
                 </div>
-                <div className={`${isA5 ? 'text-[8px] px-1 py-0.5' : isA3 ? 'text-sm px-2.5 py-1' : isDNSList ? 'text-[13px] px-1 py-1' : 'text-[9.5px] px-1.5 py-0.5'} shrink-0 ${isDNSList ? "" : "bg-slate-50 rounded border border-slate-100"} flex flex-col items-end text-right leading-tight ${isDNSList ? "max-w-[150px]" : "max-w-[120px]"}`} style={{ color: primaryColor }}>
+                <div className={`${isA5 ? 'text-[8px] px-1 py-0.5' : isA3 ? 'text-sm px-2.5 py-1' : isDNSList || isRegionalProduct ? 'text-[13px] px-1 py-1' : 'text-[9.5px] px-1.5 py-0.5'} shrink-0 ${isDNSList ? "" : "bg-slate-50 rounded border border-slate-100"} flex flex-col items-end text-right leading-tight ${isDNSList ? "max-w-[150px]" : "max-w-[120px]"}`} style={{ color: primaryColor }}>
                   {(() => {
                     if (!item.price) return null;
                     const match = item.price.match(/^([^(]+)(\(.+\))$/);

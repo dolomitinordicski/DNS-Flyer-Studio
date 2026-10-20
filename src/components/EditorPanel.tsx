@@ -12,6 +12,7 @@ import { SimpleImageEditorTab } from './editor/SimpleImageEditorTab';
 import { SimpleStyleEditorTab } from './editor/SimpleStyleEditorTab';
 import { QRCodeEditorTab } from './editor/QRCodeEditorTab';
 import { getFlyerProductByTemplate, lockContentToProduct } from '../model/flyerProductModel';
+import { inspectProductBlocks } from '../model/productBlockDiagnostics';
 
 interface EditorPanelProps {
   uiLanguage: 'de' | 'it';
@@ -44,6 +45,8 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [saveToast, setSaveToast] = useState<string | null>(null);
   const product = getFlyerProductByTemplate(content.layoutTemplateId);
+  const blockDiagnostics = product ? inspectProductBlocks(content, product) : [];
+  const blockErrors = blockDiagnostics.flatMap(entry => entry.issues.filter(issue => issue.level === 'error').map(issue => `${entry.sectionId}: ${issue.message}`));
 
   const refreshSaved = async () => {
     try {
@@ -93,6 +96,12 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
       />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        {blockErrors.length > 0 && (
+          <div role="status" className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+            <strong>{ui('Blockdaten prüfen', 'Verifica dati blocchi')}</strong>
+            <ul className="list-disc pl-4 mt-1">{blockErrors.map((message, index) => <li key={index}>{message}</li>)}</ul>
+          </div>
+        )}
         {activeTab === 'templates' && (
           <SimpleTemplatesEditorTab
             uiLanguage={uiLanguage}

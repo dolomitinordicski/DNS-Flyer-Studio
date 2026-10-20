@@ -189,7 +189,7 @@ export const DEFAULT_PRICE_LIST_TEXTS_IT = {
   regionalSeasonTitle: 'Saisonkarte • Stagionale • Season Pass',
   regionalSeasonSub: 'GANZE SAISON / TUTTA LA STAGIONE / WHOLE SEASON',
   regionalSeasonPrice: '125 €',
-  regionalNote: '* DE: Preise von den Gebieten autonom bestimmt. +5€ Aufpreis auf der Loipe. • IT: Prezzi stabiliti autonomamente da ciascuna area. +5€ in pista dal controllore. • EN: Prices set by area. +5€ surcharge on track.',
+  regionalNote: '* DE: Preise werden von den Gebieten autonom festgelegt. • IT: Prezzi stabiliti autonomamente da ciascuna area. • EN: Prices set independently by each area.',
   carouselHeader: 'DOLOMITI NORDICSKI CAROUSEL',
   carouselWeekTitle: 'Wochenkarte Karussell • Settimanale Carosello • Carousel Weekly Pass',
   carouselWeekSub: '7 TAGE / GIORNI / DAYS - 8 GEBIETE / AREE / AREAS',

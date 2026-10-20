@@ -229,7 +229,7 @@ export const FLYER_TEMPLATES: FlyerTemplate[] = [
       regionId: 'dns_central',
       headerTagline: 'Dolomiti NordicSki - Europe\'s Most Spectacular Cross-Country Ski Carousel',
       badgeText: 'PRICES & OFFICIAL LIST 2026/27',
-      title: 'PRICES & CAROUSEL TICKETS',
+      title: 'PRICES & INFORMATION',
       subtitle: '8 cross-country ski areas in the Dolomites',
       validityPeriod: '2026/27',
       location: 'Dolomiti UNESCO World Heritage',

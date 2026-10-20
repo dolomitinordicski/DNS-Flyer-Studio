@@ -180,3 +180,43 @@ export function optimizeLayout(content: FlyerContent): OptimizedLayoutResult {
 
   return { content: optimizedContent, message };
 }
+
+/**
+ * Measure the *rendered* flyer, not just its number of active sections.
+ * The primary layout and each content block are inspected because flex
+ * children can shrink while their text silently overflows.
+ * CSS transform: scale() affects getBoundingClientRect, so use
+ * layout dimensions (clientHeight/scrollHeight) for stable measurements.
+ */
+export interface FlyerLayoutMeasurement {
+  overflowPx: number;
+  overflowingBlocks: number;
+  measuredBlocks: number;
+}
+
+export function measureFlyerLayout(canvas: HTMLElement): FlyerLayoutMeasurement {
+  const variant = Array.from(canvas.children).find(node =>
+    node instanceof HTMLElement && node.classList.contains('h-full')
+  ) as HTMLElement | undefined;
+  if (!variant) return { overflowPx: 0, overflowingBlocks: 0, measuredBlocks: 0 };
+
+  const blocks = Array.from(variant.children).filter((node): node is HTMLElement =>
+    node instanceof HTMLElement && getComputedStyle(node).position !== 'absolute'
+  );
+  let overflowPx = Math.max(0, variant.scrollHeight - variant.clientHeight);
+  let overflowingBlocks = 0;
+
+  for (const block of blocks) {
+    const extra = Math.max(0, block.scrollHeight - block.clientHeight);
+    const beyondPage = Math.max(0, block.offsetTop + block.offsetHeight -
+      variant.clientHeight);
+    if (extra > 2 || beyondPage > 2) overflowingBlocks++;
+    overflowPx = Math.max(overflowPx, extra, beyondPage);
+  }
+
+  return {
+    overflowPx: Math.ceil(overflowPx),
+    overflowingBlocks,
+    measuredBlocks: blocks.length,
+  };
+}

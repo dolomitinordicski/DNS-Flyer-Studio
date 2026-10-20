@@ -13,7 +13,8 @@ interface SimpleTemplatesEditorTabProps {
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
   onSave: () => void;
   onOpenSavedDesignsModal: () => void;
-  onLoadSaved: (content: FlyerContent) => void;
+  onLoadSaved: (saved: SavedDesign) => void;
+  activeDraftId: string | null;
   isDNSAdmin: boolean;
 }
 
@@ -27,6 +28,7 @@ export function SimpleTemplatesEditorTab({
   onOpenSavedDesignsModal,
   onLoadSaved,
   isDNSAdmin,
+  activeDraftId,
 }: SimpleTemplatesEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const templates = FLYER_PRODUCTS
@@ -120,10 +122,10 @@ export function SimpleTemplatesEditorTab({
               <button
                 type="button"
                 key={item.id}
-                onClick={() => onLoadSaved(item.content)}
+                onClick={() => onLoadSaved(item)}
                 className="w-full p-2.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-left"
               >
-                <div className="font-bold text-xs text-slate-900 truncate">{item.title}</div>
+                <div className="font-bold text-xs text-slate-900 truncate">{item.title}{activeDraftId === item.id ? " ✓" : ""}</div>
               </button>
             ))}
           </div>

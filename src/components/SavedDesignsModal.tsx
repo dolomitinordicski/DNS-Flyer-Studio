@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { FlyerContent } from '../types';
 import { 
-  saveDesignToFirebase, 
   loadDesignsFromFirebase, 
   deleteDesignFromFirebase, 
   SavedDesign 
@@ -26,7 +25,8 @@ interface SavedDesignsModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentContent: FlyerContent;
-  onLoadDesign: (savedContent: FlyerContent) => void;
+  onLoadDesign: (savedContent: FlyerContent, id: string) => void;
+  onSaveCurrentDesign: (content: FlyerContent, title: string) => Promise<void>;
 }
 
 export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
@@ -34,7 +34,8 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
   isOpen,
   onClose,
   currentContent,
-  onLoadDesign
+  onLoadDesign,
+  onSaveCurrentDesign,
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [designs, setDesigns] = useState<SavedDesign[]>([]);
@@ -79,14 +80,8 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
     try {
       const savedContent = { ...currentContent, title: designTitle.trim() };
 
-      // 1. Save into Cloud Designs
-      await saveDesignToFirebase(
-        null,
-        designTitle.trim(),
-        savedContent,
-        currentContent.graphicStyle || 'classic_official',
-        currentContent.heroImageUrl
-      );
+      // Explicit save updates the active DNS Core draft, not a duplicate copy.
+      await onSaveCurrentDesign(savedContent, designTitle.trim());
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 4000);
@@ -115,7 +110,7 @@ export const SavedDesignsModal: React.FC<SavedDesignsModalProps> = ({
 
   const handleSelectDesign = (item: SavedDesign) => {
     if (item.content) {
-      onLoadDesign(item.content);
+      onLoadDesign(item.content, item.id);
       onClose();
     }
   };

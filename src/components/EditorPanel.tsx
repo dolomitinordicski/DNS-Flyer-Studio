@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import type { FlyerContent, LayoutTemplateId } from '../types';
 import {
   loadDesignsFromFirebase,
-  saveDesignToFirebase,
   type SavedDesign,
 } from '../lib/firebase';
 import { EditorChrome, type EditorTabId } from './editor/EditorChrome';
@@ -18,6 +17,10 @@ interface EditorPanelProps {
   uiLanguage: 'de' | 'it';
   content: FlyerContent;
   onChangeContent: (updated: Partial<FlyerContent>) => void;
+  onSaveDraft: () => Promise<void>;
+  onOpenSavedDraft: (content: FlyerContent, id: string) => void;
+  autosaveStatus: 'local' | 'pending' | 'saving' | 'saved' | 'error';
+  activeDraftId: string | null;
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
   onOpenSavedDesignsModal: () => void;
   onMakeItPerfect?: () => void;
@@ -31,6 +34,10 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   uiLanguage,
   content,
   onChangeContent,
+  onSaveDraft,
+  onOpenSavedDraft,
+  autosaveStatus,
+  activeDraftId,
   onApplyTemplate,
   onOpenSavedDesignsModal,
   isDNSAdmin = false,
@@ -64,13 +71,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   const saveDraft = async () => {
     setIsSaving(true);
     try {
-      await saveDesignToFirebase(
-        null,
-        content.title || ui('DNS Flyer', 'Flyer DNS'),
-        content,
-        content.graphicStyle,
-        content.heroImageUrl,
-      );
+      await onSaveDraft();
       await refreshSaved();
       setSaveToast(ui('Entwurf in DNS Core gespeichert.', 'Bozza salvata in DNS Core.'));
       setTimeout(() => setSaveToast(null), 3000);
@@ -96,6 +97,13 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
       />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        <div role="status" aria-live="polite" className="text-[11px] text-slate-600">
+          {autosaveStatus === 'local' ? ui('Lokal gespeichert · DNS Core Anmeldung erforderlich', 'Salvato sul dispositivo · accedi a DNS Core')
+            : autosaveStatus === 'pending' ? ui('Änderungen werden automatisch gespeichert…', 'Modifiche in attesa di sincronizzazione…')
+            : autosaveStatus === 'saving' ? ui('In DNS Core speichern…', 'Salvataggio in DNS Core…')
+            : autosaveStatus === 'saved' ? ui('In DNS Core gespeichert ✓', 'Salvato automaticamente in DNS Core ✓')
+            : ui('Cloud-Speicherung fehlgeschlagen · Erneut versuchen', 'Errore salvataggio cloud · riprova')}
+        </div>
         {blockErrors.length > 0 && (
           <div role="status" className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
             <strong>{ui('Blockdaten prüfen', 'Verifica dati blocchi')}</strong>
@@ -112,9 +120,10 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             onSave={saveDraft}
             onOpenSavedDesignsModal={onOpenSavedDesignsModal}
             isDNSAdmin={isDNSAdmin}
+            activeDraftId={activeDraftId}
             onLoadSaved={saved => {
-              const savedProduct = getFlyerProductByTemplate(saved.layoutTemplateId);
-              onChangeContent(savedProduct ? lockContentToProduct(saved, savedProduct) : saved);
+              const savedProduct = getFlyerProductByTemplate(saved.content.layoutTemplateId);
+              onOpenSavedDraft(savedProduct ? lockContentToProduct(saved.content, savedProduct) : saved.content, saved.id);
             }}
           />
         )}

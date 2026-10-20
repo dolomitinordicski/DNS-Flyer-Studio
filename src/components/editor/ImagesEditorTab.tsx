@@ -178,6 +178,16 @@ export function ImagesEditorTab({
         )}
       </div>
 
+      <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
+        <p className="font-bold text-[#0D4D5E]">{ui('Bildausschnitt im Rahmen', 'Inquadratura della foto nel riquadro')}</p>
+        {(['heroImageFocusX', 'heroImageFocusY'] as const).map((key, index) => (
+          <label key={key} className="block text-slate-700">
+            <span>{index === 0 ? ui('Horizontal', 'Orizzontale') : ui('Vertikal', 'Verticale')}: {content[key] ?? 50}%</span>
+            <input type="range" min="0" max="100" value={content[key] ?? 50} onChange={e => onChangeContent({ [key]: Number(e.target.value) })} className="w-full accent-[#0D4D5E]" />
+          </label>
+        ))}
+        <button type="button" onClick={() => onChangeContent({ heroImageFocusX: 50, heroImageFocusY: 50 })} className="underline text-[#0D4D5E]">{ui('Zentrieren', 'Centra immagine')}</button>
+      </div>
       <div className="bg-[#0D4D5E]/5 p-3.5 rounded-xl border border-[#0D4D5E]/30 space-y-2.5">
         <div className="flex items-center justify-between">
           <label className="block text-slate-900 font-bold font-vietnam text-xs flex items-center gap-1.5">

@@ -134,6 +134,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             uiLanguage={uiLanguage}
             content={content}
             product={product}
+            isDNSAdmin={isDNSAdmin}
             onChangeContent={onChangeContent}
           />
         )}

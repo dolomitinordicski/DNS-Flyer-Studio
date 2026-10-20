@@ -62,13 +62,14 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
 
   // Config values with smart defaults
   const isDNSList = content.layoutTemplateId === 'official_price_list';
+  const isRegionalList = content.layoutTemplateId === 'regional_price_list';
   const ticketBadge = isTrilingualEffective 
     ? getTri('ticketBadgeText', fc.ticketBadgeText || 'ACQUISTA IL BIGLIETTO DIGITALE ONLINE')
     : (fc.ticketBadgeText || plt?.footerBadgeText || 'ACQUISTA IL BIGLIETTO DIGITALE ONLINE');
 
   // Deliberately empty editable fields must never fall back to template defaults.
   const website = content.websiteUrl ?? fc.websiteUrl ?? 'www.dolomitinordicski.com';
-  const phone = content.contactPhone ?? fc.phone ?? (isDNSList ? '' : '+39 0474 913156');
+  const phone = content.contactPhone ?? fc.phone ?? (isDNSList || isRegionalList ? '' : '+39 0474 913156');
   const email = content.contactEmail ?? fc.email ?? 'info@dolomitinordicski.com';
   
   const embedQrCode = fc.embedQrCode !== false && visibility?.qrCode !== false && content.qrCode?.enabled !== false;
@@ -174,7 +175,7 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
         style={{ color: isBackground ? '#FFFFFF' : primaryColor }}
       >
         {/* Far Left: Dolomiti NordicSki Logo */}
-        {!isDNSList && <div className="flex items-center gap-1.5 shrink-0">
+        {!isDNSList && !isRegionalList && <div className="flex items-center gap-1.5 shrink-0">
           <DolomitiNordicSkiLogo 
             variant={content.logoVariant || (isBackground ? 'negative' : 'original')} 
             className={`${isA5 ? 'h-3.5' : isA3 ? 'h-7' : 'h-4 sm:h-5'} shrink-0`} 
@@ -186,15 +187,16 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
         </div>}
 
         {/* Center: Network Slogan */}
-        {!isDNSList && <div className="font-black text-center flex-1 px-1 opacity-90 leading-tight">
+        {!isDNSList && !isRegionalList && <div className="font-black text-center flex-1 px-1 opacity-90 leading-tight">
           {isDNSList && networkSlogan === "8 GEBIETE / AREE = 1 NETWORK" ? "8 GEBIETE · 8 AREE · 8 AREAS — 1 NETZWERK · 1 RETE · 1 NETWORK" : networkSlogan}
         </div>}
 
         {/* Far Right: Areas List */}
-        {!isDNSList && <div className="text-right font-semibold opacity-80 max-w-[45%] whitespace-normal break-words leading-tight">
+        {!isDNSList && !isRegionalList && <div className="text-right font-semibold opacity-80 max-w-[45%] whitespace-normal break-words leading-tight">
           {networkAreasList}
         </div>}
       </div>
+      {isRegionalList && <div className="text-[8px] font-semibold tracking-wide text-center" style={{ color: primaryColor }}>{content.customRegionName || regionLogo?.regionName || regionLogo?.name || 'REGIONAL AREA'} · DOLOMITI NORDICSKI</div>}
       {isDNSList && (
         <div className="space-y-1 border-t border-slate-200 pt-1.5" data-dns-partners>
           <p className="text-[8px] font-semibold text-center leading-tight" style={{ color: primaryColor }}>

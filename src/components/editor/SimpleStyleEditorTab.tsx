@@ -31,7 +31,7 @@ export function SimpleStyleEditorTab({ uiLanguage, content, onChangeContent }: S
             key={preset.id}
             type="button"
             aria-pressed={active === preset.id}
-            onClick={() => onChangeContent({ themeColor: preset.id, customColors: undefined, customPrimaryColor: undefined as unknown as string, customAccentColor: undefined as unknown as string })}
+            onClick={() => onChangeContent({ themeColor: preset.id, customColors: undefined, customPrimaryColor: '', customAccentColor: '' })}
             className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${active === preset.id ? 'border-[#0D4D5E] bg-[#EDF5F5] ring-1 ring-[#0D4D5E]' : 'border-slate-200 bg-white hover:bg-slate-50'}`}
           >
             <span className="h-9 w-9 rounded-md border border-slate-200 shrink-0" style={{ backgroundColor: preset.color }} />

@@ -41,7 +41,7 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
     ? (plt?.seasonYear || content.validityPeriod)
     : (content.validityPeriod || plt?.seasonYear);
 
-  const safeTitleText = isDNSList ? 'PRICES & INFORMATION' : titleText;
+  const safeTitleText = isDNSList ? (content.title ?? 'PRICES & INFORMATION') : titleText;
   const safeSubtitleText = isDNSList ? (content.subtitle ?? '') : subtitleText;
   const titleSize = isA5 
     ? 'text-2xl sm:text-3xl' 

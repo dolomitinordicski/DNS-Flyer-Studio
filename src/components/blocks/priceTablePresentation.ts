@@ -15,7 +15,7 @@ export function getPriceTablePresentation(content: FlyerContent, texts: PriceLis
     singleColumn: isRegional,
     networkEmphasis: isDNS,
     areaHeader: isNetwork ? 'AREA PRICES' : texts.regionalHeader,
-    areaName: isNetwork ? '' : content.customRegionName,
+    areaName: isNetwork ? 'Individual ski areas' : content.customRegionName,
     networkHeader: isDNS ? 'DOLOMITI NORDICSKI' : texts.carouselHeader,
     weeklyTrackSupplement: isDNS ? texts.carouselWeekTrackSupplement : undefined,
   } as const;

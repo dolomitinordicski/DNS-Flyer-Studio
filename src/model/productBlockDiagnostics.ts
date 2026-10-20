@@ -24,7 +24,9 @@ export function inspectProductBlocks(content: FlyerContent, product: FlyerProduc
           message: `The ${sectionId} block has no registered renderer.` }],
       }];
     }
-    const visible = content.sectionVisibility?.[sectionId] !== false && content.visibility?.[sectionId] !== false;
+    const first = content.sectionVisibility as Record<string, boolean | undefined> | undefined;
+    const second = content.visibility as Record<string, boolean | undefined> | undefined;
+    const visible = first?.[sectionId] !== false && second?.[sectionId] !== false;
     if (!visible) return [];
     // Prices come from authoritative Data Entry via DNS Core at render time.
     // Inline priceListTexts may hold editorial copy, not official tariff evidence.

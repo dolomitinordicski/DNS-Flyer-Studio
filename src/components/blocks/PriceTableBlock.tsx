@@ -41,7 +41,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                 {plt.regionalHeader}
               </span>
               <span className={`${isA5 ? 'text-[9.5px]' : isA3 ? 'text-base' : 'text-[11px]'} font-black tracking-tight leading-tight truncate`}>
-                {content.customRegionName || regionLogo?.name || regionLogo?.regionName || 'REGIONAL AREA'}
+                {content.customRegionName || (regionLogo?.id === 'dns_central' ? regionLogo.regionName : regionLogo?.regionName || regionLogo?.name) || 'REGIONAL AREA'}
               </span>
             </div>
             {regionLogo && regionLogo.id !== 'dns_central' && (

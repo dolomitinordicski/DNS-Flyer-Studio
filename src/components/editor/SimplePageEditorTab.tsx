@@ -6,6 +6,7 @@ import type { FlyerProductDefinition } from '../../model/flyerProductModel';
 interface SimplePageEditorTabProps {
   uiLanguage: 'de' | 'it';
   content: FlyerContent;
+  onChangeContent: (updated: Partial<FlyerContent>) => void;
   product?: FlyerProductDefinition;
   onChangeFormat?: (format: FlyerContent['format']) => void;
   onToggleOrientation?: () => void;
@@ -13,7 +14,7 @@ interface SimplePageEditorTabProps {
 }
 
 export function SimplePageEditorTab({
-  uiLanguage, content, product, onChangeFormat, onToggleOrientation, onMakeItPerfect,
+  uiLanguage, content, product, onChangeContent, onChangeFormat, onToggleOrientation, onMakeItPerfect,
 }: SimplePageEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   return (

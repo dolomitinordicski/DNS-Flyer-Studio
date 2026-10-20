@@ -14,6 +14,8 @@ export function SimpleImageEditorTab({
   onChangeContent,
 }: SimpleImageEditorTabProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const dragRef = useRef<{ x: number; y: number; focusX: number; focusY: number } | null>(null);
+  const clamp = (value: number) => Math.max(0, Math.min(100, value));
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
 
   const upload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,9 +43,13 @@ export function SimpleImageEditorTab({
         </p>
       </div>
 
-      <div className="aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+      <div className="aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50 select-none touch-none cursor-grab active:cursor-grabbing"
+        onPointerDown={e => { if (!content.heroImageUrl) return; dragRef.current = { x: e.clientX, y: e.clientY, focusX: content.heroImageFocusX ?? 50, focusY: content.heroImageFocusY ?? 50 }; e.currentTarget.setPointerCapture(e.pointerId); }}
+        onPointerMove={e => { const drag = dragRef.current; if (!drag) return; const rect = e.currentTarget.getBoundingClientRect(); onChangeContent({ heroImageFocusX: clamp(drag.focusX - 100 * (e.clientX - drag.x) / rect.width), heroImageFocusY: clamp(drag.focusY - 100 * (e.clientY - drag.y) / rect.height) }); }}
+        onPointerUp={() => { dragRef.current = null; }}
+        onPointerCancel={() => { dragRef.current = null; }}>
         {content.heroImageUrl ? (
-          <img src={content.heroImageUrl} alt="" className="w-full h-full object-cover" />
+          <img src={content.heroImageUrl} alt="" draggable={false} className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%` }} />
         ) : (
           <div className="h-full flex items-center justify-center text-slate-400">
             <ImageIcon className="w-8 h-8" />
@@ -51,6 +57,8 @@ export function SimpleImageEditorTab({
         )}
       </div>
 
+      <p className="text-[11px] text-slate-600">{ui("Bild im Rahmen ziehen, um den Ausschnitt zu wählen.", "Trascina la foto nel riquadro per scegliere l’inquadratura.")}</p>
+      <button type="button" onClick={() => onChangeContent({ heroImageFocusX: 50, heroImageFocusY: 50 })} className="text-xs underline text-[#0D4D5E]">{ui("Ausschnitt zentrieren", "Centra inquadratura")}</button>
       <input ref={inputRef} type="file" accept="image/*" onChange={upload} className="hidden" />
 
       <button

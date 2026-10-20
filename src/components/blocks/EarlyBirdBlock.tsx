@@ -15,9 +15,9 @@ export const EarlyBirdBlock: React.FC<BlockProps> = ({
     <div 
       className={`w-full ${isDNSList ? "rounded-sm p-2 border" : "rounded-xl p-2 sm:p-2.5 border-2 shadow-sm"} flex items-center justify-between gap-2.5 my-1.5 min-w-0`}
       style={{ 
-        backgroundColor: `${theme.accentHex}20`, 
+        background: isDNSList ? 'linear-gradient(110deg, #062F42 0%, #0D4D5E 60%, #216D85 100%)' : `${theme.accentHex}20`, 
         borderColor: theme.accentHex,
-        color: theme.primaryHex
+        color: isDNSList ? '#FFFFFF' : theme.primaryHex
       }}
     >
       <div className="flex items-center gap-2 min-w-0">
@@ -32,7 +32,7 @@ export const EarlyBirdBlock: React.FC<BlockProps> = ({
             {plt.earlyBirdLabel || 'PREVENDITA / VORVERKAUF'}
           </div>
           {plt.earlyBirdSub && (
-            <div className="text-[8.5px] sm:text-[9.5px] font-bold text-slate-600 truncate">
+            <div className={`text-[8.5px] sm:text-[9.5px] font-bold ${isDNSList ? "text-white/85" : "text-slate-600"} truncate`}>
               {plt.earlyBirdSub}
             </div>
           )}
@@ -41,7 +41,7 @@ export const EarlyBirdBlock: React.FC<BlockProps> = ({
       {plt.earlyBirdDiscount && (
         <div 
           className={`${isDNSList ? "px-1 py-1" : "px-2.5 py-1 rounded-lg shadow-xs"} text-xs font-black font-vietnam uppercase tracking-wide shrink-0`}
-          style={{ backgroundColor: isDNSList ? 'transparent' : theme.primaryHex, color: isDNSList ? theme.primaryHex : '#FFFFFF' }}
+          style={{ backgroundColor: isDNSList ? 'transparent' : theme.primaryHex, color: isDNSList ? '#FFFFFF' : '#FFFFFF' }}
         >
           {plt.earlyBirdDiscount}
         </div>

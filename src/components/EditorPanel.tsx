@@ -159,6 +159,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
           <SimplePageEditorTab
             uiLanguage={uiLanguage}
             content={content}
+            onChangeContent={onChangeContent}
             product={product}
             onMakeItPerfect={onMakeItPerfect}
             onChangeFormat={onChangeFormat}

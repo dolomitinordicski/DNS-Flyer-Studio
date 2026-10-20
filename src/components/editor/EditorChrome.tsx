@@ -3,6 +3,7 @@ import {
   Cloud,
   Image as ImageIcon,
   LayoutTemplate,
+  PanelsTopLeft,
   Palette,
   QrCode,
   Type,
@@ -13,6 +14,7 @@ export type EditorTabId =
   | 'content'
   | 'images'
   | 'style'
+  | 'layout'
   | 'qr';
 
 interface EditorChromeProps {
@@ -36,6 +38,7 @@ export function EditorChrome({
     { id: 'content' as const, label: ui('Inhalte', 'Contenuti'), icon: Type },
     { id: 'images' as const, label: ui('Bild', 'Immagine'), icon: ImageIcon },
     { id: 'style' as const, label: ui('Farben', 'Colori'), icon: Palette },
+    { id: 'layout' as const, label: 'Layout', icon: PanelsTopLeft },
     { id: 'qr' as const, label: 'QR', icon: QrCode },
   ];
 
@@ -71,7 +74,7 @@ export function EditorChrome({
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200">
+      <div className="grid grid-cols-6 gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

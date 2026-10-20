@@ -2,11 +2,13 @@ import React from 'react';
 import type { FlyerContent, LanguageCode } from '../../types';
 import { getContentForLanguage } from '../../utils/multilingual';
 import type { FlyerProductDefinition } from '../../model/flyerProductModel';
+import { REGIONAL_LOGOS, REGIONAL_AREA_ALIASES } from '../../data/regionalLogos';
 
 interface SimpleContentEditorTabProps {
   uiLanguage: 'de' | 'it';
   content: FlyerContent;
   product?: FlyerProductDefinition;
+  isDNSAdmin?: boolean;
   onChangeContent: (updated: Partial<FlyerContent>) => void;
 }
 
@@ -14,6 +16,7 @@ export function SimpleContentEditorTab({
   uiLanguage,
   content,
   product,
+  isDNSAdmin = false,
   onChangeContent,
 }: SimpleContentEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
@@ -87,6 +90,22 @@ export function SimpleContentEditorTab({
         </div>
       )}
 
+      {product?.type === 'regional_price_list' && isDNSAdmin && (
+        <label className="block space-y-1.5">
+          <span className="text-[10px] font-bold uppercase text-slate-600">{ui('Berichtsgebiet', 'Area partner')}</span>
+          <select
+            value={REGIONAL_AREA_ALIASES[content.regionId] || content.regionId}
+            onChange={event => onChangeContent({ regionId: event.target.value, customRegionName: '' })}
+            className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-900"
+          >
+            {REGIONAL_LOGOS.filter(area => area.id !== 'dns_central').map(area => {
+              const coreId = Object.entries(REGIONAL_AREA_ALIASES).find(([, alias]) => alias === area.id)?.[0] || area.id;
+              return <option key={coreId} value={coreId}>{area.regionName}</option>;
+            })}
+          </select>
+          <span className="text-[10px] text-slate-500">{ui('Gebietspreise werden automatisch von DNS Data Entry geladen.', 'I prezzi dell’area vengono caricati automaticamente da DNS Data Entry.')}</span>
+        </label>
+      )}
       {product?.type === 'dns_price_list' && (
         <section className="p-3 rounded-xl border border-[#AAD0D1] bg-[#EDF5F5] space-y-3">
           <h4 className="text-xs font-bold text-[#0D4D5E]">

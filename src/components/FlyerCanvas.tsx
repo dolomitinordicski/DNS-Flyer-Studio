@@ -81,6 +81,14 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
     regionalSeasonPrice: content.priceListTexts?.regionalSeasonPrice ?? localizedContent.priceListTexts?.regionalSeasonPrice,
   } : {};
   const plt = { ...DEFAULT_PRICE_LIST_TEXTS, ...localizedContent.priceListTexts, ...editorialFromPrices, ...missingOfficialPrices, ...officialPrices };
+  // Legacy saved flyers can contain the old fixed +5€ track surcharge. Remove it:
+  // the authoritative surcharge is now displayed directly below the DNS weekly price.
+  if (isPriceList && plt.regionalNote) {
+    plt.regionalNote = plt.regionalNote
+      .replace(/\s*\+\s*5\s*€\s*Aufpreis auf der Loipe\.?/gi, '')
+      .replace(/\s*\+\s*5\s*€\s*in pista dal controllore\.?/gi, '')
+      .replace(/\s*\+\s*5\s*€\s*surcharge on track\.?/gi, '');
+  }
 
   // Visibility Configuration
   const v1 = content.sectionVisibility || {};

@@ -42,7 +42,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     templateId: 'official_price_list',
     label: { de: 'DNS Gesamtpreisliste', it: 'Listino generale DNS', en: 'DNS general price list' },
     graphicStyle: 'official_price_table',
-    blockStack: ['header', 'bigTitle', 'heroImage', 'priceTables', 'servicesBox', 'qrCode', 'disclaimer', 'footer'],
+    blockStack: ['header', 'bigTitle', 'heroImage', 'priceTables', 'earlyBird', 'servicesBox', 'qrCode', 'disclaimer', 'footer'],
     editableFields: [
       'title', 'subtitle', 'validityPeriod', 'heroImageUrl', 'format', 'orientation', 'heroImageFocusX', 'heroImageFocusY',
       'customPrimaryColor', 'customAccentColor',

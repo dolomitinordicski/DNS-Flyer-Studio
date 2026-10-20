@@ -17,6 +17,8 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
   const presentation = getPriceTablePresentation(content, plt);
   const isRegionalList = presentation.singleColumn;
   const isDNSList = presentation.networkEmphasis;
+  // For both official price lists all commercial descriptions are printed
+  // together in DE / IT / EN, independently of the editor UI language.
   const isRegionalProduct = content.layoutTemplateId === 'regional_price_list';
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';

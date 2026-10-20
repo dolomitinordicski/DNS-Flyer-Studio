@@ -302,6 +302,7 @@ export function getContentForLanguage(content: FlyerContent, lang: LanguageCode)
   const translations = getInitialTranslations(content);
   const langSet = translations[lang] || translations['it'] || {};
 
+  const unifiedPriceList = content.layoutTemplateId === 'official_price_list' || content.layoutTemplateId === 'regional_price_list';
   const defaultPriceTexts = lang === 'de' 
     ? DEFAULT_PRICE_LIST_TEXTS_DE 
     : lang === 'en' 
@@ -316,9 +317,9 @@ export function getContentForLanguage(content: FlyerContent, lang: LanguageCode)
     badgeText: cleanseObsoleteTerms(langSet.badgeText ?? content.badgeText),
     // DNS general list uses a single international editorial heading/subtitle.
     // Editing them must override stale translation snapshots in PDF exports too.
-    title: cleanseObsoleteTerms(content.layoutTemplateId === 'official_price_list' ? content.title : (langSet.title ?? content.title)),
-    subtitle: cleanseObsoleteTerms(content.layoutTemplateId === 'official_price_list' ? content.subtitle : (langSet.subtitle ?? content.subtitle)),
-    validityPeriod: langSet.validityPeriod ?? content.validityPeriod ?? '2026/27',
+    title: cleanseObsoleteTerms(unifiedPriceList ? content.title : (langSet.title ?? content.title)),
+    subtitle: cleanseObsoleteTerms(unifiedPriceList ? content.subtitle : (langSet.subtitle ?? content.subtitle)),
+    validityPeriod: unifiedPriceList ? (content.validityPeriod ?? '2026/27') : (langSet.validityPeriod ?? content.validityPeriod ?? '2026/27'),
     location: langSet.location ?? content.location,
     pricePrefix: langSet.pricePrefix ?? content.pricePrefix,
     priceAmount: langSet.priceAmount ?? content.priceAmount,
@@ -341,10 +342,11 @@ export function getContentForLanguage(content: FlyerContent, lang: LanguageCode)
     turnstileNote: langSet.turnstileNote ?? content.turnstileNote,
     verificationNote: langSet.verificationNote ?? content.verificationNote,
     features: langSet.features ?? content.features,
-    priceListTexts: {
-      ...defaultPriceTexts,
-      ...content.priceListTexts,
-      ...langSet.priceListTexts
-    }
+    // DNS and regional price lists are ONE trilingual document: active UI language
+    // must not replace trilingual tariffs, services, supplements or legal conditions
+    // with old per-language snapshots. Explicit content overrides remain editable.
+    priceListTexts: unifiedPriceList
+      ? { ...DEFAULT_PRICE_LIST_TEXTS, ...content.priceListTexts }
+      : { ...defaultPriceTexts, ...content.priceListTexts, ...langSet.priceListTexts }
   };
 }

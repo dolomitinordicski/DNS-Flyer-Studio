@@ -21,6 +21,7 @@ import { createFlyerDocumentV1, normalizeFlyerContent } from './model/flyerDocum
 import { signInDNSCore, signOutDNSCore, subscribeDNSCoreUser } from './lib/dnsCore';
 import { loadCurrentFlyerAccess } from './data/currentFlyerAccess';
 import { getFlyerProductByTemplate, lockContentToProduct } from './model/flyerProductModel';
+import { useFlyerAutosave } from './hooks/useFlyerAutosave';
 
 export default function App() {
   // View mode: 'editor' | 'dashboard'
@@ -30,6 +31,7 @@ export default function App() {
   const [uiLanguage, setUiLanguageState] = useState<'de' | 'it'>(() => foundation.getLanguage());
   const [coreStatus, setCoreStatus] = useState<DNSCoreHeaderStatus>({ state: 'loading' });
   const [coreUserEmail, setCoreUserEmail] = useState<string | null>(null);
+  const [coreUserId, setCoreUserId] = useState<string | null>(null);
   const [coreAuthError, setCoreAuthError] = useState<string | null>(null);
   const [currentReportingAreaId, setCurrentReportingAreaId] = useState<string | null>(null);
   const [isDNSAdmin, setIsDNSAdmin] = useState(false);
@@ -101,6 +103,7 @@ export default function App() {
     void probeDNSCoreHeader().then(setCoreStatus);
     return subscribeDNSCoreUser(user => {
       setCoreUserEmail(user?.email ?? null);
+      setCoreUserId(user?.uid ?? null);
       if (!user) {
         setCurrentReportingAreaId(null);
         setIsDNSAdmin(false);
@@ -172,6 +175,24 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isSavedDesignsModalOpen, setIsSavedDesignsModalOpen] = useState(false);
+  // DNS Core saves the active draft after edits settle; local recovery remains immediate.
+  // Temporary export-language snapshots are deliberately excluded.
+  const autosaveAllowed = activeView === 'editor'
+    && !isExporting
+    && !isLegacyMode
+    && (content.layoutTemplateId !== 'official_price_list' || isDNSAdmin || hasDNSNetworkAccess);
+  const autosave = useFlyerAutosave(content, coreUserId, autosaveAllowed);
+
+  const handleSaveDraftNow = async (snapshot: FlyerContent = content, title?: string) => {
+    await autosave.saveNow(snapshot, title);
+  };
+
+  const handleOpenSavedDraft = (savedContent: FlyerContent, id: string) => {
+    autosave.selectDraft(id, savedContent);
+    handleLoadSavedDesign(savedContent);
+  };
+
+
   
   // Canvas DOM Reference for PDF & PNG capture
   const flyerRef = useRef<HTMLDivElement>(null);
@@ -225,6 +246,7 @@ export default function App() {
         return;
       }
       setActiveTemplateId(templateId);
+      autosave.selectDraft(null);
       setContent(prev => {
         const defaultVis = template.defaultContent.sectionVisibility || {
           header: true,
@@ -650,6 +672,7 @@ export default function App() {
         <FlyerDashboard 
           uiLanguage={uiLanguage}
           onLoadFlyerIntoEditor={(loadedContent) => {
+            autosave.selectDraft(null);
             setContent(loadedContent);
             setActiveView('editor');
           }}
@@ -671,6 +694,10 @@ export default function App() {
               />
             ) : (
               <EditorPanel
+                onSaveDraft={handleSaveDraftNow}
+                onOpenSavedDraft={handleOpenSavedDraft}
+                autosaveStatus={autosave.status}
+                activeDraftId={autosave.draftId}
                 uiLanguage={uiLanguage}
                 content={content}
                 onChangeContent={handleUpdateContent}
@@ -766,7 +793,8 @@ export default function App() {
         isOpen={isSavedDesignsModalOpen}
         onClose={() => setIsSavedDesignsModalOpen(false)}
         currentContent={content}
-        onLoadDesign={handleLoadSavedDesign}
+        onLoadDesign={handleOpenSavedDraft}
+        onSaveCurrentDesign={handleSaveDraftNow}
       />
 
       {/* Multilingual Export & Print Modal */}

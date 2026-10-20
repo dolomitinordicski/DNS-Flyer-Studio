@@ -653,6 +653,8 @@ export default function App() {
                 onApplyTemplate={handleApplyTemplate}
                 onOpenSavedDesignsModal={() => setIsSavedDesignsModalOpen(true)}
                 onMakeItPerfect={handleMakeItPerfect}
+                onChangeFormat={handleChangeFormat}
+                onToggleOrientation={handleToggleOrientation}
                 isDNSAdmin={isDNSAdmin || hasDNSNetworkAccess}
                 onOpenLegacy={() => setLegacyReviewMode(true)}
               />

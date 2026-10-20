@@ -285,6 +285,25 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
     );
   };
 
+  const renderDNSCornerSkier = () => {
+    if (!isNetworkPriceList || !content.dnsSkierCorner || content.dnsSkierCorner === 'none') return null;
+    const corner = content.dnsSkierCorner;
+    const position = {
+      top_left: 'top-3 left-3',
+      top_right: 'top-3 right-3',
+      bottom_left: 'bottom-3 left-3',
+      bottom_right: 'bottom-3 right-3',
+    }[corner];
+    // Fixed safe inset, deliberately smaller than the former full-page skier.
+    const size = content.format === 'A3' ? 105 : 65;
+    return (
+      <div className={`absolute z-20 pointer-events-none opacity-45 ${position}`}
+        style={{ width: size, height: size }} data-dns-skier={corner}>
+        <DolomitiSkierTrackEmblem />
+      </div>
+    );
+  };
+
   const variantProps = {
     content: localizedContent,
     plt,
@@ -374,7 +393,8 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       })()}
 
       {/* Nordic Swoosh Overlay */}
-      {!(isNetworkPriceList && content.orientation === 'landscape') && <NordicSwooshOverlay config={content.nordicSwoosh} />}
+      {!isNetworkPriceList && <NordicSwooshOverlay config={content.nordicSwoosh} />}
+      {renderDNSCornerSkier()}
 
       {/* Global Ornaments */}
       {!isNetworkPriceList && renderOrnament()}

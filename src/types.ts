@@ -87,6 +87,8 @@ export type LogoVariantType = 'original' | 'negative' | 'grayscale' | 'skier_tra
 
 export type LogoPositionType = 'header_left' | 'header_center' | 'top_banner' | 'floating_badge';
 
+export type DNSGraphicCorner = 'none' | 'top_left' | 'top_right' | 'bottom_left' | 'bottom_right';
+
 export type NordicSwooshPosition = 'top_left' | 'top_right' | 'bottom_left' | 'bottom_right' | 'none';
 export type NordicSwooshVariant = 'swoosh_only' | 'swoosh_skier';
 export type NordicSwooshSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'custom';
@@ -406,6 +408,8 @@ export interface FlyerContent {
   nordicSwoosh?: NordicSwooshConfig;
   ornamentCurves?: OrnamentCurvesConfig;
   ornamentSkier?: OrnamentSkierConfig;
+  /** Optional official skier artwork for DNS general list; default hidden. */
+  dnsSkierCorner?: DNSGraphicCorner;
   customColors?: CustomColorCombination;
   
   // Visibility toggles for document sections

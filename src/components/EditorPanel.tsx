@@ -20,6 +20,8 @@ interface EditorPanelProps {
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
   onOpenSavedDesignsModal: () => void;
   onMakeItPerfect?: () => void;
+  onChangeFormat?: (format: FlyerContent['format']) => void;
+  onToggleOrientation?: () => void;
   isDNSAdmin?: boolean;
   onOpenLegacy?: () => void;
 }
@@ -31,6 +33,9 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onApplyTemplate,
   onOpenSavedDesignsModal,
   isDNSAdmin = false,
+  onMakeItPerfect,
+  onChangeFormat,
+  onToggleOrientation,
   onOpenLegacy,
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
@@ -127,6 +132,10 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             uiLanguage={uiLanguage}
             content={content}
             onChangeContent={onChangeContent}
+            product={product}
+            onMakeItPerfect={onMakeItPerfect}
+            onChangeFormat={onChangeFormat}
+            onToggleOrientation={onToggleOrientation}
           />
         )}
 

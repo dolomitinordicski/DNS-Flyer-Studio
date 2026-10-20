@@ -14,6 +14,8 @@ export const HeroMediaBlock: React.FC<BlockProps> = ({
   const isA3 = fmt === 'A3';
   const isLandscape = orientation === 'landscape' || content.orientation === 'landscape';
   const isDNSList = content.layoutTemplateId === 'official_price_list';
+  const showSeasonOverlay = isDNSList && content.heroImagePosition !== 'background';
+  const season = content.validityPeriod ?? '';
   const imageUrl = content.heroImageUrl || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80';
 
   return (
@@ -39,7 +41,13 @@ export const HeroMediaBlock: React.FC<BlockProps> = ({
         className="absolute inset-0 bg-slate-900"
         style={{ opacity: (content.heroOverlayOpacity ?? 20) / 100 }}
       />
-      <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white to-transparent z-10" />
+      {showSeasonOverlay && season.trim() && (
+        <div className={`absolute left-[6%] ${isLandscape ? "bottom-8" : "bottom-10"} z-10 pointer-events-none select-none text-white font-vietnam`} style={{ textShadow: "0 2px 12px rgba(0,0,0,.65), 0 1px 3px rgba(0,0,0,.7)" }}>
+          <span className={`block uppercase font-semibold tracking-[0.28em] ${isA3 ? "text-xl" : isA5 ? "text-[9px]" : "text-xs sm:text-sm"} ml-1.5`}>WINTER</span>
+          <span className={`block leading-none tracking-tight font-extrabold ${isA3 ? "text-7xl" : isA5 ? "text-3xl" : isLandscape ? "text-4xl" : "text-5xl sm:text-6xl"} -mt-0.5`}>{season}</span>
+        </div>
+      )}
+      <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
     </div>
   );
 };

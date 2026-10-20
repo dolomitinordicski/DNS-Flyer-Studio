@@ -314,8 +314,10 @@ export function getContentForLanguage(content: FlyerContent, lang: LanguageCode)
     translations: translations,
     headerTagline: cleanseObsoleteTerms(langSet.headerTagline ?? content.headerTagline ?? ''),
     badgeText: cleanseObsoleteTerms(langSet.badgeText ?? content.badgeText),
-    title: cleanseObsoleteTerms(langSet.title ?? content.title),
-    subtitle: cleanseObsoleteTerms(langSet.subtitle ?? content.subtitle),
+    // DNS general list uses a single international editorial heading/subtitle.
+    // Editing them must override stale translation snapshots in PDF exports too.
+    title: cleanseObsoleteTerms(content.layoutTemplateId === 'official_price_list' ? content.title : (langSet.title ?? content.title)),
+    subtitle: cleanseObsoleteTerms(content.layoutTemplateId === 'official_price_list' ? content.subtitle : (langSet.subtitle ?? content.subtitle)),
     validityPeriod: langSet.validityPeriod ?? content.validityPeriod ?? '2026/27',
     location: langSet.location ?? content.location,
     pricePrefix: langSet.pricePrefix ?? content.pricePrefix,

@@ -18,7 +18,7 @@ export const HeroMediaBlock: React.FC<BlockProps> = ({
 
   return (
     <div 
-      className={`relative w-full ${!content.heroImageHeightPx ? (isA5 ? 'flex-1 min-h-[100px] max-h-[200px]' : isA3 ? 'flex-1 min-h-[220px] max-h-[500px]' : isLandscape ? 'flex-1 min-h-[100px] max-h-[220px]' : content.layoutTemplateId === 'official_price_list' ? 'flex-1 min-h-[110px] max-h-[245px]' : 'flex-1 min-h-[140px] max-h-[360px]') : 'shrink-0'} overflow-hidden bg-slate-900 shadow-inner transition-all duration-300 rounded-xl`}
+      className={`relative w-full ${!content.heroImageHeightPx ? (isA5 ? 'flex-1 min-h-[100px] max-h-[200px]' : isA3 ? 'flex-1 min-h-[220px] max-h-[500px]' : isLandscape ? 'flex-1 min-h-[100px] max-h-[220px]' : content.layoutTemplateId === 'official_price_list' ? 'flex-1 min-h-[110px] max-h-[245px]' : 'flex-1 min-h-[140px] max-h-[360px]') : 'shrink-0'} overflow-hidden bg-slate-900 shadow-inner transition-all duration-300 ${isDNSList ? 'rounded-t-2xl rounded-b-none' : 'rounded-xl'}`}
       style={isDNSList && content.heroImagePosition !== 'background'
         ? {
             flex: '1 1 0%',

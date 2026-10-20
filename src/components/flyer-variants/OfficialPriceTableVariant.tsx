@@ -56,7 +56,7 @@ export const OfficialPriceTableVariant: React.FC<FlyerVariantProps> = ({
       )}
       
       {/* Integrated Vector Kurve Header Watermark graphic */}
-      {(content.ornamentCurves?.enabled ?? true) && (
+      {!isDNSList && (content.ornamentCurves?.enabled ?? true) && (
         <div 
           className="absolute -top-6 right-0 h-36 pointer-events-none z-0 transition-all"
           style={{

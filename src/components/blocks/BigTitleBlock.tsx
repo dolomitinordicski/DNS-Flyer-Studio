@@ -41,8 +41,8 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
     ? (plt?.seasonYear || content.validityPeriod)
     : (content.validityPeriod || plt?.seasonYear);
 
-  const safeTitleText = isDNSList ? 'PRICES & INFORMATION' : titleText;
-  const safeSubtitleText = isDNSList ? '' : subtitleText;
+  const safeTitleText = isDNSList ? (content.title ?? 'PRICES & INFORMATION') : titleText;
+  const safeSubtitleText = isDNSList ? (content.subtitle ?? '') : subtitleText;
   const titleSize = isA5 
     ? 'text-2xl sm:text-3xl' 
     : isA3 
@@ -80,7 +80,7 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
       
       {safeSubtitleText && (
         <p 
-          className={`mt-0.5 ${isLandscape ? (isA5 ? 'text-xs' : isA3 ? 'text-base' : 'text-sm') : subtitleSize} font-semibold leading-relaxed max-w-2xl break-words`}
+          className={`mt-0.5 ${isDNSList ? 'text-sm sm:text-base' : isLandscape ? (isA5 ? 'text-xs' : isA3 ? 'text-base' : 'text-sm') : subtitleSize} font-semibold leading-relaxed max-w-2xl break-words`}
           style={{ color: content.heroImagePosition === 'background' ? '#E2E8F0' : `${theme.textColorHex}CC` }}
         >
           {safeSubtitleText}

@@ -354,6 +354,8 @@ export interface FlyerContent {
   heroImageUrl: string;
   heroImagePosition: 'top' | 'middle' | 'background' | 'split';
   heroOverlayOpacity: number; // 0 to 100
+  heroImageFocusX?: number; // 0-100 horizontal object-position within fixed image frame
+  heroImageFocusY?: number; // 0-100 vertical object-position within fixed image frame
   heroImageHeightPx?: number; // Custom height buffer in px computed by Make It Perfect
   textScaleFactor?: number; // Text scale multiplier computed by Make It Perfect (A3/A4/A5)
   

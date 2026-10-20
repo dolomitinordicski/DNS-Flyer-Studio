@@ -20,6 +20,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
 
+  const dnsCentral = isDNSList && content.regionId === 'dns_central';
   const primaryColor = theme.primaryHex || '#004B87';
   const secondaryColor = theme.secondaryHex || '#003366';
   const accentColor = theme.accentHex || '#3399FF';
@@ -38,10 +39,10 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
           >
             <div className="min-w-0 flex flex-col">
               <span className={`${isA5 ? 'text-[6.5px]' : isA3 ? 'text-xs' : 'text-[7.5px]'} font-bold opacity-80 tracking-widest leading-none`}>
-                {plt.regionalHeader}
+                {dnsCentral ? 'GEBIETSPREISE · PREZZI DELLE AREE · AREA PRICES' : plt.regionalHeader}
               </span>
               <span className={`${isA5 ? 'text-[9.5px]' : isA3 ? 'text-base' : 'text-[11px]'} font-black tracking-tight leading-tight truncate`}>
-                {content.customRegionName || (regionLogo?.id === 'dns_central' ? regionLogo.regionName : regionLogo?.regionName || regionLogo?.name) || 'REGIONAL AREA'}
+                {dnsCentral ? '8 GEBIETE · 8 AREE · 8 AREAS' : content.customRegionName || (regionLogo?.id === 'dns_central' ? regionLogo.regionName : regionLogo?.regionName || regionLogo?.name) || 'REGIONAL AREA'}
               </span>
             </div>
             {regionLogo && regionLogo.id !== 'dns_central' && (
@@ -81,7 +82,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                   <span className={`font-black ${isA5 ? 'text-[8px]' : isA3 ? 'text-sm' : 'text-[9.5px]'} block leading-tight break-words`} style={{ color: primaryColor }}>{item.title}</span>
                   {item.sub && <span className={`${isA3 ? 'text-[10px]' : 'text-[7px]'} text-slate-500 block leading-tight font-medium mt-0.5 uppercase tracking-tight opacity-90 break-words`}>{item.sub}</span>}
                 </div>
-                <div className={`${isA5 ? 'text-[8px] px-1 py-0.5' : isA3 ? 'text-sm px-2.5 py-1' : 'text-[9.5px] px-1.5 py-0.5'} shrink-0 bg-slate-50 rounded border border-slate-100 flex flex-col items-end text-right leading-tight max-w-[120px]`} style={{ color: primaryColor }}>
+                <div className={`${isA5 ? 'text-[8px] px-1 py-0.5' : isA3 ? 'text-sm px-2.5 py-1' : isDNSList ? 'text-[12px] px-2 py-1' : 'text-[9.5px] px-1.5 py-0.5'} shrink-0 bg-slate-50 rounded border border-slate-100 flex flex-col items-end text-right leading-tight max-w-[155px]`} style={{ color: primaryColor }}>
                   {(() => {
                     if (!item.price) return null;
                     const match = item.price.match(/^([^(]+)(\(.+\))$/);
@@ -106,13 +107,13 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
         {!isRegionalList && (
         <div 
           className="border rounded-xl bg-white/95 overflow-hidden flex flex-col shadow-xs" 
-          style={{ borderColor: `${accentColor}80` }}
+          style={{ borderColor: isDNSList ? secondaryColor : `${accentColor}80`, borderWidth: isDNSList ? 2 : 1 }}
         >
           <div 
             className={`text-white font-black ${isA5 ? 'text-[8.5px] p-1.5' : isA3 ? 'text-sm p-3' : 'text-[10px] p-2'} text-center uppercase tracking-widest flex-1 flex items-center justify-center`} 
             style={{ backgroundColor: secondaryColor }}
           >
-            {plt.carouselHeader}
+            {isDNSList ? "DOLOMITI NORDICSKI · 8 GEBIETE / AREE / AREAS" : plt.carouselHeader}
           </div>
           <div className={`${isA5 ? 'p-1.5 space-y-0.5' : isA3 ? 'p-3.5 space-y-2' : 'p-2 space-y-1'}`}>
             {[
@@ -140,7 +141,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                     }
                     return <span className="font-black break-words">{item.price}</span>;
                   })()}
-                  {item.supplement && <span className="font-medium text-[6.5px] sm:text-[7px] text-slate-600 mt-0.5 leading-tight">Aufpreis Loipe / Supplemento pista / Track surcharge: {item.supplement}</span>}
+                  {item.supplement && <span className="font-medium text-[8px] text-slate-600 mt-1 leading-snug max-w-[135px]">Aufpreis Loipe / Supplemento pista / Track surcharge: {item.supplement}</span>}
                 </div>
               </div>
             ))}

@@ -60,6 +60,7 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
   const accentColor = activeColors?.accent || theme?.accentHex || '#AAD0D1';
 
   // Config values with smart defaults
+  const isDNSList = content.layoutTemplateId === 'official_price_list';
   const ticketBadge = isTrilingualEffective 
     ? getTri('ticketBadgeText', fc.ticketBadgeText || 'ACQUISTA IL BIGLIETTO DIGITALE ONLINE')
     : (fc.ticketBadgeText || plt?.footerBadgeText || 'ACQUISTA IL BIGLIETTO DIGITALE ONLINE');
@@ -108,7 +109,7 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
                 }`}
                 style={{ backgroundColor: primaryColor, color: '#FFFFFF' }}
               >
-                {ticketBadge}
+                {isDNSList && ticketBadge === "ACQUISTA IL BIGLIETTO DIGITALE ONLINE" ? "ONLINE KAUFEN · ACQUISTA ONLINE · BUY ONLINE" : ticketBadge}
               </span>
             </div>
 
@@ -150,7 +151,7 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
               <span className={`font-black uppercase tracking-wider text-center mt-0.5 ${
                 isA3 ? 'text-[8.5px]' : isA5 ? 'text-[6px]' : 'text-[7px] sm:text-[7.5px]'
               }`} style={{ color: primaryColor }}>
-                {qrScanLabel}
+                {isDNSList && qrScanLabel === "SCANSIONA PER..." ? "SCAN · SCANSIONA · SCAN" : qrScanLabel}
               </span>
             </div>
           )}
@@ -177,12 +178,12 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
         </div>
 
         {/* Center: Network Slogan */}
-        <div className="truncate font-black text-center flex-1 px-1 opacity-90">
-          {networkSlogan}
+        <div className="font-black text-center flex-1 px-1 opacity-90 leading-tight">
+          {isDNSList && networkSlogan === "8 GEBIETE / AREE = 1 NETWORK" ? "8 GEBIETE · 8 AREE · 8 AREAS — 1 NETZWERK · 1 RETE · 1 NETWORK" : networkSlogan}
         </div>
 
         {/* Far Right: Areas List */}
-        <div className="shrink-0 text-right font-semibold opacity-80 truncate max-w-[42%]">
+        <div className="text-right font-semibold opacity-80 max-w-[45%] whitespace-normal break-words leading-tight">
           {networkAreasList}
         </div>
       </div>

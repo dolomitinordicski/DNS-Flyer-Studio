@@ -14,7 +14,7 @@ export interface ProductBlockDiagnostic {
 }
 
 export function inspectProductBlocks(content: FlyerContent, product: FlyerProductDefinition): ProductBlockDiagnostic[] {
-  return product.blockStack.flatMap(sectionId => {
+  return product.blockStack.flatMap<ProductBlockDiagnostic>(sectionId => {
     const definition = getRuntimeBlock(sectionId);
     if (!definition) {
       return [{

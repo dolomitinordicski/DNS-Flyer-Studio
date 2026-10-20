@@ -9,6 +9,7 @@ import { SimpleTemplatesEditorTab } from './editor/SimpleTemplatesEditorTab';
 import { SimpleContentEditorTab } from './editor/SimpleContentEditorTab';
 import { SimpleImageEditorTab } from './editor/SimpleImageEditorTab';
 import { SimpleStyleEditorTab } from './editor/SimpleStyleEditorTab';
+import { SimplePageEditorTab } from './editor/SimplePageEditorTab';
 import { QRCodeEditorTab } from './editor/QRCodeEditorTab';
 import { getFlyerProductByTemplate, lockContentToProduct } from '../model/flyerProductModel';
 import { inspectProductBlocks } from '../model/productBlockDiagnostics';
@@ -150,6 +151,13 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             uiLanguage={uiLanguage}
             content={content}
             onChangeContent={onChangeContent}
+          />
+        )}
+
+        {activeTab === 'layout' && (
+          <SimplePageEditorTab
+            uiLanguage={uiLanguage}
+            content={content}
             product={product}
             onMakeItPerfect={onMakeItPerfect}
             onChangeFormat={onChangeFormat}

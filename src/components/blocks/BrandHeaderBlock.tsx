@@ -36,7 +36,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
       <div className={`flex flex-col ${isA5 ? 'gap-1.5' : 'gap-2 sm:gap-3'} relative z-10 w-full min-w-0`}>
         
         {/* Primary Row: Central Brand Logo & Regional Partner Badge */}
-        <div className="flex items-center justify-between gap-3 w-full min-w-0">
+        <div className={`flex items-center gap-3 w-full min-w-0 ${isDNSList ? "justify-end" : "justify-between"}`}>
           
           {/* Left: Dolomiti NordicSki Central Brand Logo */}
           <div className="flex items-center gap-3 min-w-0 max-w-[65%] shrink">
@@ -44,7 +44,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
               <DolomitiFullLogo 
                 variant={content.logoVariant} 
                 isDarkHeader={!theme.isHeaderLight}
-                className={`${isA5 ? 'h-7' : isA3 ? 'h-14 sm:h-18' : 'h-10 sm:h-12'} max-w-full object-contain shrink min-w-0`} 
+                className={`${isDNSList ? 'h-14 sm:h-16' : isA5 ? 'h-7' : isA3 ? 'h-14 sm:h-18' : 'h-10 sm:h-12'} max-w-full object-contain shrink min-w-0`} 
                 customPrimary={theme.primaryHex}
                 customAccent={theme.accentHex}
                 cornerStyle={content.logoCornerStyle}

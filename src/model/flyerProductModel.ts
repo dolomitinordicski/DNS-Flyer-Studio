@@ -1,4 +1,4 @@
-import type { FlyerContent, GraphicStyle, LayoutTemplateId } from '../types';
+import type { FlyerContent, GraphicStyle, LayoutTemplateId, PaperFormat, PaperOrientation } from '../types';
 import type { FlyerSectionId } from '../types';
 
 export type FlyerProductType =
@@ -32,6 +32,7 @@ export interface FlyerProductDefinition {
   graphicStyle: GraphicStyle;
   blockStack: FlyerSectionId[];
   editableFields: readonly (keyof FlyerContent | string)[];
+  pagePolicy: { formats: readonly PaperFormat[]; orientations: readonly PaperOrientation[]; magicLayout: boolean };
   dataPolicy: FlyerDataPolicy;
 }
 
@@ -43,11 +44,12 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     graphicStyle: 'official_price_table',
     blockStack: ['header', 'bigTitle', 'heroImage', 'priceTables', 'servicesBox', 'qrCode', 'disclaimer', 'footer'],
     editableFields: [
-      'title', 'subtitle', 'validityPeriod', 'heroImageUrl',
+      'title', 'subtitle', 'validityPeriod', 'heroImageUrl', 'format', 'orientation', 'heroImageFocusX', 'heroImageFocusY',
       'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
-      'priceListTexts',
+      'priceListTexts', 'format', 'orientation', 'heroImageFocusX', 'heroImageFocusY',
     ],
+    pagePolicy: { formats: ['A3', 'A4'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: {
       access: 'dns-only',
       languageMode: 'trilingual',
@@ -68,6 +70,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
     ],
+    pagePolicy: { formats: ['A3', 'A4'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: {
       access: 'area',
       languageMode: 'trilingual',
@@ -86,6 +89,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     editableFields: [
       'heroImageUrl', 'customPrimaryColor', 'customAccentColor', 'qrCode',
     ],
+    pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait'], magicLayout: true },
     dataPolicy: {
       access: 'area',
       languageMode: 'monolingual',
@@ -101,6 +105,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     editableFields: [
       'heroImageUrl', 'customPrimaryColor', 'customAccentColor', 'qrCode',
     ],
+    pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait'], magicLayout: true },
     dataPolicy: {
       access: 'area',
       languageMode: 'monolingual',
@@ -116,6 +121,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     editableFields: [
       'heroImageUrl', 'customPrimaryColor', 'customAccentColor', 'qrCode',
     ],
+    pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait'], magicLayout: true },
     dataPolicy: {
       access: 'area',
       languageMode: 'monolingual',
@@ -134,6 +140,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode', 'features',
     ],
+    pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: { access: 'area', languageMode: 'monolingual' },
   },
   {
@@ -147,6 +154,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       'priceAmount', 'priceNote', 'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
     ],
+    pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: { access: 'area', languageMode: 'monolingual' },
   },
   {
@@ -161,6 +169,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
     ],
+    pagePolicy: { formats: ['A3', 'A4', 'A5'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: { access: 'area', languageMode: 'monolingual' },
   },
 ] as const;
@@ -198,6 +207,8 @@ export function lockContentToProduct(
 
   return {
     ...content,
+    format: product.pagePolicy.formats.includes(content.format) ? content.format : product.pagePolicy.formats.includes('A4') ? 'A4' : product.pagePolicy.formats[0],
+    orientation: product.pagePolicy.orientations.includes(content.orientation) ? content.orientation : product.pagePolicy.orientations[0],
     layoutTemplateId: product.templateId,
     graphicStyle: product.graphicStyle,
     sectionOrderPortrait: [...product.blockStack],

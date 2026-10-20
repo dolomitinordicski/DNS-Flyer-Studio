@@ -17,6 +17,7 @@ export const OfficialPriceTableVariant: React.FC<FlyerVariantProps> = ({
     accent: theme.accentHex,
   };
   const isBackground = content.heroImagePosition === 'background';
+  const isDNSList = content.layoutTemplateId === 'official_price_list';
   const isLandscape = content.orientation === 'landscape';
   const fmt = content.format || 'A4';
   const isA5 = fmt === 'A5';
@@ -33,7 +34,7 @@ export const OfficialPriceTableVariant: React.FC<FlyerVariantProps> = ({
 
   return (
     <div 
-      className={`relative z-10 h-full flex flex-col justify-between ${isBackground ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'} ${mainPadding} font-vietnam space-y-2 overflow-hidden min-w-0 ${
+      className={`relative z-10 h-full flex flex-col ${isDNSList ? "justify-start gap-3" : "justify-between space-y-2"} ${isBackground ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'} ${mainPadding} font-vietnam space-y-2 overflow-hidden min-w-0 ${
         content.cornerStyle === 'sharp' ? '[&_*]:!rounded-none' : 
         content.cornerStyle === 'none' ? '[&_*]:!rounded-none [&_*]:!border-0 [&_*]:!shadow-none' : ''
       }`}

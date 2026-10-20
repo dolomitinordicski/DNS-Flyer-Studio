@@ -94,7 +94,7 @@ export function SimpleContentEditorTab({
         <label className="block space-y-1.5">
           <span className="text-[10px] font-bold uppercase text-slate-600">{ui('Berichtsgebiet', 'Area partner')}</span>
           <select
-            value={REGIONAL_AREA_ALIASES[content.regionId] || content.regionId}
+            value={Object.entries(REGIONAL_AREA_ALIASES).find(([, alias]) => alias === content.regionId)?.[0] || content.regionId}
             onChange={event => onChangeContent({ regionId: event.target.value, customRegionName: '' })}
             className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-900"
           >

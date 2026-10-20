@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect, useState } from 'react';
 import { FlyerContent } from '../types';
-import { REGIONAL_LOGOS } from '../data/regionalLogos';
+import { findReportingAreaLogo } from '../data/regionalLogos';
 import { getFlyerProductByTemplate } from '../model/flyerProductModel';
 import { SPORTS_ICONS, getAllSportsIcons } from '../data/sportsIcons';
 import { DEFAULT_PRICE_LIST_TEXTS } from '../data/templates';
@@ -22,7 +22,7 @@ interface FlyerCanvasProps {
 
 export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ content, scale = 1 }, ref) => {
   // Selected regional logo info
-  const baseRegionLogo = REGIONAL_LOGOS.find(r => r.id === content.regionId) || REGIONAL_LOGOS[0];
+  const baseRegionLogo = findReportingAreaLogo(content.regionId);
   const selectedLogoOption = baseRegionLogo.logos?.find(l => l.id === content.selectedRegionLogoId) 
     || baseRegionLogo.logoOptions?.find(l => l.id === content.selectedRegionLogoId)
     || baseRegionLogo.logos?.[0]

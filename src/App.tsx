@@ -185,6 +185,7 @@ export default function App() {
 
   const handleSaveDraftNow = async (snapshot: FlyerContent = content, title?: string) => {
     await autosave.saveNow(snapshot, title);
+    if (title && title !== content.title) setContent(snapshot);
   };
 
   const handleOpenSavedDraft = (savedContent: FlyerContent, id: string) => {

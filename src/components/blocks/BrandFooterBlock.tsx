@@ -3,6 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Phone, Mail } from 'lucide-react';
 import { FlyerContent, BrandColorScheme, SectionVisibility } from '../../types';
 import { DolomitiNordicSkiLogo, DolomitiCurvesVector } from '../CorporateVectors';
+import { REGIONAL_LOGOS } from '../../data/regionalLogos';
 
 export interface BrandFooterBlockProps {
   content: FlyerContent;
@@ -65,9 +66,10 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
     ? getTri('ticketBadgeText', fc.ticketBadgeText || 'ACQUISTA IL BIGLIETTO DIGITALE ONLINE')
     : (fc.ticketBadgeText || plt?.footerBadgeText || 'ACQUISTA IL BIGLIETTO DIGITALE ONLINE');
 
-  const website = fc.websiteUrl || content.websiteUrl || 'www.dolomitinordicski.com';
-  const phone = fc.phone || content.contactPhone || '+39 0474 913156';
-  const email = fc.email || content.contactEmail || 'info@dolomitinordicski.com';
+  // Deliberately empty editable fields must never fall back to template defaults.
+  const website = content.websiteUrl ?? fc.websiteUrl ?? 'www.dolomitinordicski.com';
+  const phone = content.contactPhone ?? fc.phone ?? (isDNSList ? '' : '+39 0474 913156');
+  const email = content.contactEmail ?? fc.email ?? 'info@dolomitinordicski.com';
   
   const embedQrCode = fc.embedQrCode !== false && visibility?.qrCode !== false && content.qrCode?.enabled !== false;
   const qrUrl = content.qrCode?.url || (website.startsWith('http') ? website : `https://${website}`);
@@ -79,7 +81,13 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
     ? getTri('footerText', fc.networkSlogan || (plt?.footerText ? `${plt.footerText}` : '8 AREAS = 1 NETWORK • DOLOMITI NORDICSKI'))
     : (fc.networkSlogan || (plt?.footerText ? `${plt.footerText}` : '8 AREAS = 1 NETWORK • DOLOMITI NORDICSKI'));
     
-  const networkAreasList = fc.networkAreasList || 'Anterselva • Val Casies • 3 Cime • Osttirol • Comelico • Cortina • Valle Aurina • Seiser Alm';
+  const networkAreasList = fc.networkAreasList ?? 'Anterselva • Val Casies • 3 Cime • Osttirol • Comelico • Cortina • Valle Aurina • Seiser Alm';
+  const partnerAreas = REGIONAL_LOGOS.filter(area => area.id !== 'dns_central').map(area => area.regionName);
+  const umbrellaLogos = [
+    { label: 'Südtirol', filename: 'suedtirol.svg' },
+    { label: 'Osttirol', filename: 'osttirol.svg' },
+    { label: 'Dolomiti Bellunesi', filename: 'dolomiti-bellunesi.svg' },
+  ];
 
   return (
     <footer className="w-full shrink-0 space-y-1 font-vietnam mt-auto pt-1">
@@ -94,9 +102,9 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
         }`}
       >
         {/* Subtle Skier/Swoosh Background Watermark Graphic on the Right */}
-        {!isDNSList && <div className="absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none opacity-20 overflow-hidden flex items-center justify-end pr-6">
+        <div className={`absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none overflow-hidden flex items-center justify-end pr-6 ${isDNSList ? "opacity-10" : "opacity-20"}`}>
           <DolomitiCurvesVector className="w-full h-full text-[#0D4D5E] object-cover scale-125 translate-x-6" />
-        </div>}
+        </div>
 
         <div className="relative z-10 flex items-center justify-between gap-2.5">
           {/* Left Column: Ticket Badge, Main URL, Contacts */}
@@ -114,11 +122,11 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
             </div>
 
             {/* Main Website URL */}
-            <div className={`font-black tracking-tight leading-tight truncate ${
+            {website && <div className={`font-black tracking-tight leading-tight truncate ${
               isA3 ? 'text-base sm:text-lg' : isA5 ? 'text-[9.5px]' : 'text-xs sm:text-sm'
             }`} style={{ color: isBackground ? '#FFFFFF' : primaryColor }}>
               {website}
-            </div>
+            </div>}
 
             {/* Contacts Row */}
             <div className={`flex items-center gap-2 font-bold flex-wrap opacity-90 ${
@@ -166,7 +174,7 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
         style={{ color: isBackground ? '#FFFFFF' : primaryColor }}
       >
         {/* Far Left: Dolomiti NordicSki Logo */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        {!isDNSList && <div className="flex items-center gap-1.5 shrink-0">
           <DolomitiNordicSkiLogo 
             variant={content.logoVariant || (isBackground ? 'negative' : 'original')} 
             className={`${isA5 ? 'h-3.5' : isA3 ? 'h-7' : 'h-4 sm:h-5'} shrink-0`} 
@@ -175,7 +183,7 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
             customAccent={accentColor}
             cornerStyle={content.logoCornerStyle}
           />
-        </div>
+        </div>}
 
         {/* Center: Network Slogan */}
         {!isDNSList && <div className="font-black text-center flex-1 px-1 opacity-90 leading-tight">
@@ -187,6 +195,19 @@ export const BrandFooterBlock: React.FC<BrandFooterBlockProps> = ({
           {networkAreasList}
         </div>}
       </div>
+      {isDNSList && (
+        <div className="space-y-1 border-t border-slate-200 pt-1.5" data-dns-partners>
+          <p className="text-[8px] font-semibold text-center leading-tight" style={{ color: primaryColor }}>
+            {partnerAreas.join(" · ")}
+          </p>
+          <div className="flex items-center justify-center gap-5">
+            {umbrellaLogos.map(logo => (
+              <img key={logo.filename} src={`https://dolomitinordicski.github.io/dns-shared-data/brand/regions/${logo.filename}`}
+                alt={logo.label} className="h-5 max-w-[95px] w-auto object-contain" referrerPolicy="no-referrer" />
+            ))}
+          </div>
+        </div>
+      )}
     </footer>
   );
 };

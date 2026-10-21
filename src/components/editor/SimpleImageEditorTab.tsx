@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { listFlyerImages, uploadFlyerImage, type FlyerImageAsset } from '../../data/flyerImageLibrary';
 import { Image as ImageIcon, Upload } from 'lucide-react';
+import { clearTemporaryFlyerImage, setTemporaryFlyerImage } from '../../data/temporaryFlyerImage';
 import type { FlyerContent } from '../../types';
 
 interface SimpleImageEditorTabProps {
@@ -19,6 +20,8 @@ export function SimpleImageEditorTab({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [libraryError, setLibraryError] = useState('');
+  const [imageError, setImageError] = useState(false);
+  const [pendingPhoto, setPendingPhoto] = useState(false);
   useEffect(() => {
     let cancelled = false;
     setLibrary([]);
@@ -31,17 +34,30 @@ export function SimpleImageEditorTab({
   const clamp = (value: number) => Math.max(0, Math.min(100, value));
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
 
+  const verifyImage = (url: string) => new Promise<void>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error('IMAGE_DOWNLOAD_OR_DECODE_FAILED'));
+    image.src = url;
+  });
+
   const upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
     setBusy(true);
     setError('');
+    setImageError(false);
+    setPendingPhoto(true);
+    setTemporaryFlyerImage(content.regionId, file);
     try {
       // Firestore document snapshots must never contain megabytes of base64.
       const asset = await uploadFlyerImage(file, content.regionId);
+      await verifyImage(asset.url);
       setLibrary(old => [asset, ...old]);
       onChangeContent({ heroImageUrl: asset.url, heroImageFocusX: 50, heroImageFocusY: 50 });
+      clearTemporaryFlyerImage();
+      setPendingPhoto(false);
     } catch (err: any) {
       const code = err?.code || err?.message || 'IMAGE_UPLOAD_FAILED';
       setError(code);
@@ -59,6 +75,8 @@ export function SimpleImageEditorTab({
         </p>
       </div>
 
+      {pendingPhoto && !error && <div role="status" className="text-xs text-blue-800 bg-blue-50 border border-blue-200 p-2 rounded">{ui('Lokale Vorschau: Upload zu DNS Core läuft. Noch nicht dauerhaft gespeichert.', 'Anteprima locale: caricamento su DNS Core in corso. Foto non ancora salvata definitivamente.')}</div>}
+      {error && <div role="status" className="text-xs text-amber-900 bg-amber-50 border p-2 rounded">{ui('Das Bild ist nur als temporäre Vorschau sichtbar und wird nach Neuladen verschwinden.', 'La fotografia visibile è soltanto un’anteprima temporanea: scomparirà ricaricando la pagina.')}</div>}
       {error && (
         <div role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 p-2 rounded space-y-1">
           <strong className="block">{ui('Bild konnte nicht in DNS Core Storage gespeichert werden', 'Impossibile salvare l’immagine in DNS Core Storage')}</strong>
@@ -81,13 +99,14 @@ export function SimpleImageEditorTab({
           {ui('Älteres Bild ist nur lokal vorhanden und wird nicht in DNS Core gespeichert. Bitte erneut hochladen.', 'Questa vecchia immagine è incorporata nella bozza e non può essere salvata in DNS Core. Ricaricala nella libreria.')}
         </p>
       )}
+      {imageError && <div role="alert" className="text-xs text-red-700">{ui('Bild-URL nicht erreichbar. Bitte anderes Bild auswählen.', 'Immagine non raggiungibile tramite URL. Seleziona un’altra fotografia.')}</div>}
       <div className="aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50 select-none touch-none cursor-grab active:cursor-grabbing"
         onPointerDown={e => { if (!content.heroImageUrl) return; dragRef.current = { x: e.clientX, y: e.clientY, focusX: content.heroImageFocusX ?? 50, focusY: content.heroImageFocusY ?? 50 }; e.currentTarget.setPointerCapture(e.pointerId); }}
         onPointerMove={e => { const drag = dragRef.current; if (!drag) return; const rect = e.currentTarget.getBoundingClientRect(); onChangeContent({ heroImageFocusX: clamp(drag.focusX - 100 * (e.clientX - drag.x) / rect.width), heroImageFocusY: clamp(drag.focusY - 100 * (e.clientY - drag.y) / rect.height) }); }}
         onPointerUp={() => { dragRef.current = null; }}
         onPointerCancel={() => { dragRef.current = null; }}>
         {content.heroImageUrl ? (
-          <img src={content.heroImageUrl} alt="" draggable={false} className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%` }} />
+          <img src={content.heroImageUrl} alt="" onLoad={() => setImageError(false)} onError={() => setImageError(true)} draggable={false} className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%` }} />
         ) : (
           <div className="h-full flex items-center justify-center text-slate-400">
             <ImageIcon className="w-8 h-8" />
@@ -114,7 +133,7 @@ export function SimpleImageEditorTab({
           <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Gespeicherte Bilder', 'Immagini salvate')}</h4>
           <div className="grid grid-cols-3 gap-2 max-h-52 overflow-y-auto">
             {library.map(asset => (
-              <button key={asset.path} type="button" onClick={() => onChangeContent({ heroImageUrl: asset.url })}
+              <button key={asset.path} type="button" onClick={async () => { setError(''); try { await verifyImage(asset.url); clearTemporaryFlyerImage(); setPendingPhoto(false); onChangeContent({ heroImageUrl: asset.url }); } catch { setImageError(true); } }}
                 className="border border-slate-200 rounded overflow-hidden" title={asset.name}>
                 <img src={asset.url} alt={asset.name} loading="lazy" className="aspect-square w-full object-cover"/>
               </button>

@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState, useSyncExternalStore } from 'react';
 import { FlyerContent } from '../types';
 import { findReportingAreaLogo } from '../data/regionalLogos';
 import { getFlyerProductByTemplate } from '../model/flyerProductModel';
@@ -7,6 +7,7 @@ import { DEFAULT_PRICE_LIST_TEXTS } from '../data/templates';
 import { loadOfficialPriceTexts } from '../data/livePriceLists';
 import type { PriceListTexts } from '../types';
 import { getContentForLanguage } from '../utils/multilingual';
+import { getTemporaryFlyerImage, subscribeTemporaryFlyerImage } from '../data/temporaryFlyerImage';
 import { 
   DolomitiSkierTrackEmblem, 
   NordicSwooshOverlay,
@@ -49,7 +50,9 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
     .filter(Boolean);
 
   // Localized Content for active language
+  const temporaryPhoto = useSyncExternalStore(subscribeTemporaryFlyerImage, getTemporaryFlyerImage);
   const localizedContent = getContentForLanguage(content, content.activeLanguage || 'it');
+  if (temporaryPhoto?.regionId === content.regionId) localizedContent.heroImageUrl = temporaryPhoto.url;
 
   // Graphic Style choice
   const graphicStyle = content.graphicStyle || 'classic_official';
@@ -362,10 +365,10 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       <div className="absolute inset-0 z-0 bg-white" />
       
       {/* Background Hero Image (if set to full background) */}
-      {visibility.heroImage && content.heroImagePosition === 'background' && content.heroImageUrl && (
+      {visibility.heroImage && content.heroImagePosition === 'background' && localizedContent.heroImageUrl && (
         <div className="absolute inset-0 z-0">
           <img
-            src={content.heroImageUrl}
+            src={localizedContent.heroImageUrl}
             alt="Background"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"

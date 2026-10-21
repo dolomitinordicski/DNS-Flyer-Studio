@@ -59,7 +59,28 @@ export function SimpleImageEditorTab({
         </p>
       </div>
 
-      {error && <div role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 p-2 rounded space-y-1">\n        <strong className="block">{ui('Bild konnte nicht in DNS Core Storage gespeichert werden', 'Impossibile salvare l’immagine in DNS Core Storage')}</strong>\n        <span className="block font-mono">{error}</span>\n        {(error.includes('unauthorized') || error.includes('permission-denied')) && <span className="block">{ui('Die Firebase Storage-Regeln verweigern dem angemeldeten Benutzer den Zugriff. DNS Core Storage-Berechtigungen prüfen.', 'Le regole di Firebase Storage negano l’accesso all’utente. Occorre verificare i permessi Storage di DNS Core.')}</span>}\n        {error.includes('DNS_CORE_AUTH_REQUIRED') && <span className="block">{ui('Bitte mit DNS Core anmelden.', 'Accedi prima a DNS Core.')}</span>}\n      </div>}\n      {libraryError && <div role="status" className="text-[11px] text-amber-800 bg-amber-50 rounded p-2">{ui('Bildarchiv nicht verfügbar', 'Archivio immagini non disponibile')}: <code>{libraryError}</code></div>}\n      {/^data:image\\//i.test(content.heroImageUrl || '') && <p className="text-[11px] text-amber-800">{ui('Älteres Bild ist nur lokal im Dokument vorhanden und wird nicht in DNS Core gespeichert. Bitte erneut hochladen.', 'Questa immagine precedente è incorporata nella bozza e non può essere salvata in DNS Core. Ricaricala nella libreria.')}</p>}
+      {error && (
+        <div role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 p-2 rounded space-y-1">
+          <strong className="block">{ui('Bild konnte nicht in DNS Core Storage gespeichert werden', 'Impossibile salvare l’immagine in DNS Core Storage')}</strong>
+          <span className="block font-mono">{error}</span>
+          {(error.includes('unauthorized') || error.includes('permission-denied')) && (
+            <span className="block">{ui('Die Firebase Storage-Regeln verweigern den Zugriff. DNS Core Storage-Berechtigungen prüfen.', 'Le regole Firebase Storage negano l’accesso. Occorre verificare i permessi Storage di DNS Core.')}</span>
+          )}
+          {error.includes('DNS_CORE_AUTH_REQUIRED') && (
+            <span className="block">{ui('Bitte mit DNS Core anmelden.', 'Accedi prima a DNS Core.')}</span>
+          )}
+        </div>
+      )}
+      {libraryError && (
+        <div role="status" className="text-[11px] text-amber-800 bg-amber-50 rounded p-2">
+          {ui('Bildarchiv nicht verfügbar', 'Archivio immagini non disponibile')}: <code>{libraryError}</code>
+        </div>
+      )}
+      {content.heroImageUrl?.startsWith('data:image/') && (
+        <p className="text-[11px] text-amber-800">
+          {ui('Älteres Bild ist nur lokal vorhanden und wird nicht in DNS Core gespeichert. Bitte erneut hochladen.', 'Questa vecchia immagine è incorporata nella bozza e non può essere salvata in DNS Core. Ricaricala nella libreria.')}
+        </p>
+      )}
       <div className="aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50 select-none touch-none cursor-grab active:cursor-grabbing"
         onPointerDown={e => { if (!content.heroImageUrl) return; dragRef.current = { x: e.clientX, y: e.clientY, focusX: content.heroImageFocusX ?? 50, focusY: content.heroImageFocusY ?? 50 }; e.currentTarget.setPointerCapture(e.pointerId); }}
         onPointerMove={e => { const drag = dragRef.current; if (!drag) return; const rect = e.currentTarget.getBoundingClientRect(); onChangeContent({ heroImageFocusX: clamp(drag.focusX - 100 * (e.clientX - drag.x) / rect.width), heroImageFocusY: clamp(drag.focusY - 100 * (e.clientY - drag.y) / rect.height) }); }}

@@ -110,7 +110,16 @@ export async function saveFlyerDocument(
   const id = options.id ?? `flyer_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const scope = scopeFromContent(content);
   const seasonId = seasonIdFromContent(content);
-  const flyerDocument = firestoreSafeDocument(createFlyerDocumentV1(content, {
+  // Historic imports embedded full Base64 files in drafts. Never send these
+  // oversized binary strings to Firestore (which has a 1 MiB document limit).
+  // The user can replace their legacy image with a persisted Storage URL.
+  const safeContent: FlyerContent = {
+    ...content,
+    heroImageUrl: /^data:image\//i.test(content.heroImageUrl || '') ? '' : content.heroImageUrl,
+    importedImages: (content.importedImages || []).filter(url => !/^data:/i.test(url)),
+    secondaryImages: (content.secondaryImages || []).filter(url => !/^data:/i.test(url)),
+  };
+  const flyerDocument = firestoreSafeDocument(createFlyerDocumentV1(safeContent, {
     id,
     title: options.title,
     source: 'saved-design',

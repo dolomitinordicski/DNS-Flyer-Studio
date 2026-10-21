@@ -18,6 +18,7 @@ export function useFlyerAutosave(
   enabled: boolean,
 ) {
   const [status, setStatus] = useState<AutosaveStatus>('local');
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
   const idRef = useRef<string | null>(null);
   const epochRef = useRef(0);
@@ -34,6 +35,7 @@ export function useFlyerAutosave(
     setDraftId(restoredId);
     lastSavedRef.current = null;
     setStatus(userId ? 'pending' : 'local');
+    setErrorCode(null);
   }, [userId]);
 
   const selectDraft = useCallback((id: string | null, loaded?: FlyerContent) => {
@@ -61,6 +63,7 @@ export function useFlyerAutosave(
     const signature = JSON.stringify(snapshot);
     if (signature === lastSavedRef.current && !title) return queueRef.current.then(() => {});
     setStatus('saving');
+    setErrorCode(null);
 
     const next = queueRef.current.catch(() => {}).then(async () => {
       if (epoch !== epochRef.current || owner !== userRef.current) return;
@@ -78,10 +81,14 @@ export function useFlyerAutosave(
       localStorage.setItem(`dns_active_draft_${owner}`, savedId);
       lastSavedRef.current = signature;
       setStatus('saved');
+      setErrorCode(null);
     });
     queueRef.current = next.catch(() => {});
     return next.catch(error => {
-      if (epoch === epochRef.current) setStatus('error');
+      if (epoch === epochRef.current) {
+        setErrorCode(error?.code || error?.message || 'FIRESTORE_SAVE_FAILED');
+        setStatus('error');
+      }
       throw error;
     });
   }, []);
@@ -96,5 +103,5 @@ export function useFlyerAutosave(
     return () => window.clearTimeout(timer);
   }, [content, userId, enabled, saveNow]);
 
-  return { status, draftId, saveNow, selectDraft };
+  return { status, errorCode, draftId, saveNow, selectDraft };
 }

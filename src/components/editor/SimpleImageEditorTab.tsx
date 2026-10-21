@@ -18,11 +18,13 @@ export function SimpleImageEditorTab({
   const [library, setLibrary] = useState<FlyerImageAsset[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [libraryError, setLibraryError] = useState('');
   useEffect(() => {
     let cancelled = false;
     setLibrary([]);
+    setLibraryError('');
     void listFlyerImages(content.regionId).then(images => { if (!cancelled) setLibrary(images); })
-      .catch(err => { if (!cancelled) setError(err?.message || 'IMAGE_LIBRARY_UNAVAILABLE'); });
+      .catch(err => { if (!cancelled) setLibraryError(err?.code || err?.message || 'IMAGE_LIBRARY_UNAVAILABLE'); });
     return () => { cancelled = true; };
   }, [content.regionId]);
   const dragRef = useRef<{ x: number; y: number; focusX: number; focusY: number } | null>(null);
@@ -41,7 +43,8 @@ export function SimpleImageEditorTab({
       setLibrary(old => [asset, ...old]);
       onChangeContent({ heroImageUrl: asset.url, heroImageFocusX: 50, heroImageFocusY: 50 });
     } catch (err: any) {
-      setError(err?.code || err?.message || 'IMAGE_UPLOAD_FAILED');
+      const code = err?.code || err?.message || 'IMAGE_UPLOAD_FAILED';
+      setError(code);
     } finally {
       setBusy(false);
     }
@@ -56,7 +59,28 @@ export function SimpleImageEditorTab({
         </p>
       </div>
 
-      {error && <div role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 p-2 rounded">{ui('Bild konnte nicht gespeichert werden', 'Impossibile salvare l’immagine')}: {error}</div>}
+      {error && (
+        <div role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 p-2 rounded space-y-1">
+          <strong className="block">{ui('Bild konnte nicht in DNS Core Storage gespeichert werden', 'Impossibile salvare l’immagine in DNS Core Storage')}</strong>
+          <span className="block font-mono">{error}</span>
+          {(error.includes('unauthorized') || error.includes('permission-denied')) && (
+            <span className="block">{ui('Die Firebase Storage-Regeln verweigern den Zugriff. DNS Core Storage-Berechtigungen prüfen.', 'Le regole Firebase Storage negano l’accesso. Occorre verificare i permessi Storage di DNS Core.')}</span>
+          )}
+          {error.includes('DNS_CORE_AUTH_REQUIRED') && (
+            <span className="block">{ui('Bitte mit DNS Core anmelden.', 'Accedi prima a DNS Core.')}</span>
+          )}
+        </div>
+      )}
+      {libraryError && (
+        <div role="status" className="text-[11px] text-amber-800 bg-amber-50 rounded p-2">
+          {ui('Bildarchiv nicht verfügbar', 'Archivio immagini non disponibile')}: <code>{libraryError}</code>
+        </div>
+      )}
+      {content.heroImageUrl?.startsWith('data:image/') && (
+        <p className="text-[11px] text-amber-800">
+          {ui('Älteres Bild ist nur lokal vorhanden und wird nicht in DNS Core gespeichert. Bitte erneut hochladen.', 'Questa vecchia immagine è incorporata nella bozza e non può essere salvata in DNS Core. Ricaricala nella libreria.')}
+        </p>
+      )}
       <div className="aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50 select-none touch-none cursor-grab active:cursor-grabbing"
         onPointerDown={e => { if (!content.heroImageUrl) return; dragRef.current = { x: e.clientX, y: e.clientY, focusX: content.heroImageFocusX ?? 50, focusY: content.heroImageFocusY ?? 50 }; e.currentTarget.setPointerCapture(e.pointerId); }}
         onPointerMove={e => { const drag = dragRef.current; if (!drag) return; const rect = e.currentTarget.getBoundingClientRect(); onChangeContent({ heroImageFocusX: clamp(drag.focusX - 100 * (e.clientX - drag.x) / rect.width), heroImageFocusY: clamp(drag.focusY - 100 * (e.clientY - drag.y) / rect.height) }); }}

@@ -76,9 +76,9 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
           </div>
           <div className={`${isA5 ? 'p-1.5 space-y-0.5' : isA3 ? 'p-3.5 space-y-2' : 'p-2 space-y-1'}`}>
             {[
-              { title: plt.regionalDayTitle, sub: plt.regionalDaySub, price: plt.regionalDayPrice },
-              { title: plt.regionalWeekTitle, sub: plt.regionalWeekSub, price: plt.regionalWeekPrice },
-              { title: plt.regionalSeasonTitle, sub: plt.regionalSeasonSub, price: plt.regionalSeasonPrice }
+              { title: plt.regionalDayTitle, sub: plt.regionalDaySub, price: plt.regionalDayPrice, supplement: isRegionalProduct ? plt.regionalDayTrackSupplement : undefined },
+              { title: plt.regionalWeekTitle, sub: plt.regionalWeekSub, price: plt.regionalWeekPrice, supplement: isRegionalProduct ? plt.regionalWeekTrackSupplement : undefined },
+              { title: plt.regionalSeasonTitle, sub: plt.regionalSeasonSub, price: plt.regionalSeasonPrice, supplement: undefined as string | undefined }
             ].map((item, idx) => (
               <div key={idx} className="flex justify-between items-center py-0.5 border-b border-slate-100 last:border-0 gap-1.5">
                 <div className="min-w-0 flex-1">
@@ -101,6 +101,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                     }
                     return <span className="font-black break-words">{item.price}</span>;
                   })()}
+                  {item.supplement && item.supplement !== '—' && <span className="font-medium text-[8px] text-slate-600 mt-1 leading-snug max-w-[135px]">Aufpreis Loipe · Supplemento pista · Track surcharge: {item.supplement}</span>}
                 </div>
               </div>
             ))}
@@ -144,7 +145,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
                     }
                     return <span className="font-black break-words">{item.price}</span>;
                   })()}
-                  {item.supplement && <span className="font-medium text-[8px] text-slate-600 mt-1 leading-snug max-w-[135px]">Aufpreis Loipe · Supplemento pista · Track surcharge: {item.supplement}</span>}
+                  {item.supplement && item.supplement !== '—' && <span className="font-medium text-[8px] text-slate-600 mt-1 leading-snug max-w-[135px]">Aufpreis Loipe · Supplemento pista · Track surcharge: {item.supplement}</span>}
                 </div>
               </div>
             ))}

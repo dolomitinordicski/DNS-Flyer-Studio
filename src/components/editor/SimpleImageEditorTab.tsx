@@ -20,16 +20,37 @@ export function SimpleImageEditorTab({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [libraryError, setLibraryError] = useState('');
+  const [loadingLibrary, setLoadingLibrary] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState(false);
+  // Keep existing draft image references usable, even if Storage's list API
+  // is unavailable (e.g. storage/retry-limit-exceeded).
   useEffect(() => {
-    let cancelled = false;
-    setLibrary([]);
+    const urls = [content.heroImageUrl, ...(content.importedImages ?? [])]
+      .filter((url): url is string => !!url && /^https?:\/\//.test(url));
+    setLibrary(previous => {
+      const existing = new Map(previous.map(item => [item.url, item]));
+      return [...new Set(urls)].map((url, index) =>
+        existing.get(url) || { url, path: url, name: `Bild ${index + 1}` });
+    });
     setLibraryError('');
-    void listFlyerImages(content.regionId).then(images => { if (!cancelled) setLibrary(images); })
-      .catch(err => { if (!cancelled) setLibraryError(err?.code || err?.message || 'IMAGE_LIBRARY_UNAVAILABLE'); });
-    return () => { cancelled = true; };
   }, [content.regionId]);
+
+  const refreshLibrary = async () => {
+    setLoadingLibrary(true);
+    setLibraryError('');
+    try {
+      const assets = await listFlyerImages(content.regionId);
+      setLibrary(previous => {
+        const all = [...assets, ...previous];
+        return all.filter((asset, index) => all.findIndex(other => other.url === asset.url) === index);
+      });
+    } catch (err: any) {
+      setLibraryError(err?.code || err?.message || 'IMAGE_LIBRARY_UNAVAILABLE');
+    } finally {
+      setLoadingLibrary(false);
+    }
+  };
   const dragRef = useRef<{ x: number; y: number; focusX: number; focusY: number } | null>(null);
   const clamp = (value: number) => Math.max(0, Math.min(100, value));
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
@@ -54,8 +75,13 @@ export function SimpleImageEditorTab({
       // Firestore document snapshots must never contain megabytes of base64.
       const asset = await uploadFlyerImage(file, content.regionId);
       await verifyImage(asset.url);
-      setLibrary(old => [asset, ...old]);
-      onChangeContent({ heroImageUrl: asset.url, heroImageFocusX: 50, heroImageFocusY: 50 });
+      setLibrary(old => [asset, ...old.filter(item => item.url !== asset.url)]);
+      onChangeContent({
+        heroImageUrl: asset.url,
+        heroImageFocusX: 50,
+        heroImageFocusY: 50,
+        importedImages: [asset.url, ...(content.importedImages ?? []).filter(url => url !== asset.url && !url.startsWith('data:'))].slice(0, 80),
+      });
       clearTemporaryFlyerImage();
       setPendingPhoto(false);
     } catch (err: any) {
@@ -91,7 +117,7 @@ export function SimpleImageEditorTab({
       )}
       {libraryError && (
         <div role="status" className="text-[11px] text-amber-800 bg-amber-50 rounded p-2">
-          {ui('Bildarchiv nicht verfügbar', 'Archivio immagini non disponibile')}: <code>{libraryError}</code>
+          {ui('Cloud-Archiv kann derzeit nicht abgefragt werden; vorhandene Bilder im Flyer bleiben nutzbar.', 'La lista cloud non risponde al momento; le immagini già associate al flyer restano utilizzabili.')}: <code>{libraryError}</code>
         </div>
       )}
       {content.heroImageUrl?.startsWith('data:image/') && (
@@ -128,6 +154,10 @@ export function SimpleImageEditorTab({
         {busy ? ui('Bild wird gespeichert…', 'Salvataggio immagine…') : ui('Bild ändern', 'Cambia immagine')}
       </button>
 
+      <button type="button" disabled={loadingLibrary} onClick={() => void refreshLibrary()}
+        className="w-full py-2 px-3 rounded-lg border border-[#0D4D5E] text-[#0D4D5E] text-xs font-bold disabled:opacity-50">
+        {loadingLibrary ? ui('Bildarchiv wird geladen…', 'Caricamento archivio immagini…') : ui('Cloud-Bildarchiv laden', 'Carica archivio immagini cloud')}
+      </button>
       {library.length > 0 && (
         <section className="space-y-2">
           <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Gespeicherte Bilder', 'Immagini salvate')}</h4>

@@ -1,11 +1,7 @@
-import { getDownloadURL, getStorage, listAll, ref, uploadBytes, setMaxOperationRetryTime, setMaxUploadRetryTime } from 'firebase/storage';
+import { getDownloadURL, getStorage, listAll, ref, uploadBytes } from 'firebase/storage';
 import { dnsCoreApp, getDNSCoreUser } from '../lib/dnsCore';
 
 const storage = getStorage(dnsCoreApp);
-// Avoid hanging the entire image editor when the bucket cannot answer.
-// A retry-limit error is a real Storage/backend error, not a failed draft save.
-setMaxOperationRetryTime(storage, 12000);
-setMaxUploadRetryTime(storage, 25000);
 const MAX_BYTES = 12 * 1024 * 1024;
 const MAX_DIMENSION = 2400;
 

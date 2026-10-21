@@ -20,6 +20,7 @@ export const OfficialPriceTableVariant: React.FC<FlyerVariantProps> = ({
   const isDNSList = content.layoutTemplateId === 'official_price_list';
   const isRegionalList = content.layoutTemplateId === 'regional_price_list';
   const isEditorial = isDNSList || isRegionalList;
+  const hasRegionalExtras = isRegionalList && (!!content.regionalLocalText?.trim() || !!content.regionalLocalServices?.length);
   const isLandscape = content.orientation === 'landscape';
   const fmt = content.format || 'A4';
   const isA5 = fmt === 'A5';
@@ -47,7 +48,7 @@ export const OfficialPriceTableVariant: React.FC<FlyerVariantProps> = ({
     return (
       <div
         className={`relative z-10 h-full min-w-0 overflow-hidden bg-white text-slate-900 font-vietnam flex flex-col ${isA3 ? 'p-7 gap-3' : 'p-3.5 gap-2'} ${content.cornerStyle === 'sharp' ? '[&_*]:!rounded-none' : content.cornerStyle === 'none' ? '[&_*]:!rounded-none [&_*]:!border-0 [&_*]:!shadow-none' : ''}`}
-        data-dns-landscape="editorial"
+        data-dns-landscape={isRegionalList ? (hasRegionalExtras ? "regional-extended" : "regional-compact") : "editorial"}
       >
         <div className="shrink-0">
           <BlockStackRenderer order={pick(['header'])} {...sharedProps} />
@@ -55,7 +56,7 @@ export const OfficialPriceTableVariant: React.FC<FlyerVariantProps> = ({
         <div className="shrink-0">
           <BlockStackRenderer order={pick(['bigTitle'])} {...sharedProps} />
         </div>
-        <div className={`flex-1 min-h-0 min-w-0 grid ${isA3 ? 'grid-cols-[46%_minmax(0,1fr)] gap-5' : 'grid-cols-[43%_minmax(0,1fr)] gap-3'}`}>
+        <div className={`flex-1 min-h-0 min-w-0 grid ${isA3 ? (hasRegionalExtras ? 'grid-cols-[33%_minmax(0,1fr)] gap-4' : 'grid-cols-[46%_minmax(0,1fr)] gap-5') : (hasRegionalExtras ? 'grid-cols-[31%_minmax(0,1fr)] gap-3' : 'grid-cols-[43%_minmax(0,1fr)] gap-3')}`}>
           <div className="min-w-0 min-h-0 flex flex-col [&>div]:!max-h-none [&>div]:!min-h-0" data-dns-landscape-photo>
             <BlockStackRenderer order={pick(['heroImage'])} {...sharedProps} />
           </div>

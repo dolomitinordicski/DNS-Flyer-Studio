@@ -156,9 +156,11 @@ export interface PriceListTexts {
   regionalDayTitle?: string;
   regionalDaySub?: string;
   regionalDayPrice?: string;
+  regionalDayTrackSupplement?: string;
   regionalWeekTitle?: string;
   regionalWeekSub?: string;
   regionalWeekPrice?: string;
+  regionalWeekTrackSupplement?: string;
   regionalSeasonTitle?: string;
   regionalSeasonSub?: string;
   regionalSeasonPrice?: string;
@@ -396,6 +398,10 @@ export interface FlyerContent {
   showCropMarks: boolean;
   showBleedArea: boolean;
   
+  /** Optional region-only copy and services; empty means compact landscape. */
+  regionalLocalText?: string;
+  regionalLocalServices?: string[];
+
   // Footer partner logos visibility
   showPartnerLogos: boolean;
 

@@ -25,8 +25,30 @@ export const ServiceGridBlock: React.FC<BlockProps> = ({
   const isA3 = fmt === 'A3';
   const isLandscape = orientation === 'landscape' || content.orientation === 'landscape';
 
+  const isRegional = content.layoutTemplateId === 'regional_price_list';
+  const localText = isRegional ? (content.regionalLocalText ?? '').trim() : '';
+  const localServices = isRegional ? (content.regionalLocalServices ?? []) : [];
+  const localServiceNames: Record<string, string> = {
+    ski_school: 'Skischule · Scuola sci · Ski school',
+    rental: 'Verleih · Noleggio · Rental',
+    ski_bus: 'Ski bus',
+    parking: 'Parkplatz · Parcheggio · Parking',
+  };
   return (
     <div className="space-y-2 min-w-0 flex flex-col justify-between w-full">
+      {(localText || localServices.length > 0) && (
+        <section data-regional-local-content className="border border-slate-200 rounded-sm p-2 space-y-1.5">
+          <h4 className="text-[9px] font-black uppercase tracking-wide" style={{ color: theme.primaryHex }}>AREA INFORMATION</h4>
+          {localText && <p className="text-[9px] text-slate-700 whitespace-pre-wrap break-words">{localText}</p>}
+          {localServices.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {localServices.filter(key => localServiceNames[key]).map(key => (
+                <span key={key} className="text-[8px] font-semibold text-slate-700">✓ {localServiceNames[key]}</span>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
       {/* Inclusions / Features */}
       {content.features && content.features.length > 0 && (
         <div className="space-y-1.5 min-w-0">

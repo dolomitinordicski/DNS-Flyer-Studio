@@ -21,6 +21,7 @@ interface EditorPanelProps {
   onSaveDraft: () => Promise<void>;
   onOpenSavedDraft: (content: FlyerContent, id: string) => void;
   autosaveStatus: 'local' | 'pending' | 'saving' | 'saved' | 'error';
+  autosaveErrorCode?: string | null;
   activeDraftId: string | null;
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
   onOpenSavedDesignsModal: () => void;
@@ -38,6 +39,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onSaveDraft,
   onOpenSavedDraft,
   autosaveStatus,
+  autosaveErrorCode,
   activeDraftId,
   onApplyTemplate,
   onOpenSavedDesignsModal,
@@ -105,6 +107,11 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             : autosaveStatus === 'saved' ? ui('In DNS Core gespeichert ✓', 'Salvato automaticamente in DNS Core ✓')
             : ui('Cloud-Speicherung fehlgeschlagen · Erneut versuchen', 'Errore salvataggio cloud · riprova')}
         </div>
+        {autosaveStatus === 'error' && autosaveErrorCode && (
+          <div role="alert" className="text-[11px] p-2 bg-red-50 text-red-800 rounded border border-red-200">
+            {ui('DNS Core Firestore: Entwurf nicht gespeichert', 'DNS Core Firestore: bozza non salvata')}: <code>{autosaveErrorCode}</code>
+          </div>
+        )}
         {blockErrors.length > 0 && (
           <div role="status" className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
             <strong>{ui('Blockdaten prüfen', 'Verifica dati blocchi')}</strong>

@@ -697,6 +697,7 @@ export default function App() {
                 onSaveDraft={handleSaveDraftNow}
                 onOpenSavedDraft={handleOpenSavedDraft}
                 autosaveStatus={autosave.status}
+                autosaveErrorCode={autosave.errorCode}
                 activeDraftId={autosave.draftId}
                 uiLanguage={uiLanguage}
                 content={content}

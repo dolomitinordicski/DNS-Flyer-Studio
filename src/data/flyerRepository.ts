@@ -17,6 +17,7 @@ import {
   type FlyerDocumentV1,
 } from '../model/flyerDocument';
 import { dnsCoreDb, getDNSCoreUser } from '../lib/dnsCore';
+import { coreReportingAreaId } from './regionalLogos';
 
 export type FlyerScopeType = 'network' | 'reportingArea' | 'organization';
 
@@ -87,7 +88,7 @@ export function scopeFromContent(content: FlyerContent): { scopeType: FlyerScope
   if (!content.regionId || content.regionId === 'dns_central') {
     return { scopeType: 'network', scopeId: 'dolomiti-nordicski' };
   }
-  return { scopeType: 'reportingArea', scopeId: content.regionId };
+  return { scopeType: 'reportingArea', scopeId: coreReportingAreaId(content.regionId) };
 }
 
 export function seasonIdFromContent(content: FlyerContent): string {

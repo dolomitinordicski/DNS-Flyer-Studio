@@ -137,6 +137,36 @@ export function SimpleContentEditorTab({
           {ui('Gebietstarife und DNS-Netzpreise werden aus Data Entry geladen; hier nicht bearbeitbar.', 'Le tariffe della regione e quelle DNS provengono da Data Entry e non sono modificabili qui.')}
         </p>
       )}
+      {product?.type === 'regional_price_list' && (
+        <section className="p-3 rounded-xl border border-[#AAD0D1] space-y-3">
+          <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Eigene Gebietsinfos', 'Informazioni proprie dell’area')}</h4>
+          <p className="text-[10px] text-slate-500">{ui('Nur ausgefüllte Angaben werden gezeigt. Das Querformat passt sich automatisch an.', 'Mostriamo solo i contenuti inseriti: il layout orizzontale si adatta automaticamente.')}</p>
+          <label className="block space-y-1">
+            <span className="text-[10px] font-semibold">{ui('Kurztext (DE / IT / EN)', 'Breve testo (DE / IT / EN)')}</span>
+            <textarea rows={3} maxLength={350} className="w-full border rounded-lg p-2 text-xs"
+              value={content.regionalLocalText ?? ''}
+              onChange={e => onChangeContent({ regionalLocalText: e.target.value })}
+              placeholder={ui('Ein kurzer Text, vorzugsweise dreisprachig…', 'Un breve testo, preferibilmente trilingue…')}/>
+          </label>
+          <div className="space-y-1">
+            <div className="text-[10px] font-semibold">{ui('Dienste', 'Servizi')}</div>
+            {([
+              ['ski_school', ui('Skischule', 'Scuola sci')],
+              ['rental', ui('Verleih', 'Noleggio')],
+              ['ski_bus', 'Ski bus'],
+              ['parking', ui('Parkplatz', 'Parcheggio')],
+            ] as const).map(([key, label]) => (
+              <label key={key} className="flex items-center gap-2 text-xs">
+                <input type="checkbox" checked={(content.regionalLocalServices ?? []).includes(key)}
+                  onChange={e => onChangeContent({ regionalLocalServices: e.target.checked
+                    ? [...(content.regionalLocalServices ?? []), key]
+                    : (content.regionalLocalServices ?? []).filter(item => item !== key) })}/>
+                {label}
+              </label>
+            ))}
+          </div>
+        </section>
+      )}
       {field('title', 'Titel', 'Titolo')}
       {field('subtitle', 'Untertitel', 'Sottotitolo', true)}
       {field('validityPeriod', 'Gültigkeit', 'Validità')}

@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { listFlyerImages, uploadFlyerImage, type FlyerImageAsset } from '../../data/flyerImageLibrary';
 import { Image as ImageIcon, Upload } from 'lucide-react';
 import type { FlyerContent } from '../../types';
 
@@ -14,24 +15,36 @@ export function SimpleImageEditorTab({
   onChangeContent,
 }: SimpleImageEditorTabProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [library, setLibrary] = useState<FlyerImageAsset[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    setLibrary([]);
+    void listFlyerImages(content.regionId).then(images => { if (!cancelled) setLibrary(images); })
+      .catch(err => { if (!cancelled) setError(err?.message || 'IMAGE_LIBRARY_UNAVAILABLE'); });
+    return () => { cancelled = true; };
+  }, [content.regionId]);
   const dragRef = useRef<{ x: number; y: number; focusX: number; focusY: number } | null>(null);
   const clamp = (value: number) => Math.max(0, Math.min(100, value));
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
 
-  const upload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const url = e.target?.result;
-      if (typeof url === 'string') {
-        onChangeContent({
-          heroImageUrl: url,
-          importedImages: [url, ...(content.importedImages ?? [])],
-        });
-      }
-    };
-    reader.readAsDataURL(file);
+    event.target.value = '';
+    if (!file) return;
+    setBusy(true);
+    setError('');
+    try {
+      // Firestore document snapshots must never contain megabytes of base64.
+      const asset = await uploadFlyerImage(file, content.regionId);
+      setLibrary(old => [asset, ...old]);
+      onChangeContent({ heroImageUrl: asset.url, heroImageFocusX: 50, heroImageFocusY: 50 });
+    } catch (err: any) {
+      setError(err?.code || err?.message || 'IMAGE_UPLOAD_FAILED');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -43,6 +56,7 @@ export function SimpleImageEditorTab({
         </p>
       </div>
 
+      {error && <div role="alert" className="text-xs text-red-700 bg-red-50 border border-red-200 p-2 rounded">{ui('Bild konnte nicht gespeichert werden', 'Impossibile salvare l’immagine')}: {error}</div>}
       <div className="aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50 select-none touch-none cursor-grab active:cursor-grabbing"
         onPointerDown={e => { if (!content.heroImageUrl) return; dragRef.current = { x: e.clientX, y: e.clientY, focusX: content.heroImageFocusX ?? 50, focusY: content.heroImageFocusY ?? 50 }; e.currentTarget.setPointerCapture(e.pointerId); }}
         onPointerMove={e => { const drag = dragRef.current; if (!drag) return; const rect = e.currentTarget.getBoundingClientRect(); onChangeContent({ heroImageFocusX: clamp(drag.focusX - 100 * (e.clientX - drag.x) / rect.width), heroImageFocusY: clamp(drag.focusY - 100 * (e.clientY - drag.y) / rect.height) }); }}
@@ -63,13 +77,27 @@ export function SimpleImageEditorTab({
 
       <button
         type="button"
+        disabled={busy}
         onClick={() => inputRef.current?.click()}
         className="w-full py-2.5 bg-[#0D4D5E] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2"
       >
         <Upload className="w-4 h-4 text-[#AAD0D1]" />
-        {ui('Bild ändern', 'Cambia immagine')}
+        {busy ? ui('Bild wird gespeichert…', 'Salvataggio immagine…') : ui('Bild ändern', 'Cambia immagine')}
       </button>
 
+      {library.length > 0 && (
+        <section className="space-y-2">
+          <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Gespeicherte Bilder', 'Immagini salvate')}</h4>
+          <div className="grid grid-cols-3 gap-2 max-h-52 overflow-y-auto">
+            {library.map(asset => (
+              <button key={asset.path} type="button" onClick={() => onChangeContent({ heroImageUrl: asset.url })}
+                className="border border-slate-200 rounded overflow-hidden" title={asset.name}>
+                <img src={asset.url} alt={asset.name} loading="lazy" className="aspect-square w-full object-cover"/>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
       <label className="block space-y-1.5">
         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">URL</span>
         <input

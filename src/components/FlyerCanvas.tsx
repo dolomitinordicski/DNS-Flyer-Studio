@@ -74,7 +74,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
 
   const missingOfficialPrices: Partial<PriceListTexts> = isPriceList ? {
     carouselWeekPrice: '—', carouselWeekTrackSupplement: '—', carouselSeasonPrice: '—',
-    ...(isNetworkPriceList ? {} : { regionalDayPrice: '—', regionalWeekPrice: '—', regionalSeasonPrice: '—' }),
+    ...(isNetworkPriceList ? {} : { regionalDayPrice: '—', regionalDayTrackSupplement: '—', regionalWeekPrice: '—', regionalWeekTrackSupplement: '—', regionalSeasonPrice: '—' }),
   } : {};
   const editorialFromPrices: Partial<PriceListTexts> = isNetworkPriceList ? {
     regionalDayPrice: content.priceListTexts?.regionalDayPrice ?? localizedContent.priceListTexts?.regionalDayPrice,

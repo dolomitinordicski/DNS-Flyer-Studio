@@ -64,11 +64,11 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     templateId: 'regional_price_list',
     label: { de: 'Regionale Preisliste', it: 'Listino regionale', en: 'Regional price list' },
     graphicStyle: 'official_price_table',
-    blockStack: ['header', 'bigTitle', 'heroImage', 'priceTables', 'servicesBox', 'qrCode', 'disclaimer', 'footer'],
+    blockStack: ['header', 'bigTitle', 'heroImage', 'priceTables', 'earlyBird', 'servicesBox', 'qrCode', 'disclaimer', 'footer'],
     editableFields: [
       'title', 'subtitle', 'validityPeriod', 'heroImageUrl',
       'customPrimaryColor', 'customAccentColor',
-      'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
+      'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode', 'regionalLocalText', 'regionalLocalServices',
     ],
     pagePolicy: { formats: ['A3', 'A4'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: {

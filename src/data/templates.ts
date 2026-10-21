@@ -328,7 +328,6 @@ export const FLYER_TEMPLATES: FlyerTemplate[] = [
       heroImageUrl: 'https://images.unsplash.com/photo-1517649763962-0c623266010b?auto=format&fit=crop&w=1200&q=80',
       heroImagePosition: 'top',
       heroOverlayOpacity: 10,
-      selectedSportsIcons: [],
       ctaText: 'Punti Vendita & Mappa Piste Online',
       contactEmail: '',
       contactPhone: '',

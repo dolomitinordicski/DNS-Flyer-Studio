@@ -9,7 +9,7 @@ export const EarlyBirdBlock: React.FC<BlockProps> = ({
 }) => {
   if (visibility && visibility.earlyBird === false) return null;
   if (!plt || (!plt.earlyBirdLabel && !plt.earlyBirdDiscount)) return null;
-  const isDNSList = content.layoutTemplateId === 'official_price_list';
+  const isDNSList = content.layoutTemplateId === 'official_price_list' || content.layoutTemplateId === 'regional_price_list';
 
   return (
     <div 

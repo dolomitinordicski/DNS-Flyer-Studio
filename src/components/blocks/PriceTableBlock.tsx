@@ -20,6 +20,8 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
   // For both official price lists all commercial descriptions are printed
   // together in DE / IT / EN, independently of the editor UI language.
   const isRegionalProduct = content.layoutTemplateId === 'regional_price_list';
+  const regionCompact = isRegionalProduct && content.orientation === 'landscape'
+    && !content.regionalLocalText?.trim() && !(content.regionalLocalServices?.length);
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
@@ -30,7 +32,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
 
   return (
     <div className="space-y-1 shrink-0 min-w-0 w-full" data-price-list-variant={presentation.kind}>
-      <div className={`grid ${isRegionalList ? "grid-cols-1" : "grid-cols-2"} ${isA5 ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}>
+      <div className={`grid ${isRegionalList || regionCompact ? "grid-cols-1" : "grid-cols-2"} ${isA5 ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}>
         {/* Regional rates: main section for area flyers, comparative section on network flyers. */}
         <div 
           className={`border bg-white/95 overflow-hidden flex flex-col ${isRegionalProduct ? "order-2" : "order-1"} ${isDNSList ? "rounded-sm" : isRegionalList ? "rounded-md border-2 shadow-xs" : "rounded-xl shadow-xs"}`} 

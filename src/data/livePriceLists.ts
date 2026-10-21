@@ -51,6 +51,11 @@ export async function loadOfficialPriceTexts(
     row.productCode === 'wk-dns' && row.salesChannel === 'track' && row.salesPeriod === 'regular')?.unitPrice;
   const trackSupplement = typeof officialWeekly === 'number' && typeof trackWeekly === 'number'
     ? format(trackWeekly - officialWeekly) : '—';
+  const difference = (scopeType: string, scopeId: string, productCode: string): string => {
+    const regular = rows.find(row => row.scopeType === scopeType && row.scopeId === scopeId && row.productCode === productCode && row.salesChannel === 'official' && row.salesPeriod === 'regular')?.unitPrice;
+    const onTrack = rows.find(row => row.scopeType === scopeType && row.scopeId === scopeId && row.productCode === productCode && row.salesChannel === 'track' && row.salesPeriod === 'regular')?.unitPrice;
+    return typeof regular === 'number' && typeof onTrack === 'number' ? format(onTrack - regular) : '—';
+  };
   const result: Partial<PriceListTexts> = {
     carouselWeekPrice: price('network', network, 'wk-dns'),
     carouselWeekTrackSupplement: trackSupplement,
@@ -62,7 +67,9 @@ export async function loadOfficialPriceTexts(
   if (!isNetworkList) {
     const reportingAreaId = CORE_AREA_ID[regionId] || regionId;
     result.regionalDayPrice = price('reportingArea', reportingAreaId, 'day');
+    result.regionalDayTrackSupplement = difference('reportingArea', reportingAreaId, 'day');
     result.regionalWeekPrice = price('reportingArea', reportingAreaId, 'wk-area');
+    result.regionalWeekTrackSupplement = difference('reportingArea', reportingAreaId, 'wk-area');
     result.regionalSeasonPrice = price('network', network, 'sk-area');
   }
   return result;

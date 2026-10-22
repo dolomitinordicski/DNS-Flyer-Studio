@@ -1,6 +1,7 @@
 import React from 'react';
 import { BlockProps } from './BlockTypes';
 import * as LucideIcons from 'lucide-react';
+import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
 
 export const BigTitleBlock: React.FC<BlockProps> = ({
   content,
@@ -69,6 +70,9 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
         </div>
       )}
 
+      {isRegionalList && resolveDNSRegionAccent(content.regionId) && (
+        <div aria-hidden="true" style={{ width: '34px', height: '4px', backgroundColor: resolveDNSRegionAccent(content.regionId) || undefined, borderRadius: '2px' }}/>
+      )}
       <h2 
         className={`${isDNSList || isRegionalList ? 'text-2xl sm:text-3xl' : isLandscape ? (isA5 ? 'text-lg' : isA3 ? 'text-4xl' : 'text-2xl sm:text-3xl') : titleSize} font-black leading-[1.1] tracking-tight break-words`}
         style={{ 

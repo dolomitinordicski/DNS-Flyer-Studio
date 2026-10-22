@@ -106,6 +106,48 @@ export function SimpleContentEditorTab({
           <span className="text-[10px] text-slate-500">{ui('Gebietspreise werden automatisch von DNS Data Entry geladen.', 'I prezzi dell’area vengono caricati automaticamente da DNS Data Entry.')}</span>
         </label>
       )}
+      {product?.dataPolicy.ticketType && (
+        <section className="space-y-3 rounded-xl border border-[#AAD0D1] bg-slate-50 p-3">
+          <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Ticket · Ausstellendes Gebiet', 'Ticket · Area emittente')}</h4>
+          {isDNSAdmin && <label className="block space-y-1">
+            <span className="text-[10px] font-bold">{ui('Area auswählen', 'Seleziona area')}</span>
+            <select className="w-full rounded-lg border p-2 text-xs" value={content.issuingAreaId || (content.regionId !== 'dns_central' ? content.regionId : '3_zinnen')}
+              onChange={e => onChangeContent({ issuingAreaId: e.target.value, issuerName: '', customRegionName: '' })}>
+              {REGIONAL_LOGOS.filter(area => area.id !== 'dns_central').map(area => <option key={area.id} value={area.id}>{area.regionName}</option>)}
+            </select>
+          </label>}
+          <p className="text-[10px] text-slate-500">{ui('Alle drei Tickettypen verwenden das Logo der ausstellenden Area.', 'Tutti e tre i ticket utilizzano il logo dell’area emittente.')}</p>
+          {(['issuerName', 'contactEmail', 'contactPhone', 'websiteUrl'] as const).map(key => (
+            <label key={key} className="block space-y-1"><span className="text-[10px] font-bold">{key}</span>
+              <input className="w-full rounded-lg border p-2 text-xs" value={content[key] || ''} onChange={e => onChangeContent({ [key]: e.target.value })} />
+            </label>
+          ))}
+          <label className="block space-y-1"><span className="text-[10px] font-bold">{ui('Zusätzliches Tourismuslogo (URL)', 'Logo turistico aggiuntivo (URL)')}</span>
+            <input className="w-full rounded-lg border p-2 text-xs" value={content.ticketLocalLogoUrl || ''} onChange={e => onChangeContent({ ticketLocalLogoUrl: e.target.value })} placeholder="https://…/logo.png" />
+          </label>
+          <label className="block space-y-1"><span className="text-[10px] font-bold">{ui('Name Zusatzlogo', 'Nome logo aggiuntivo')}</span>
+            <input className="w-full rounded-lg border p-2 text-xs" value={content.ticketLocalLogoName || ''} onChange={e => onChangeContent({ ticketLocalLogoName: e.target.value })} />
+          </label>
+          <label className="flex items-center gap-2 text-xs font-bold">
+            <input type="checkbox" checked={content.ticketContent?.enabled || false} onChange={e => onChangeContent({ ticketContent: { ...content.ticketContent, enabled: e.target.checked, type: content.ticketContent?.type || 'info' } })} />
+            {ui('Zusätzliche Ticketinhalte', 'Contenuti aggiuntivi ticket')}
+          </label>
+          {content.ticketContent?.enabled && <div className="space-y-2">
+            <select className="w-full rounded-lg border p-2 text-xs" value={content.ticketContent.type}
+              onChange={e => onChangeContent({ ticketContent: { ...content.ticketContent!, type: e.target.value as 'promo' | 'info' } })}>
+              <option value="info">Info</option><option value="promo">Promo</option>
+            </select>
+            {(['title', 'subtitle', 'body', 'imageUrl', 'qrImageUrl', 'qrLabel'] as const).map(key => (
+              <label key={key} className="block space-y-1"><span className="text-[10px] font-bold">{key}</span>
+                {key === 'body' ? <textarea rows={3} maxLength={350} className="w-full rounded-lg border p-2 text-xs" value={content.ticketContent?.[key] || ''}
+                    onChange={e => onChangeContent({ ticketContent: { ...content.ticketContent!, [key]: e.target.value } })} />
+                  : <input className="w-full rounded-lg border p-2 text-xs" value={content.ticketContent?.[key] || ''}
+                    onChange={e => onChangeContent({ ticketContent: { ...content.ticketContent!, [key]: e.target.value } })} />}
+              </label>
+            ))}
+          </div>}
+        </section>
+      )}
       {product?.type === 'dns_price_list' && (
         <section className="p-3 rounded-xl border border-[#AAD0D1] bg-[#EDF5F5] space-y-3">
           <h4 className="text-xs font-bold text-[#0D4D5E]">

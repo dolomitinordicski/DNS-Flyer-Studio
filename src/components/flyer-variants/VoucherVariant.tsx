@@ -1,4 +1,5 @@
 import React from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import type { FlyerVariantProps } from './VariantTypes';
 import { BlockStackRenderer } from '../blocks';
 import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
@@ -23,6 +24,22 @@ const VoucherImage: React.FC<{ content: FlyerVariantProps['content']; visible: b
         referrerPolicy="no-referrer" />
     </div>
   );
+};
+
+/** Compact shared document footer: no legacy flyer slogan, sports tiles or CTA. */
+const DocumentFooter: React.FC<{ content: FlyerVariantProps['content']; theme: FlyerVariantProps['theme']; visibility: FlyerVariantProps['visibility'] }> = ({ content, theme, visibility }) => {
+  const qrUrl = content.qrCode?.url?.trim();
+  const showQr = visibility.qrCode !== false && content.qrCode?.enabled === true && !!qrUrl;
+  const details = [content.contactEmail, content.contactPhone, content.websiteUrl].filter(Boolean);
+  if (visibility.footer === false && !showQr) return null;
+  return <footer className="mt-auto flex shrink-0 items-end justify-between gap-4 border-t border-slate-200 pt-3 text-[10px] text-slate-600">
+    {visibility.footer !== false && <div className="min-w-0 flex-1 space-y-1">
+      <p className="font-semibold" style={{ color: theme.primaryHex }}>Dolomiti NordicSki</p>
+      {details.length > 0 && <p className="break-words">{details.join(' · ')}</p>}
+      {content.priceNote && <p className="break-words text-[9px]">{content.priceNote}</p>}
+    </div>}
+    {showQr && <div className="shrink-0" aria-label="QR"><QRCodeSVG value={qrUrl!} size={56} fgColor={theme.primaryHex} bgColor="#FFFFFF" /></div>}
+  </footer>;
 };
 
 export const VoucherVariant: React.FC<FlyerVariantProps> = ({
@@ -57,7 +74,7 @@ export const VoucherVariant: React.FC<FlyerVariantProps> = ({
           <div className="h-full min-h-0 min-w-0 flex-[0.85]">{photo}</div>
           <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-3">
             {accent && <span aria-hidden="true" className="h-[3px] w-8 rounded-full" style={{ backgroundColor: accent }} />}
-            {stack(['bigTitle', 'promotionBox', 'servicesBox'])}
+            {stack(['bigTitle', 'promotionBox'])}
           </div>
         </div>
       ) : (
@@ -68,9 +85,7 @@ export const VoucherVariant: React.FC<FlyerVariantProps> = ({
         </div>
       )}
 
-      <div className="mt-auto shrink-0 space-y-2">
-        {stack(['qrCode', 'disclaimer', 'footer'])}
-      </div>
+      <DocumentFooter content={content} theme={theme} visibility={visibility} />
     </article>
   );
 };
@@ -101,7 +116,7 @@ export const GutscheinVariant: React.FC<FlyerVariantProps> = ({
           {blocks(['bigTitle', 'promotionBox'])}
         </div>
       </div>
-      <div className="mt-auto shrink-0 space-y-2">{blocks(['qrCode', 'disclaimer', 'footer'])}</div>
+      <DocumentFooter content={content} theme={theme} visibility={visibility} />
     </article>
   );
 };

@@ -250,9 +250,27 @@ export function SimpleContentEditorTab({
       {field('location', 'Ort', 'Località')}
       {field('pricePrefix', 'Preispräfix', 'Prefisso prezzo')}
       {field('priceAmount', 'Preis', 'Prezzo')}
+      {field('priceCurrency', 'Währung', 'Valuta')}
       {field('priceSuffix', 'Preis-Zusatz', 'Dettaglio prezzo')}
       {field('priceNote', 'Preishinweis', 'Nota prezzo', true)}
       {field('featuresTitle', 'Leistungen', 'Servizi inclusi')}
+      {product?.type === 'hotel_package' && (
+        <section className="space-y-2">
+          <p className="text-[10px] font-bold uppercase text-slate-600">{ui('Inklusivleistungen (bis zu 5)', 'Servizi inclusi (fino a 5)')}</p>
+          {(content.features || []).slice(0, 5).map((feature, index) => (
+            <div key={feature.id || index} className="flex items-center gap-2">
+              <input className="min-w-0 flex-1 rounded-lg border border-slate-200 p-2 text-xs"
+                value={feature.text} onChange={event => onChangeContent({ features: (content.features || []).map((item, i) => i === index ? { ...item, text: event.target.value } : item) })} />
+              <button type="button" className="px-2 text-xs text-slate-600" aria-label={ui('Entfernen', 'Rimuovi')}
+                onClick={() => onChangeContent({ features: (content.features || []).filter((_, i) => i !== index) })}>×</button>
+            </div>
+          ))}
+          {(content.features || []).length < 5 && <button type="button" className="text-xs font-semibold text-[#0D4D5E]"
+            onClick={() => onChangeContent({ features: [...(content.features || []), { id: 'offer-' + Date.now(), icon: 'nordic_classic', text: '', highlight: false }] })}>
+            + {ui('Leistung hinzufügen', 'Aggiungi servizio')}
+          </button>}
+        </section>
+      )}
       {field('ctaText', 'Aktion', 'Invito all’azione')}
       {field('contactEmail', 'E-Mail', 'Email')}
       {field('contactPhone', 'Telefon', 'Telefono')}

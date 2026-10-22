@@ -1,3 +1,15 @@
+import { REPORTING_AREAS } from '@dolomitinordicski/dns-shared-data';
+import { coreReportingAreaId } from '../../data/regionalLogos';
+
+function officialPackageAreaName(areaId: string | undefined, language: string): string | null {
+  if (!areaId || areaId === 'dns_central') return null;
+  const canonicalId = coreReportingAreaId(areaId);
+  const area = REPORTING_AREAS.find(item => item.id === canonicalId && item.active);
+  if (!area) return null;
+  const locale = language === 'de' || language === 'en' ? language : 'it';
+  return area.localizedName[locale] || area.canonicalName;
+}
+
 export interface ResolvedHotelPackageData {
   title: string;
   subtitle: string;
@@ -54,7 +66,10 @@ export function resolveHotelPackageData(
   const subtitle = getField('subtitle', 'Soggiorno esclusivo in hotel con Skipass Dolomiti NordicSki incluso e servizi benessere.');
   const badge = getField('badgeText', 'OFFERTA SPECIALE HOTEL PARTNER 2026/27');
   const headerTagline = getField('headerTagline', 'Dolomiti NordicSki • Special Package');
-  const location = getField('location', '3 Zinnen Dolomites / Alta Pusteria');
+  // Official area name is authoritative; never show another area's sample label.
+  // A custom venue/location remains editorial when this is a DNS-wide package.
+  const location = officialPackageAreaName(content.regionId, activeLanguage)
+    || getField('location', 'Dolomiti NordicSki');
   const validityPeriod = getField('validityPeriod', 'Valido dal 06.01.2027 al 28.03.2027');
 
   const pricePrefix = getField('pricePrefix', 'DA');

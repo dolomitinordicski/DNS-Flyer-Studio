@@ -14,7 +14,7 @@ import { LEGACY_FLYER_TEMPLATES } from './data/legacyTemplates';
 import { Printer, Download, Eye, RotateCw, Cloud, Sparkles, CheckCircle2 } from 'lucide-react';
 import { ExportModal } from './components/ExportModal';
 import { getContentForLanguage } from './utils/multilingual';
-import { optimizeLayout, measureFlyerLayout } from './utils/layoutOptimizer';
+import { runMakeItPerfect } from './features/make-it-perfect/runMakeItPerfect';
 import { probeDNSCoreHeader, type DNSCoreHeaderStatus } from './lib/dnsCoreHeader';
 import { getDNSFoundationRuntime } from './lib/foundationRuntime';
 import { createFlyerDocumentV1, normalizeFlyerContent } from './model/flyerDocument';
@@ -391,36 +391,15 @@ export default function App() {
     setContent(prev => ({ ...prev, showCropMarks: !prev.showCropMarks }));
   };
 
-  // MAKE IT PERFECT: Standardized layout-specific optimization algorithm for A3, A4, A5 (Portrait/Landscape)
+  // The layout engine lives in a dedicated feature; App only connects UI state.
   const handleMakeItPerfect = async () => {
-    // Preserve template block order, tariff bindings, translations and the
-    // user's chosen image focal point; adapt only the current page geometry.
-    const { content: updatedContent } = optimizeLayout(content);
-    setContent(updatedContent);
-    const afterPaint = () => new Promise<void>(resolve =>
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-    );
-    await afterPaint();
-    let measurement = flyerRef.current ? measureFlyerLayout(flyerRef.current) : null;
-
-    // Recover overflowing space from the hero only. Never shrink legal text,
-    // official tariffs or trilingual content just to force a one-page fit.
-    let height = updatedContent.heroImageHeightPx ?? 140;
-    for (let attempt = 0; measurement && measurement.overflowPx > 2 && attempt < 3; attempt++) {
-      const nextHeight = Math.max(65, height - measurement.overflowPx - 8);
-      if (nextHeight >= height) break;
-      height = nextHeight;
-      setContent(prev => ({ ...prev, heroImageHeightPx: nextHeight }));
-      await afterPaint();
-      measurement = flyerRef.current ? measureFlyerLayout(flyerRef.current) : null;
-    }
-
-    const page = `${updatedContent.format} · ${updatedContent.orientation === 'landscape' ? 'orizzontale' : 'verticale'}`;
-    setPerfectToast(!measurement
-      ? `Layout ${page}: anteprima non disponibile per la verifica.`
-      : measurement.overflowPx > 2
-        ? `Attenzione: ${page} — ${measurement.overflowPx}px di contenuti fuori pagina. Scegli un formato maggiore o riduci i testi.`
-        : `Layout ${page}: ${measurement.measuredBlocks} blocchi controllati, nessun overflow rilevato.`);
+    const message = await runMakeItPerfect({
+      content,
+      applyContent: setContent,
+      adjustHeroHeight: height => setContent(prev => ({ ...prev, heroImageHeightPx: height })),
+      getCanvas: () => flyerRef.current,
+    });
+    setPerfectToast(message);
     setTimeout(() => setPerfectToast(null), 6000);
   };
 

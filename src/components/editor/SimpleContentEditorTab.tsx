@@ -1,3 +1,4 @@
+import { REPORTING_AREAS } from '@dolomitinordicski/dns-shared-data';
 import React from 'react';
 import { PACKAGE_OFFER_PRESETS, applyPackageOfferPreset } from '../../model/packageOfferPresets';
 import type { FlyerContent, LanguageCode } from '../../types';
@@ -123,6 +124,24 @@ export function SimpleContentEditorTab({
           </select>
           <span className="text-[10px] text-slate-500">{ui('Gebietspreise werden automatisch von DNS Data Entry geladen.', 'I prezzi dell’area vengono caricati automaticamente da DNS Data Entry.')}</span>
         </label>
+      )}
+      {(product?.type === 'voucher' || product?.type === 'gutschein') && (
+        <section className="space-y-2 rounded-xl border border-slate-200 p-3">
+          <label htmlFor="voucher-reporting-area" className="block text-[10px] font-bold uppercase tracking-wider text-slate-600">
+            {ui('DNS Gebiet / Aussteller', 'Area DNS / emittente')}
+          </label>
+          <select id="voucher-reporting-area"
+            className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-900"
+            value={Object.entries(REGIONAL_AREA_ALIASES).find(([, legacy]) => legacy === content.regionId)?.[0] || content.regionId}
+            onChange={event => onChangeContent({ regionId: event.target.value, customRegionName: '', selectedRegionLogoId: 'primary' })}
+            disabled={!isDNSAdmin}
+          >
+            {REPORTING_AREAS.filter(area => area.active).map(area => (
+              <option key={area.id} value={area.id}>{area.localizedName[uiLanguage] || area.canonicalName}</option>
+            ))}
+          </select>
+          {!isDNSAdmin && <p className="text-[10px] text-slate-500">{ui('Gebiet wird von DNS Core vorgegeben.', 'Area assegnata da DNS Core.')}</p>}
+        </section>
       )}
       {product?.dataPolicy.ticketType && (
         <section className="space-y-3 rounded-xl border border-[#AAD0D1] bg-slate-50 p-3">

@@ -1,5 +1,5 @@
 import type { FlyerContent } from '../../types';
-import { measureFlyerLayout, optimizeLayout } from '../../utils/layoutOptimizer';
+import { measureFlyerLayout } from '../../utils/layoutOptimizer';
 
 export interface MakeItPerfectOptions {
   content: FlyerContent;
@@ -12,7 +12,8 @@ export interface MakeItPerfectOptions {
 export async function runMakeItPerfect({
   content, applyContent, getCanvas,
 }: MakeItPerfectOptions): Promise<string> {
-  const { content: optimized } = optimizeLayout(content);
+  // Preserve all editorial, tariff and layout fields; auto-fit only changes text size.
+  const optimized = content;
   const afterPaint = () => new Promise<void>(resolve =>
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
   );

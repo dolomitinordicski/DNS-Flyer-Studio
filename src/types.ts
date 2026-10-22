@@ -24,6 +24,7 @@ export type GraphicStyle =
   | 'official_ticket_voucher_v1'
   | 'online_ticket_manifesto'
   | 'online_ticket_manifesto_v1'
+  | 'package_offer_editorial'
   | 'hotel_skipass_package'
   | 'hotel_skipass_boutique'
   | 'hotel_skipass_panorama'

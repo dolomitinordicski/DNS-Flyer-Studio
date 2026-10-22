@@ -14,13 +14,26 @@ export const BRAND_FACTS = {
   brandName: 'DOLOMITI NORDICSKI',
 };
 
-export const BRAND_AREAS: BrandRegionArea[] = [
-  { id: 'anterselva', code: '02', shortName: 'Anterselva', fullName: 'Antholzertal / Valle Anterselva' },
-  { id: 'gsiesertal', code: '03', shortName: 'Val Casies', fullName: 'Gsiesertal / Val Casies' },
-  { id: '3_zinnen', code: '04', shortName: '3 Cime', fullName: '3 Zinnen Dolomites / 3 Cime Dolomiti' },
-  { id: 'osttirol', code: '05', shortName: 'Osttirol', fullName: 'Osttirol / Tirolo Orientale' },
-  { id: 'comelico', code: '06', shortName: 'Comelico', fullName: 'Comelico / Val Comelico' },
-  { id: 'cortina', code: '07', shortName: 'Cortina', fullName: 'Cortina d\'Ampezzo' },
-  { id: 'ahrntal', code: '08', shortName: 'Valle Aurina', fullName: 'Ahrntal / Valle Aurina' },
-  { id: 'seiser_alm_val_gardena', code: '09', shortName: 'Seiser Alm', fullName: 'Seiser Alm / Val Gardena' },
-];
+// Area IDs, official flyer display names and numbering come from the shared
+// regional presentation registry. Only the short editorial labels live here.
+import { REGIONAL_LOGOS } from './regionalLogos';
+
+const EDITORIAL_SHORT_NAMES: Record<string, string> = {
+  anterselva: 'Anterselva',
+  gsiesertal: 'Val Casies',
+  '3_zinnen': '3 Cime',
+  osttirol: 'Osttirol',
+  comelico: 'Comelico',
+  cortina: 'Cortina',
+  ahrntal: 'Valle Aurina',
+  seiser_alm_val_gardena: 'Seiser Alm',
+};
+
+export const BRAND_AREAS: BrandRegionArea[] = REGIONAL_LOGOS
+  .filter(area => area.id !== 'dns_central')
+  .map(area => ({
+    id: area.id,
+    code: area.name.slice(0, 2),
+    shortName: EDITORIAL_SHORT_NAMES[area.id] || area.regionName,
+    fullName: area.regionName,
+  }));

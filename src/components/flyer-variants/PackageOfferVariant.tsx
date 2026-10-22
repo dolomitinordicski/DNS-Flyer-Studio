@@ -18,6 +18,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   const compact = content.format === 'A5';
   const tight = landscape || compact;
   const optimized = (content.textScaleFactor ?? 1) < 0.9;
+  const layoutScale = landscape ? Math.max(0.66, Math.min(1, content.textScaleFactor ?? 1)) : 1;
   const longCopy = data.title.length > 46 || data.subtitle.length > 110;
   const primary = theme.primaryHex;
   const photoMargin = compact ? 'mx-5' : 'mx-9';
@@ -67,7 +68,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
           <div className="min-w-0">
             <div className={landscape ? 'mb-2 h-1 w-12' : 'mb-5 h-1 w-12'} data-dns-area-accent="package-heading" style={{ backgroundColor: areaAccent }} />
             {data.badge && <p className={`${tight ? 'mb-1 text-[9px]' : 'mb-3 text-[10px]'} font-semibold uppercase tracking-[0.17em]`} style={{ color: primary }}>{data.badge}</p>}
-            <h1 className={`${compact ? 'text-2xl' : landscape ? (optimized || longCopy ? 'text-[23px]' : 'text-[28px]') : 'text-[44px]'} font-semibold leading-[1.08] tracking-tight break-words`}>{data.title}</h1>
+            <h1 className={`${compact ? 'text-2xl' : landscape ? (optimized || longCopy ? 'text-[23px]' : 'text-[28px]') : 'text-[44px]'} font-semibold leading-[1.08] tracking-tight break-words`} style={landscape ? { fontSize: `${Math.round((longCopy ? 30 : 34) * layoutScale)}px` } : undefined}>{data.title}</h1>
             {data.subtitle && <p className={`${tight ? 'mt-1 text-[11px] leading-snug' : 'mt-4 text-base leading-relaxed'} text-slate-600 break-words`}>{data.subtitle}</p>}
             {(data.location || data.validityPeriod) && <p className={`${tight ? 'mt-2 text-[9px]' : 'mt-4 text-[11px]'} tracking-wide text-slate-500 break-words`}>{[data.location, data.validityPeriod].filter(Boolean).join('  ·  ')}</p>}
           </div>

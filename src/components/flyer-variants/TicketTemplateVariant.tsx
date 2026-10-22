@@ -17,10 +17,23 @@ const UI: Record<Locale, { valid: string; area: string; id: string; sample: stri
   en: { valid: 'Validity', area: 'Area', id: 'Ticket number', sample: 'SAMPLE · NOT VALID', noData: 'Provided by TicWeb', price: 'Price' },
 };
 
+const COVERAGE = {
+  de: { title: 'GÜLTIGKEITSBEREICH', network: 'Alle teilnehmenden Dolomiti NordicSki Gebiete', cross: 'Auch gültig in', only: 'Gültig im angegebenen Langlaufgebiet', terms: 'ALLGEMEINE GESCHÄFTSBEDINGUNGEN', termsPending: 'Offizielle Ticketbedingungen müssen vor der Ausgabe hinterlegt werden.' },
+  it: { title: 'DOVE È VALIDO', network: 'Tutte le aree aderenti a Dolomiti NordicSki', cross: 'Valido anche a', only: 'Valido nell’area di sci di fondo indicata', terms: 'CONDIZIONI GENERALI', termsPending: 'Inserire le condizioni ufficiali prima dell’emissione.' },
+  en: { title: 'VALID IN', network: 'All participating Dolomiti NordicSki areas', cross: 'Also valid in', only: 'Valid in the specified cross-country area', terms: 'TERMS & CONDITIONS', termsPending: 'Official ticket terms must be provided before issuance.' },
+} as const;
+
+// Reciprocal coverage supplied by DNS. Confirm with the authoritative ticket
+// validity dataset before production exports; keep future agreements data-driven.
+const RECIPROCAL_AREAS: Record<string, string> = {
+  '3_zinnen': 'Cortina d’Ampezzo',
+  cortina: '3 Zinnen Dolomites',
+};
+
 /**
  * Graphic preview only. Ticket issuance, validation codes, tariff, and runtime
  * passenger/validity data belong to TicWeb, never to Flyer Studio.
- * Dimensions and placement must be calibrated against a verified legacy sample.
+ * Visual design follows the approved DNS Ticketvorlage, not legacy pixel fidelity.
  */
 export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, theme, regionLogo }) => {
   const kind: TicketKind = content.digitalPassType === 'daily_area'
@@ -32,6 +45,11 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
   const isArea = kind !== 'weekly_dns';
   const areaName = isArea ? (content.customRegionName || regionLogo?.regionName || regionLogo?.name || ui.noData) : 'Dolomiti NordicSki';
   const logo = isArea ? regionLogo?.logoSrc : null;
+  const coverage = COVERAGE[locale];
+  const extraArea = isArea ? RECIPROCAL_AREAS[content.regionId] : undefined;
+  const terms = locale === 'de' ? content.priceListTexts?.disclaimerDe
+    : locale === 'en' ? content.priceListTexts?.disclaimerEn
+    : content.priceListTexts?.disclaimerIt;
 
   return (
     <article className="relative flex h-full w-full flex-col overflow-hidden border-[6px] border-solid bg-white font-vietnam text-slate-900" style={{ borderColor: theme.primaryHex }} aria-label={LABELS[locale][kind]}>
@@ -63,6 +81,16 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
             TICWEB<br />SCAN AREA
           </div>
         </div>
+      </section>
+      <section className="mx-8 mt-5 border-l-4 bg-slate-50 px-5 py-4" style={{ borderColor: theme.primaryHex }}>
+        <h2 className="text-xs font-extrabold tracking-wider" style={{ color: theme.primaryHex }}>{coverage.title}</h2>
+        <p className="mt-2 text-sm font-semibold">{isArea ? areaName : coverage.network}</p>
+        {extraArea && <p className="mt-1 text-sm font-semibold">{coverage.cross} {extraArea}</p>}
+        {isArea && !extraArea && <p className="mt-1 text-xs">{coverage.only}</p>}
+      </section>
+      <section className="mx-8 mt-4 px-1">
+        <h2 className="text-xs font-extrabold tracking-wider" style={{ color: theme.primaryHex }}>{coverage.terms}</h2>
+        <p className="mt-2 whitespace-pre-line text-[11px] leading-relaxed text-slate-700">{terms?.trim() || coverage.termsPending}</p>
       </section>
       <footer className="mx-8 mb-7 mt-6 border-t pt-4 text-xs font-medium" style={{ borderColor: theme.accentHex }}>
         <div className="flex justify-between gap-3"><span>Dolomiti NordicSki</span><span>{ui.sample}</span></div>

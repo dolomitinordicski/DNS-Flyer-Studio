@@ -142,12 +142,12 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
   {
     type: 'hotel_package',
     templateId: 'hotel_skipass_package',
-    label: { de: 'Hotel + Langlauf', it: 'Hotel + sci di fondo', en: 'Hotel + Nordic ski' },
+    label: { de: 'Pakete & Angebote', it: 'Pacchetti e offerte', en: 'Packages & offers' },
     graphicStyle: 'hotel_skipass_package',
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
     editableFields: [
       'title', 'subtitle', 'validityPeriod', 'heroImageUrl',
-      'priceAmount', 'priceSuffix', 'priceNote',
+      'badgeText', 'location', 'pricePrefix', 'priceAmount', 'priceSuffix', 'priceNote', 'featuresTitle', 'ctaText',
       'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode', 'features',
     ],

@@ -34,22 +34,23 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
   const logo = isArea ? regionLogo?.logoSrc : null;
 
   return (
-    <article className="relative flex h-full w-full flex-col overflow-hidden bg-white font-vietnam text-slate-900" aria-label={LABELS[locale][kind]}>
+    <article className="relative flex h-full w-full flex-col overflow-hidden border-[6px] border-solid bg-white font-vietnam text-slate-900" style={{ borderColor: theme.primaryHex }} aria-label={LABELS[locale][kind]}>
       <header className="flex items-center justify-between gap-5 border-b-4 px-8 py-6" style={{ borderColor: theme.primaryHex }}>
         <img src={dnsLogo} alt="Dolomiti NordicSki" className="max-h-20 max-w-[55%] object-contain" />
         {isArea && logo ? <img src={logo} alt={areaName} className="max-h-16 max-w-[35%] object-contain" /> : null}
       </header>
       <div className="flex items-center justify-between gap-4 px-8 pt-7">
         <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: theme.primaryHex }}>WINTER {content.validityPeriod || '2026/27'}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: theme.primaryHex }}>OFFICIAL SKI TICKET · WINTER {content.validityPeriod || '2026/27'}</p>
           <h1 className="mt-2 break-words text-3xl font-extrabold leading-tight" style={{ color: theme.primaryHex }}>{LABELS[locale][kind]}</h1>
           {isArea && <p className="mt-2 text-lg font-semibold">{areaName}</p>}
         </div>
       </div>
-      <section className="relative mx-8 mt-8 flex min-h-[36%] flex-1 flex-col justify-between border-2 p-6" style={{ borderColor: theme.primaryHex }} aria-label="TicWeb runtime fields">
+      <section className="relative mx-8 mt-6 flex min-h-[36%] flex-1 flex-col justify-between border-2 border-dashed p-6" style={{ borderColor: theme.primaryHex }} aria-label="TicWeb runtime fields">
         <div className="absolute inset-0 flex rotate-[-22deg] items-center justify-center overflow-hidden pointer-events-none">
           <span className="whitespace-nowrap text-3xl font-black opacity-15">{ui.sample}</span>
         </div>
+        <div className="relative mb-6 flex items-center gap-2 border-b pb-3 text-sm font-black uppercase tracking-widest" style={{ borderColor: theme.accentHex, color: theme.primaryHex }}>TICKET · {LABELS[locale][kind]}</div>
         <div className="relative grid grid-cols-2 gap-x-6 gap-y-7">
           <div className="min-w-0"><p className="text-xs font-semibold uppercase opacity-65">{ui.id}</p><p className="mt-1 break-words font-semibold">{ui.noData}</p></div>
           <div className="min-w-0"><p className="text-xs font-semibold uppercase opacity-65">{ui.valid}</p><p className="mt-1 break-words font-semibold">{ui.noData}</p></div>
@@ -59,7 +60,7 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
         <div className="relative mt-8 flex items-end justify-between gap-4 border-t pt-6">
           <p className="max-w-[55%] text-sm leading-relaxed opacity-75">{ui.noData}</p>
           <div className="flex h-28 w-28 shrink-0 items-center justify-center border-2 border-dashed text-center text-xs font-bold" style={{ borderColor: theme.primaryHex, color: theme.primaryHex }}>
-            TICWEB<br />QR / BARCODE
+            TICWEB<br />SCAN AREA
           </div>
         </div>
       </section>

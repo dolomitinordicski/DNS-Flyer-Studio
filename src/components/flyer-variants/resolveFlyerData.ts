@@ -1,7 +1,7 @@
 import { REPORTING_AREAS } from '@dolomitinordicski/dns-shared-data';
 import { coreReportingAreaId } from '../../data/regionalLogos';
 
-function officialPackageAreaName(areaId: string | undefined, language: string): string | null {
+export function officialPackageAreaName(areaId: string | undefined, language: string): string | null {
   if (!areaId || areaId === 'dns_central') return null;
   const canonicalId = coreReportingAreaId(areaId);
   const area = REPORTING_AREAS.find(item => item.id === canonicalId && item.active);

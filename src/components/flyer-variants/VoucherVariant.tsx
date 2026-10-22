@@ -1,57 +1,58 @@
 import React from 'react';
-import { FlyerVariantProps, getActiveOrder } from './VariantTypes';
+import type { FlyerVariantProps } from './VariantTypes';
 import { BlockStackRenderer } from '../blocks';
+import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
 
+/**
+ * Voucher editorial composition.
+ * Uses the same shared blocks, form fields, localization, permissions and
+ * print pipeline as the other flyers. It does not issue redeemable vouchers.
+ */
 export const VoucherVariant: React.FC<FlyerVariantProps> = ({
-  content,
-  plt,
-  theme,
-  regionLogo,
-  activeSportsIcons = [],
-  visibility
+  content, plt, theme, regionLogo, activeSportsIcons = [], visibility,
 }) => {
-  const fmt = content.format || 'A4';
-  const isA5 = fmt === 'A5';
-  const isA3 = fmt === 'A3';
-  const isLandscape = content.orientation === 'landscape';
+  const compact = content.format === 'A5';
+  const large = content.format === 'A3';
+  const landscape = content.orientation === 'landscape';
+  const accent = resolveDNSRegionAccent(content.regionId);
+  const shared = {
+    content, plt, theme, regionLogo, activeSportsIcons, visibility,
+    format: content.format || 'A4' as const,
+    orientation: content.orientation || 'portrait' as const,
+  };
 
-  const visibleCount = Object.values(visibility).filter(Boolean).length;
-  const isAiry = visibleCount < 5;
-
-  const mainGap = isA5 
-    ? (isLandscape ? 'gap-1' : (isAiry ? 'gap-2' : 'gap-1.5')) 
-    : isA3 
-    ? (isAiry ? 'gap-6 sm:gap-8' : 'gap-4 sm:gap-5') 
-    : (isAiry ? 'gap-4' : 'gap-2.5 sm:gap-3');
-
-  const mainPadding = isA5 
-    ? (isLandscape ? 'p-1.5' : 'p-2.5') 
-    : isA3 
-    ? 'p-8 sm:p-12' 
-    : (isAiry ? 'p-5 sm:p-7' : 'p-4 sm:p-5');
+  // Controlled, legible voucher hierarchy instead of the generic 12-section
+  // flyer stack. Existing editors/visibility toggles still control each block.
+  const stack = (order: Array<'header' | 'heroImage' | 'bigTitle' | 'promotionBox' | 'servicesBox' | 'qrCode' | 'disclaimer' | 'footer'>) =>
+    <BlockStackRenderer order={order} {...shared} />;
 
   return (
-    <div 
-      className={`relative z-10 h-full flex flex-col justify-between text-slate-900 ${mainPadding} font-vietnam ${mainGap} overflow-hidden min-w-0 ${
-        content.cornerStyle === 'sharp' ? '[&_*]:!rounded-none' : 
-        content.cornerStyle === 'none' ? '[&_*]:!rounded-none [&_*]:!border-0 [&_*]:!shadow-none' : ''
-      }`}
+    <article
+      data-voucher-layout="editorial"
+      className={`relative z-10 flex h-full min-w-0 flex-col overflow-hidden bg-white font-vietnam text-slate-900 ${compact ? 'gap-2 p-3' : large ? 'gap-5 p-9' : 'gap-3 p-6'} ${content.cornerStyle === 'none' || content.cornerStyle === 'sharp' ? '[&_*]:!rounded-none' : ''}`}
       style={{ backgroundColor: theme.cardBgHex }}
     >
-      {/* Dashed Voucher Cutout Border Frame */}
-      <div className="absolute inset-1.5 sm:inset-3 border-2 border-dashed border-slate-300 rounded-3xl pointer-events-none z-0 opacity-60" />
+      <div className="shrink-0">{stack(['header'])}</div>
 
-      <BlockStackRenderer
-        order={getActiveOrder(content)}
-        content={content}
-        theme={theme}
-        plt={plt}
-        regionLogo={regionLogo}
-        activeSportsIcons={activeSportsIcons}
-        visibility={visibility}
-        format={content.format || 'A4'}
-        orientation={content.orientation || 'portrait'}
-      />
-    </div>
+      {landscape ? (
+        <div className="flex min-h-0 flex-1 gap-5">
+          <div className="min-h-0 min-w-0 flex-[1.05] overflow-hidden">{stack(['heroImage'])}</div>
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-3">
+            {accent && <span aria-hidden="true" className="h-[3px] w-8 rounded-full" style={{ backgroundColor: accent }} />}
+            {stack(['bigTitle', 'promotionBox', 'servicesBox'])}
+          </div>
+        </div>
+      ) : (
+        <div className="flex min-h-0 flex-1 flex-col justify-center gap-3">
+          <div className="min-h-0 overflow-hidden">{stack(['heroImage'])}</div>
+          {accent && <span aria-hidden="true" className="h-[3px] w-8 shrink-0 rounded-full" style={{ backgroundColor: accent }} />}
+          {stack(['bigTitle', 'promotionBox', 'servicesBox'])}
+        </div>
+      )}
+
+      <div className="mt-auto shrink-0 space-y-2">
+        {stack(['qrCode', 'disclaimer', 'footer'])}
+      </div>
+    </article>
   );
 };

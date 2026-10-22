@@ -8,40 +8,45 @@ export interface MakeItPerfectOptions {
   getCanvas: () => HTMLElement | null;
 }
 
-/** Optimizes document geometry without touching authoritative prices or legal copy. */
+/** Fit typography in every flyer without changing any text, prices or legal content. */
 export async function runMakeItPerfect({
-  content, applyContent, adjustHeroHeight, getCanvas,
+  content, applyContent, getCanvas,
 }: MakeItPerfectOptions): Promise<string> {
-  const { content: updated } = optimizeLayout(content);
-  const isPackageLandscape = updated.layoutTemplateId === 'hotel_skipass_package' && updated.orientation === 'landscape';
-  applyContent(updated);
+  const { content: optimized } = optimizeLayout(content);
   const afterPaint = () => new Promise<void>(resolve =>
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
   );
-  await afterPaint();
-  let measurement = getCanvas() ? measureFlyerLayout(getCanvas()!) : null;
-  let height = updated.heroImageHeightPx ?? 140;
-  for (let attempt = 0; measurement && measurement.overflowPx > 2 && attempt < 3; attempt++) {
-    if (isPackageLandscape) {
-      const nextFactor = Math.max(0.66, (updated.textScaleFactor ?? 0.82) - (attempt + 1) * 0.05);
-      applyContent({ ...updated, textScaleFactor: nextFactor });
-      await afterPaint();
-      const canvas = getCanvas();
-      measurement = canvas ? measureFlyerLayout(canvas) : null;
-      continue;
-    }
-    const nextHeight = Math.max(65, height - measurement.overflowPx - 8);
-    if (nextHeight >= height) break;
-    height = nextHeight;
-    adjustHeroHeight(nextHeight);
+  const fit = async (factor: number) => {
+    applyContent({ ...optimized, textScaleFactor: factor });
     await afterPaint();
     const canvas = getCanvas();
-    measurement = canvas ? measureFlyerLayout(canvas) : null;
+    return canvas ? measureFlyerLayout(canvas) : null;
+  };
+  // Start from a conservative size, grow when whitespace permits, shrink on overflow.
+  let factor = Math.max(0.72, Math.min(1.12, optimized.textScaleFactor ?? 1));
+  let measurement = await fit(factor);
+  if (!measurement) return 'Make It Perfect: anteprima non disponibile.';
+
+  if (measurement.overflowPx > 2) {
+    for (let i = 0; i < 7 && measurement.overflowPx > 2 && factor > 0.72; i++) {
+      factor = Math.max(0.72, factor - 0.06);
+      measurement = (await fit(factor)) ?? measurement;
+    }
+  } else {
+    // When the page has room, test larger type and retain only the last fitting size.
+    for (let i = 0; i < 5 && factor < 1.24; i++) {
+      const candidate = Math.min(1.24, factor + 0.04);
+      const trial = await fit(candidate);
+      if (!trial || trial.overflowPx > 2) {
+        await fit(factor);
+        break;
+      }
+      factor = candidate;
+      measurement = trial;
+    }
   }
-  const page = `${updated.format} · ${updated.orientation === 'landscape' ? 'orizzontale' : 'verticale'}`;
-  return !measurement
-    ? `Layout ${page}: anteprima non disponibile per la verifica.`
-    : measurement.overflowPx > 2
-      ? `Attenzione: ${page} — ${measurement.overflowPx}px di contenuti fuori pagina. Scegli un formato maggiore o riduci i testi.`
-      : `Layout ${page}: ${measurement.measuredBlocks} blocchi controllati, nessun overflow rilevato.`;
+  const page = `${optimized.format} · ${optimized.orientation === 'landscape' ? 'orizzontale' : 'verticale'}`;
+  return measurement.overflowPx > 2
+    ? `Attenzione: ${page} — ${measurement.overflowPx}px fuori pagina anche con il testo ridotto.`
+    : `Layout ${page}: tipografia ${Math.round(factor * 100)}%, ${measurement.measuredBlocks} blocchi verificati.`;
 }

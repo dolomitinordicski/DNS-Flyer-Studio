@@ -13,6 +13,7 @@ export async function runMakeItPerfect({
   content, applyContent, adjustHeroHeight, getCanvas,
 }: MakeItPerfectOptions): Promise<string> {
   const { content: updated } = optimizeLayout(content);
+  const isPackageLandscape = updated.layoutTemplateId === 'hotel_skipass_package' && updated.orientation === 'landscape';
   applyContent(updated);
   const afterPaint = () => new Promise<void>(resolve =>
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
@@ -21,6 +22,14 @@ export async function runMakeItPerfect({
   let measurement = getCanvas() ? measureFlyerLayout(getCanvas()!) : null;
   let height = updated.heroImageHeightPx ?? 140;
   for (let attempt = 0; measurement && measurement.overflowPx > 2 && attempt < 3; attempt++) {
+    if (isPackageLandscape) {
+      const nextFactor = Math.max(0.66, (updated.textScaleFactor ?? 0.82) - (attempt + 1) * 0.05);
+      applyContent({ ...updated, textScaleFactor: nextFactor });
+      await afterPaint();
+      const canvas = getCanvas();
+      measurement = canvas ? measureFlyerLayout(canvas) : null;
+      continue;
+    }
     const nextHeight = Math.max(65, height - measurement.overflowPx - 8);
     if (nextHeight >= height) break;
     height = nextHeight;

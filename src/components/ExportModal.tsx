@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Printer, Download, FileText, Globe, Check, Layers, Loader2 } from 'lucide-react';
+import { X, Printer, Download, FileText, Globe, Check, Layers, Loader2, Code2 } from 'lucide-react';
 import { PaperFormat, LanguageCode } from '../types';
 
 interface ExportModalProps {
@@ -15,6 +15,8 @@ interface ExportModalProps {
   onExportPngSingle: (lang: LanguageCode) => Promise<void>;
   isExporting: boolean;
   isPriceTable?: boolean;
+  codeExportEnabled?: boolean;
+  onExportCode?: () => Promise<void>;
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
@@ -29,7 +31,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   onExportPngSeparate,
   onExportPngSingle,
   isExporting,
-  isPriceTable = false
+  isPriceTable = false,
+  codeExportEnabled = false,
+  onExportCode
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   if (!isOpen) return null;
@@ -238,6 +242,24 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
 
         </div>
+
+        {codeExportEnabled && onExportCode && (
+          <div className="px-6 pb-4">
+            <button
+              type="button"
+              disabled={isExporting}
+              onClick={async () => { await onExportCode(); onClose(); }}
+              className="w-full flex items-center gap-3 text-left rounded-xl border border-[#0D4D5E] px-4 py-3 hover:bg-[#F4F9FA] disabled:opacity-50"
+            >
+              <Code2 className="h-5 w-5 text-[#0D4D5E] shrink-0"/>
+              <span className="min-w-0">
+                <strong className="block text-sm text-[#0D4D5E]">Code</strong>
+                <span className="block text-[11px] text-slate-600">{ui('HTML-Vorlage für die technische Integration', 'Modello HTML per integrazione tecnica')}</span>
+              </span>
+              <Download className="h-4 w-4 ml-auto shrink-0 text-[#0D4D5E]"/>
+            </button>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 font-medium">

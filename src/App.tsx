@@ -22,6 +22,7 @@ import { signInDNSCore, signOutDNSCore, subscribeDNSCoreUser } from './lib/dnsCo
 import { loadCurrentFlyerAccess } from './data/currentFlyerAccess';
 import { getFlyerProductByTemplate, lockContentToProduct } from './model/flyerProductModel';
 import { useFlyerAutosave } from './hooks/useFlyerAutosave';
+import { downloadFlyerCodeHtml } from './utils/codeExport';
 
 export default function App() {
   // View mode: 'editor' | 'dashboard'
@@ -608,6 +609,21 @@ export default function App() {
 
   const handleExportPng = () => handleExportPngSingle(content.activeLanguage || 'it');
 
+  const handleExportCode = async () => {
+    const product = getFlyerProductByTemplate(content.layoutTemplateId);
+    if (product?.exportPolicy?.code !== 'html' || !flyerRef.current) return;
+    setIsExporting(true);
+    try {
+      await downloadFlyerCodeHtml(flyerRef.current, content, content.activeLanguage || 'it');
+    } catch (error) {
+      console.error('Code export failed:', error);
+      window.alert(uiLanguage === 'de' ? 'Code-Export fehlgeschlagen.' : 'Esportazione Code non riuscita.');
+      throw error;
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const isOnlineTicketModel = content.graphicStyle === 'online_ticket_manifesto' || content.graphicStyle === 'online_ticket_manifesto_v1';
 
   const uiCopy = uiLanguage === 'de'
@@ -811,6 +827,8 @@ export default function App() {
         onExportPngSeparate={handleExportPngSeparate}
         onExportPngSingle={handleExportPngSingle}
         isExporting={isExporting}
+        codeExportEnabled={getFlyerProductByTemplate(content.layoutTemplateId)?.exportPolicy?.code === 'html'}
+        onExportCode={handleExportCode}
         isPriceTable={content.graphicStyle === 'official_price_table' || content.graphicStyle === 'official_price_table_v1'}
       />
 

@@ -34,6 +34,8 @@ export interface FlyerProductDefinition {
   editableFields: readonly (keyof FlyerContent | string)[];
   pagePolicy: { formats: readonly PaperFormat[]; orientations: readonly PaperOrientation[]; magicLayout: boolean };
   dataPolicy: FlyerDataPolicy;
+  /** Optional artifact exports. Absent means PDF/PNG only. */
+  exportPolicy?: { code: 'html' };
 }
 
 export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
@@ -95,6 +97,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       languageMode: 'monolingual',
       ticketType: 'weekly_dns',
     },
+    exportPolicy: { code: 'html' } as const,
   },
   {
     type: 'ticket_weekly_area',
@@ -111,6 +114,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       languageMode: 'monolingual',
       ticketType: 'weekly_area',
     },
+    exportPolicy: { code: 'html' } as const,
   },
   {
     type: 'ticket_daily_area',
@@ -127,6 +131,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
       languageMode: 'monolingual',
       ticketType: 'daily_area',
     },
+    exportPolicy: { code: 'html' } as const,
   },
   {
     type: 'hotel_package',
@@ -142,6 +147,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     ],
     pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: { access: 'area', languageMode: 'monolingual' },
+    exportPolicy: { code: 'html' } as const,
   },
   {
     type: 'voucher',
@@ -156,6 +162,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     ],
     pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: { access: 'area', languageMode: 'monolingual' },
+    exportPolicy: { code: 'html' } as const,
   },
   {
     type: 'promotion',

@@ -7,6 +7,7 @@ import { NordicModernVariant } from './NordicModernVariant';
 import { OfficialPriceTableVariant } from './OfficialPriceTableVariant';
 import { OnlineTicketVariant } from './OnlineTicketVariant';
 import { VoucherVariant } from './VoucherVariant';
+import { PackageOfferVariant } from './PackageOfferVariant';
 import { HotelSkipassVariant } from './HotelSkipassVariant';
 import { HotelSkipassPanoramaVariant } from './HotelSkipassPanoramaVariant';
 import { HotelSkipassCompactVariant } from './HotelSkipassCompactVariant';
@@ -44,6 +45,7 @@ export const FLYER_VARIANT_MAP: Record<string, React.FC<FlyerVariantProps>> = {
   manifesto_voucher_v1: VoucherVariant,
   official_ticket_voucher: VoucherVariant,
   official_ticket_voucher_v1: VoucherVariant,
+  package_offer_editorial: PackageOfferVariant,
   hotel_skipass_package: HotelSkipassVariant,
   hotel_skipass_boutique: HotelSkipassVariant,
   hotel_skipass_panorama: HotelSkipassPanoramaVariant,

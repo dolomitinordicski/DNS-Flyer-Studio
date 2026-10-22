@@ -1,5 +1,6 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { DolomitiFullLogo } from '../CorporateVectors';
 import type { FlyerVariantProps } from './VariantTypes';
 import { resolveHotelPackageData } from './resolveFlyerData';
 
@@ -14,6 +15,9 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   const landscape = content.orientation === 'landscape';
   const compact = content.format === 'A5';
   const primary = theme.primaryHex;
+  const accent = theme.accentHex;
+  const regionalLogo = regionLogo?.logoSrc;
+  const partnerLogo = content.customRegionalLogoUrl;
   const hasPrice = Boolean(data.priceAmount.trim());
   const showPhoto = visibility.heroImage !== false && Boolean(content.heroImageUrl);
   const showServices = visibility.servicesBox !== false && data.features.length > 0;
@@ -21,8 +25,13 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   const focus = `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%`;
 
   const image = showPhoto ? (
-    <div className="relative overflow-hidden min-h-0 bg-slate-100" style={{ flex: landscape ? '1 1 48%' : '0 0 47%' }}>
+    <div className="relative overflow-hidden min-h-0 bg-slate-100" style={{ flex: landscape ? '1 1 52%' : '0 0 51%' }}>
       <img src={content.heroImageUrl} alt="" className="h-full w-full object-cover" style={{ objectPosition: focus }} referrerPolicy="no-referrer" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
+      <div className={`absolute bottom-0 left-0 right-0 ${compact ? 'p-5' : 'p-9'}`}>
+        <span className="inline-block h-1 w-12 mb-3" style={{ backgroundColor: accent }} />
+        <p className="text-white text-xs font-semibold uppercase tracking-[0.22em]">{data.location || 'Dolomiti NordicSki'}</p>
+      </div>
     </div>
   ) : null;
 
@@ -30,18 +39,27 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
     <article className="relative z-10 flex h-full min-w-0 flex-col overflow-hidden bg-white font-vietnam text-slate-900" data-package-layout={landscape ? 'split' : 'editorial'}>
       {visibility.header !== false && (
         <header className={`flex shrink-0 items-center justify-between gap-4 ${compact ? 'px-6 py-4' : 'px-10 py-7'}`}>
-          <div className="min-w-0 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: primary }}>
-            {regionLogo?.regionName || regionLogo?.name || 'Dolomiti NordicSki'}
+          <div className="flex items-center min-w-0 shrink-0">
+            <DolomitiFullLogo variant={content.logoVariant} isDarkHeader={false}
+              className={compact ? 'h-8 w-auto max-w-[140px] object-contain' : 'h-12 w-auto max-w-[220px] object-contain'}
+              customPrimary={primary} customAccent={accent} cornerStyle={content.logoCornerStyle} />
           </div>
-          <div className="text-right text-[10px] font-semibold tracking-[0.15em] text-slate-500">DOLOMITI NORDICSKI</div>
+          <div className="flex items-center justify-end min-w-0 gap-3">
+            {regionalLogo && content.regionId !== 'dns_central' && (
+              <img src={regionalLogo} alt={regionLogo?.regionName || 'Area partner'}
+                className={compact ? 'h-8 max-w-[110px] object-contain' : 'h-11 max-w-[170px] object-contain'} />
+            )}
+            {partnerLogo && <img src={partnerLogo} alt="Partner" className={compact ? 'h-8 max-w-[85px] object-contain' : 'h-11 max-w-[120px] object-contain'} />}
+          </div>
         </header>
       )}
       <div className={`flex min-h-0 flex-1 ${landscape ? 'flex-row' : 'flex-col'}`}>
         {image}
         <div className={`flex min-h-0 min-w-0 flex-1 flex-col justify-between ${compact ? 'gap-3 px-6 py-5' : 'gap-6 px-10 py-9'}`}>
           <div className="min-w-0">
+            <div className="mb-5 h-1 w-12" style={{ backgroundColor: accent }} />
             {data.badge && <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: primary }}>{data.badge}</p>}
-            <h1 className={`${compact ? 'text-2xl' : 'text-[38px]'} font-semibold leading-[1.08] tracking-tight break-words`}>{data.title}</h1>
+            <h1 className={`${compact ? 'text-2xl' : landscape ? 'text-[38px]' : 'text-[44px]'} font-semibold leading-[1.08] tracking-tight break-words`}>{data.title}</h1>
             {data.subtitle && <p className={`${compact ? 'mt-2 text-xs' : 'mt-4 text-base'} leading-relaxed text-slate-600`}>{data.subtitle}</p>}
             {(data.location || data.validityPeriod) && <p className="mt-4 text-[11px] tracking-wide text-slate-500">{[data.location, data.validityPeriod].filter(Boolean).join('  ·  ')}</p>}
           </div>

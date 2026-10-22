@@ -23,14 +23,16 @@ interface FlyerCanvasProps {
 
 export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ content, scale = 1 }, ref) => {
   // Selected regional logo info
-  const baseRegionLogo = findReportingAreaLogo(content.regionId);
+  const isTicketDocument = ['ticket_online_weekly_dns', 'ticket_online_weekly_area', 'ticket_online_daily'].includes(content.layoutTemplateId || '');
+  const brandingAreaId = isTicketDocument ? (content.issuingAreaId || (content.regionId !== 'dns_central' ? content.regionId : '3_zinnen')) : content.regionId;
+  const baseRegionLogo = findReportingAreaLogo(brandingAreaId);
   // Official regional flyers must display all approved partner marks automatically.
   // Older drafts may have persisted 'primary' or another single-logo choice.
   const selectedLogoOption = content.layoutTemplateId === 'regional_price_list'
-    ? defaultRegionalLogoOption(content.regionId)
+    ? defaultRegionalLogoOption(brandingAreaId)
     : (baseRegionLogo.logos?.find(l => l.id === content.selectedRegionLogoId)
       || baseRegionLogo.logoOptions?.find(l => l.id === content.selectedRegionLogoId)
-      || defaultRegionalLogoOption(content.regionId));
+      || defaultRegionalLogoOption(brandingAreaId));
 
   const regionLogo = {
     ...baseRegionLogo,

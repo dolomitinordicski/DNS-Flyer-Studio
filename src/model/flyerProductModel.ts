@@ -90,6 +90,8 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
     editableFields: [
       'heroImageUrl', 'customPrimaryColor', 'customAccentColor', 'qrCode',
+      'issuingAreaId', 'issuerName', 'contactEmail', 'contactPhone', 'websiteUrl',
+      'ticketLocalLogoUrl', 'ticketLocalLogoName', 'ticketContent',
     ],
     pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait'], magicLayout: true },
     dataPolicy: {
@@ -107,6 +109,8 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
     editableFields: [
       'heroImageUrl', 'customPrimaryColor', 'customAccentColor', 'qrCode',
+      'issuingAreaId', 'issuerName', 'contactEmail', 'contactPhone', 'websiteUrl',
+      'ticketLocalLogoUrl', 'ticketLocalLogoName', 'ticketContent',
     ],
     pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait'], magicLayout: true },
     dataPolicy: {
@@ -124,6 +128,8 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
     editableFields: [
       'heroImageUrl', 'customPrimaryColor', 'customAccentColor', 'qrCode',
+      'issuingAreaId', 'issuerName', 'contactEmail', 'contactPhone', 'websiteUrl',
+      'ticketLocalLogoUrl', 'ticketLocalLogoName', 'ticketContent',
     ],
     pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait'], magicLayout: true },
     dataPolicy: {

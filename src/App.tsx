@@ -348,6 +348,8 @@ export default function App() {
 
   // Toggle Format (A4, A5, A3)
   const handleChangeFormat = (format: PaperFormat) => {
+    const product = getFlyerProductByTemplate(content.layoutTemplateId);
+    if (product && !product.pagePolicy.formats.includes(format)) return;
     const isLandscape = content.orientation === 'landscape';
     const { swooshWidth, curveSize } = getOptimalGraphicSizes(format, isLandscape);
 
@@ -367,6 +369,7 @@ export default function App() {
 
   // Toggle Orientation (Portrait / Landscape)
   const handleToggleOrientation = () => {
+    if (getFlyerProductByTemplate(content.layoutTemplateId)?.dataPolicy.ticketType) return;
     const newOrientation: PaperOrientation = content.orientation === 'portrait' ? 'landscape' : 'portrait';
     const isLandscape = newOrientation === 'landscape';
     const fmt = content.format || 'A4';

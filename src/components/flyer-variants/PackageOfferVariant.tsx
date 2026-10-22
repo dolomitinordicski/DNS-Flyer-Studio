@@ -16,6 +16,9 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   const areaName = officialPackageAreaName(content.regionId, content.activeLanguage || 'de');
   const landscape = content.orientation === 'landscape';
   const compact = content.format === 'A5';
+  const tight = landscape || compact;
+  const optimized = (content.textScaleFactor ?? 1) < 0.9;
+  const longCopy = data.title.length > 46 || data.subtitle.length > 110;
   const primary = theme.primaryHex;
   const photoMargin = compact ? 'mx-5' : 'mx-9';
   // Area identity only on small existing graphic accents; corporate palette stays intact.
@@ -30,7 +33,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   const focus = `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%`;
 
   const image = showPhoto ? (
-    <div className={`relative overflow-hidden min-h-0 bg-slate-100 ${landscape ? '' : photoMargin}`} style={{ flex: landscape ? '1 1 52%' : '0 0 49%' }}>
+    <div className={`relative overflow-hidden min-h-0 bg-slate-100 ${landscape ? '' : photoMargin}`} style={{ flex: landscape ? '0 0 40%' : '0 0 49%' }}>
       <img src={content.heroImageUrl} alt="" className="h-full w-full object-cover" style={{ objectPosition: focus }} referrerPolicy="no-referrer" />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
       <div className={`absolute bottom-0 left-0 right-0 ${compact ? 'p-5' : 'p-9'}`}>
@@ -58,30 +61,30 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
           </div>
         </header>
       )}
-      <div className={`flex min-h-0 flex-1 ${landscape ? 'flex-row px-9 gap-7' : 'flex-col'}`}>
+      <div className={`flex min-h-0 flex-1 ${landscape ? 'flex-row px-7 gap-4' : 'flex-col'}`}>
         {image}
-        <div className={`flex min-h-0 min-w-0 flex-1 flex-col justify-between ${compact ? 'gap-3 px-6 py-5' : landscape ? 'gap-5 px-3 py-6' : 'gap-6 px-10 py-8'}`}>
+        <div className={`flex min-h-0 min-w-0 flex-1 flex-col justify-between ${compact ? 'gap-3 px-6 py-5' : landscape ? 'gap-2 px-1 py-3' : 'gap-6 px-10 py-8'}`}>
           <div className="min-w-0">
-            <div className="mb-5 h-1 w-12" data-dns-area-accent="package-heading" style={{ backgroundColor: areaAccent }} />
-            {data.badge && <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: primary }}>{data.badge}</p>}
-            <h1 className={`${compact ? 'text-2xl' : landscape ? 'text-[38px]' : 'text-[44px]'} font-semibold leading-[1.08] tracking-tight break-words`}>{data.title}</h1>
-            {data.subtitle && <p className={`${compact ? 'mt-2 text-xs' : 'mt-4 text-base'} leading-relaxed text-slate-600`}>{data.subtitle}</p>}
-            {(data.location || data.validityPeriod) && <p className="mt-4 text-[11px] tracking-wide text-slate-500">{[data.location, data.validityPeriod].filter(Boolean).join('  ·  ')}</p>}
+            <div className={landscape ? 'mb-2 h-1 w-12' : 'mb-5 h-1 w-12'} data-dns-area-accent="package-heading" style={{ backgroundColor: areaAccent }} />
+            {data.badge && <p className={`${tight ? 'mb-1 text-[9px]' : 'mb-3 text-[10px]'} font-semibold uppercase tracking-[0.17em]`} style={{ color: primary }}>{data.badge}</p>}
+            <h1 className={`${compact ? 'text-2xl' : landscape ? (optimized || longCopy ? 'text-[23px]' : 'text-[28px]') : 'text-[44px]'} font-semibold leading-[1.08] tracking-tight break-words`}>{data.title}</h1>
+            {data.subtitle && <p className={`${tight ? 'mt-1 text-[11px] leading-snug' : 'mt-4 text-base leading-relaxed'} text-slate-600 break-words`}>{data.subtitle}</p>}
+            {(data.location || data.validityPeriod) && <p className={`${tight ? 'mt-2 text-[9px]' : 'mt-4 text-[11px]'} tracking-wide text-slate-500 break-words`}>{[data.location, data.validityPeriod].filter(Boolean).join('  ·  ')}</p>}
           </div>
           {showServices && (
             <div className="min-w-0">
               {data.featuresTitle && <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{data.featuresTitle}</p>}
-              <p className={`${compact ? 'text-[11px]' : 'text-[13px]'} leading-relaxed text-slate-700`}>
-                {data.features.filter(f => f.text?.trim()).slice(0, compact ? 3 : 4).map(f => f.text).join('  ·  ')}
+              <p className={`${tight ? 'text-[10px]' : 'text-[13px]'} leading-relaxed text-slate-700`}>
+                {data.features.filter(f => f.text?.trim()).slice(0, tight ? 3 : 4).map(f => f.text).join('  ·  ')}
               </p>
             </div>
           )}
           {visibility.priceTables !== false && (
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 break-words">
               {hasPrice ? (
                 <>
                   {data.pricePrefix && <span className="text-xs uppercase tracking-[0.14em] text-slate-500">{data.pricePrefix}</span>}
-                  <span className={`${compact ? 'text-3xl' : 'text-5xl'} font-semibold tracking-tight`} style={{ color: primary }}>{data.priceAmount} {data.priceCurrency}</span>
+                  <span className={`${tight ? 'text-2xl' : 'text-5xl'} font-semibold tracking-tight`} style={{ color: primary }}>{data.priceAmount} {data.priceCurrency}</span>
                   {data.priceSuffix && <span className="text-xs text-slate-500">{data.priceSuffix}</span>}
                 </>
               ) : <span className="text-lg font-medium" style={{ color: primary }}>{data.priceNote || 'Preis auf Anfrage'}</span>}

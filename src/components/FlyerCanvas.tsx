@@ -1,5 +1,4 @@
 import React, { forwardRef, useEffect, useState, useSyncExternalStore } from 'react';
-import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
 import { FlyerContent } from '../types';
 import { getAllSportsIcons } from '../data/sportsIcons';
 import { DEFAULT_PRICE_LIST_TEXTS } from '../data/templates';
@@ -146,9 +145,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
   };
 
   const dimensions = resolveFlyerDimensions(content);
-  // Official area identity accent, separate from DNS corporate colors.
-  const regionalDocument = ['regional_price_list', 'ticket_online_weekly_area', 'ticket_online_daily'].includes(content.layoutTemplateId || '');
-  const regionAccent = regionalDocument ? resolveDNSRegionAccent(content.regionId) : null;
+
 
   return (
     <div 
@@ -164,11 +161,6 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       }}
     >
       <div className="absolute inset-0 z-0 bg-white" />
-      {regionAccent && (
-        <div aria-hidden="true" data-dns-area-accent={content.regionId}
-          className="absolute inset-y-0 left-0 z-20 pointer-events-none"
-          style={{ width: '2mm', backgroundColor: regionAccent }} />
-      )}
       
       {/* Background Hero Image (if set to full background) */}
       {visibility.heroImage && content.layoutTemplateId !== 'hotel_skipass_package' && content.heroImagePosition === 'background' && localizedContent.heroImageUrl && (

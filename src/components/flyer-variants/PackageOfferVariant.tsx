@@ -64,7 +64,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
       )}
       <div className={`flex min-h-0 flex-1 ${landscape ? 'flex-row px-7 gap-4' : 'flex-col'}`}>
         {image}
-        <div className={`flex min-h-0 min-w-0 flex-1 flex-col justify-between ${compact ? 'gap-3 px-6 py-5' : landscape ? 'gap-2 px-1 py-3' : 'gap-6 px-10 py-8'}`}>
+        <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${landscape ? 'justify-start' : 'justify-between'} ${compact ? 'gap-3 px-6 py-5' : landscape ? 'gap-2 px-1 py-3' : 'gap-6 px-10 py-8'}`}>
           <div className="min-w-0">
             <div className={landscape ? 'mb-2 h-1 w-12' : 'mb-5 h-1 w-12'} data-dns-area-accent="package-heading" style={{ backgroundColor: areaAccent }} />
             {data.badge && <p className={`${tight ? 'mb-1 text-[9px]' : 'mb-3 text-[10px]'} font-semibold uppercase tracking-[0.17em]`} style={{ color: primary }}>{data.badge}</p>}
@@ -81,7 +81,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
             </div>
           )}
           {visibility.priceTables !== false && (
-            <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 break-words">
+            <div className={`flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 break-words ${landscape ? "mt-auto pt-5" : ""}`}>
               {hasPrice ? (
                 <>
                   {data.pricePrefix && <span className="text-xs uppercase tracking-[0.14em] text-slate-500">{data.pricePrefix}</span>}

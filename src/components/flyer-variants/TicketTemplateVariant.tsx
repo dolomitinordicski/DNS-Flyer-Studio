@@ -1,4 +1,5 @@
 import React from 'react';
+import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
 import type { FlyerVariantProps } from './VariantTypes';
 import dnsLogo from '../../assets/logo_farbe_2025.svg';
 import { QRCodeSVG } from 'qrcode.react';
@@ -13,6 +14,8 @@ import { createTicketProofData } from '../print-proof/printProofModel';
 export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, theme, regionLogo }) => {
   const { kind, locale, ui, isArea, areaName, regionalMarks, issuer, issuerContact, editorial, terms, coverage, extraArea } =
     resolveTicketPresentation(content, regionLogo);
+  // This variant draws its own ticket header rather than the shared flyer blocks.
+  const identityAccent = isArea ? resolveDNSRegionAccent(content.issuingAreaId || content.regionId) : null;
   const proof = content.ticketProofMode === true;
   const sample = proof ? createTicketProofData(content) : null;
 
@@ -30,6 +33,7 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
         <div className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: theme.primaryHex }}>OFFICIAL SKI TICKET · WINTER {content.validityPeriod || '2026/27'}</p>
           <h1 className="mt-2 break-words text-3xl font-extrabold leading-tight" style={{ color: theme.primaryHex }}>{TICKET_LABELS[locale][kind]}</h1>
+          {identityAccent && <div aria-hidden="true" data-dns-area-accent="ticket-title" className="mt-2 h-[3px] w-8 rounded-full" style={{ backgroundColor: identityAccent }} />}
           <p className="mt-2 text-lg font-semibold">{areaName}</p>
         </div>
       </div>

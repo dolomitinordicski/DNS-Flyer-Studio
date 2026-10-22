@@ -16,8 +16,10 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
 
   const isDNSList = content.layoutTemplateId === 'official_price_list';
   const isRegionalList = content.layoutTemplateId === 'regional_price_list';
-  const isRegionalDocument = ['regional_price_list', 'ticket_online_weekly_area', 'ticket_online_daily'].includes(content.layoutTemplateId || '');
-  const identityAccent = isRegionalDocument ? resolveDNSRegionAccent(content.regionId) : null;
+  // Apply regional identity to any area-branded flyer (including packages and vouchers).
+  // Keep general DNS documents strictly corporate.
+  const identityAccent = content.layoutTemplateId === 'official_price_list' || content.layoutTemplateId === 'ticket_online_weekly_dns'
+    ? null : resolveDNSRegionAccent(content.regionId);
   const hasDualRegionalLogos = isRegionalList && !!regionLogo.secondaryLogoSrc;
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';

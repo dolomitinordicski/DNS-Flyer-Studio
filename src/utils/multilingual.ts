@@ -299,6 +299,11 @@ function translateToEn(text: string): string {
 }
 
 export function getContentForLanguage(content: FlyerContent, lang: LanguageCode): FlyerContent {
+  // Packages & offers have one manually edited document, not separate translated
+  // price snapshots. Old translations must never override live editor values.
+  if (content.layoutTemplateId === 'hotel_skipass_package') {
+    return { ...content, activeLanguage: lang, translations: undefined };
+  }
   const translations = getInitialTranslations(content);
   const langSet = translations[lang] || translations['it'] || {};
 

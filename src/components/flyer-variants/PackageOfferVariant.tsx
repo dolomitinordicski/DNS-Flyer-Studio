@@ -2,7 +2,7 @@ import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { DolomitiFullLogo, NordicSwooshGraphic } from '../CorporateVectors';
 import type { FlyerVariantProps } from './VariantTypes';
-import { resolveHotelPackageData } from './resolveFlyerData';
+import { resolveHotelPackageData, officialPackageAreaName } from './resolveFlyerData';
 
 /**
  * Print-first package composition. Editorial content only: no tariff lookup,
@@ -12,6 +12,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   content, theme, regionLogo, visibility,
 }) => {
   const data = resolveHotelPackageData(content, content.activeLanguage || 'de');
+  const areaName = officialPackageAreaName(content.regionId, content.activeLanguage || 'de');
   const landscape = content.orientation === 'landscape';
   const compact = content.format === 'A5';
   const primary = theme.primaryHex;
@@ -42,9 +43,9 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
         <header className={`flex shrink-0 items-center justify-between gap-4 ${compact ? 'px-6 py-4' : 'px-10 py-7'}`}>
           <div className="flex min-w-0 items-center gap-3">
             {regionalLogo && content.regionId !== 'dns_central' ? (
-              <img src={regionalLogo} alt={regionLogo?.regionName || 'Area partner'}
+              <img src={regionalLogo} alt={areaName || regionLogo?.regionName || 'Area partner'}
                 className={compact ? 'h-11 max-w-[170px] object-contain' : 'h-16 max-w-[280px] object-contain'} />
-            ) : <span className="text-sm font-semibold" style={{ color: primary }}>{regionLogo?.regionName || 'Dolomiti NordicSki'}</span>}
+            ) : <span className="text-sm font-semibold" style={{ color: primary }}>{areaName || 'Dolomiti NordicSki'}</span>}
             {partnerLogo && <img src={partnerLogo} alt="Partner" className={compact ? 'h-8 max-w-[75px] object-contain' : 'h-10 max-w-[100px] object-contain'} />}
           </div>
           <div className="shrink-0 opacity-80">

@@ -370,7 +370,7 @@ export const FLYER_TEMPLATES: FlyerTemplate[] = [
       format: 'A4',
       orientation: 'portrait',
       themeColor: 'frosted_ice',
-      graphicStyle: 'hotel_skipass_package',
+      graphicStyle: 'package_offer_editorial',
       sectionVisibility: {
         header: true,
         bigTitle: true,

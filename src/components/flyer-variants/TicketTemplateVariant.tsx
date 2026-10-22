@@ -79,7 +79,7 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
           </div>
         </section>
       )}
-      <section className="mx-8 mt-5 border-l-4 bg-slate-50 px-5 py-4" style={{ borderColor: theme.primaryHex }}>
+      <section className="mx-8 mt-5 border-l-4 bg-slate-50 px-5 py-4" data-dns-area-accent={identityAccent ? "coverage" : undefined} style={{ borderColor: identityAccent || theme.primaryHex }}>
         <h2 className="text-xs font-extrabold tracking-wider" style={{ color: theme.primaryHex }}>{coverage.title}</h2>
         <p className="mt-2 text-sm font-semibold">{isArea ? areaName : coverage.network}</p>
         {extraArea && <p className="mt-1 text-sm font-semibold">{coverage.cross} {extraArea}</p>}

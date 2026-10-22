@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect, useState, useSyncExternalStore } from 'react';
 import { FlyerContent } from '../types';
-import { findReportingAreaLogo } from '../data/regionalLogos';
+import { findReportingAreaLogo, defaultRegionalLogoOption } from '../data/regionalLogos';
 import { getFlyerProductByTemplate } from '../model/flyerProductModel';
 import { SPORTS_ICONS, getAllSportsIcons } from '../data/sportsIcons';
 import { DEFAULT_PRICE_LIST_TEXTS } from '../data/templates';
@@ -24,10 +24,13 @@ interface FlyerCanvasProps {
 export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ content, scale = 1 }, ref) => {
   // Selected regional logo info
   const baseRegionLogo = findReportingAreaLogo(content.regionId);
-  const selectedLogoOption = baseRegionLogo.logos?.find(l => l.id === content.selectedRegionLogoId) 
-    || baseRegionLogo.logoOptions?.find(l => l.id === content.selectedRegionLogoId)
-    || baseRegionLogo.logos?.[0]
-    || baseRegionLogo.logoOptions?.[0];
+  // Official regional flyers must display all approved partner marks automatically.
+  // Older drafts may have persisted 'primary' or another single-logo choice.
+  const selectedLogoOption = content.layoutTemplateId === 'regional_price_list'
+    ? defaultRegionalLogoOption(content.regionId)
+    : (baseRegionLogo.logos?.find(l => l.id === content.selectedRegionLogoId)
+      || baseRegionLogo.logoOptions?.find(l => l.id === content.selectedRegionLogoId)
+      || defaultRegionalLogoOption(content.regionId));
 
   const regionLogo = {
     ...baseRegionLogo,

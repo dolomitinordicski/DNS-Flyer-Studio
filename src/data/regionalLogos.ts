@@ -14,6 +14,7 @@ const logoGsiesertalSvg = sharedRegionLogo('gsiesertal-welsberg-taisten.svg');
 const logo3ZinnenSvg = sharedRegionLogo('drei-zinnen-dolomites.svg');
 const logoOsttirolSvg = sharedRegionLogo('osttirol.svg');
 const logoComelicoSvg = sharedRegionLogo('val-comelico.svg');
+const logoComelicoConsorzioSvg = sharedRegionLogo('consorzio-turistico-val-comelico.svg');
 const logoCortinaSvg = sharedRegionLogo('cortina-dolomiti.svg');
 const logoAhrntalSvg = sharedRegionLogo('ahrntal-valle-aurina.svg');
 const logoSeiserAlmSvg = sharedRegionLogo('seiser-alm.svg');
@@ -92,7 +93,12 @@ export const REGIONAL_LOGOS: RegionalLogo[] = [
     regionName: 'Comelico / Val Comelico',
     subTitle: 'Piste di Fondo tra Cime Spettacolari',
     primaryColor: '#0D4D5E',
-    logoSrc: logoComelicoSvg
+    logoSrc: logoComelicoSvg,
+    logos: [
+      { id: 'primary', name: 'Val Comelico', logoSrc: logoComelicoSvg },
+      { id: 'consorzio', name: 'Consorzio Turistico Val Comelico', logoSrc: logoComelicoConsorzioSvg },
+      { id: 'both', name: 'Val Comelico + Consorzio Turistico', logoSrc: logoComelicoSvg, secondaryLogoSrc: logoComelicoConsorzioSvg },
+    ]
   },
   {
     id: 'cortina',
@@ -155,4 +161,12 @@ export function findReportingAreaLogo(areaId: string) {
 /** Exact Firestore reportingAreas document ID for Flyer persistence and pricing. */
 export function coreReportingAreaId(areaId: string): string {
   return Object.entries(REGIONAL_AREA_ALIASES).find(([, legacy]) => legacy === areaId)?.[0] || areaId;
+}
+
+/** Flyer-specific dual-partner presentation; does not change Shared Data's
+ * canonical entity bindings (Biathlon and Comelico consorzio are organizations). */
+export function defaultRegionalLogoOption(areaId: string) {
+  const area = findReportingAreaLogo(areaId);
+  const combined = area.logos?.find(option => option.id === 'both');
+  return combined || area.logos?.[0] || area.logoOptions?.[0];
 }

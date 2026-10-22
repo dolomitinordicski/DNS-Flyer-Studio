@@ -15,6 +15,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
 
   const isDNSList = content.layoutTemplateId === 'official_price_list';
   const isRegionalList = content.layoutTemplateId === 'regional_price_list';
+  const hasDualRegionalLogos = isRegionalList && !!regionLogo.secondaryLogoSrc;
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
@@ -56,7 +57,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
           {/* Right: Selected Regional Partner Badge */}
           {content.regionId && content.regionId !== 'dns_central' && (
             <div 
-              className={`flex items-center gap-2 ${isA5 ? 'px-1.5 py-1' : 'px-2.5 py-1.5'} min-w-0 max-w-[55%] shrink justify-end ${
+              className={`flex items-center ${hasDualRegionalLogos ? 'gap-1.5' : 'gap-2'} ${isA5 ? 'px-1.5 py-1' : 'px-2.5 py-1.5'} min-w-0 ${hasDualRegionalLogos ? 'max-w-[66%]' : 'max-w-[55%]'} shrink justify-end ${
                 (content.logoCornerStyle || 'rounded') === 'none'
                   ? ''
                   : (content.logoCornerStyle === 'sharp' ? 'rounded-none border backdrop-blur-md shadow-sm' : 'rounded-xl border backdrop-blur-md shadow-sm')
@@ -74,7 +75,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
                     : (regionLogo.logoWhiteSrc || regionLogo.logoSrc || OFFICIAL_ASSET_PATHS.logoWhiteSvg)
                 } 
                 alt={regionLogo.name} 
-                className={`${isA5 ? 'h-5' : isA3 ? 'h-10 sm:h-12' : 'h-7 sm:h-9'} w-auto object-contain shrink-0`} 
+                className={`${isA5 ? 'h-5' : isA3 ? 'h-10 sm:h-12' : 'h-7 sm:h-9'} ${hasDualRegionalLogos ? 'max-w-[78px]' : ''} w-auto object-contain shrink-0`} 
               />
               {regionLogo.secondaryLogoSrc && (
                 <img 
@@ -83,11 +84,11 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
                       ? regionLogo.secondaryLogoSrc
                       : (regionLogo.secondaryLogoWhiteSrc || regionLogo.secondaryLogoSrc)
                   } 
-                  alt={`${regionLogo.name} Secondary`} 
-                  className={`${isA5 ? 'h-5' : isA3 ? 'h-10 sm:h-12' : 'h-7 sm:h-9'} w-auto object-contain shrink-0`} 
+                  alt={`${regionLogo.name} Partner`} 
+                  className={`${isA5 ? 'h-5' : isA3 ? 'h-10 sm:h-12' : 'h-7 sm:h-9'} max-w-[78px] w-auto object-contain shrink-0`} 
                 />
               )}
-              <div className="text-right min-w-0 flex-1">
+              <div className={`text-right min-w-0 flex-1 ${hasDualRegionalLogos ? "hidden sm:block" : ""}`}>
                 <div className={`${isA5 ? 'text-[8px]' : 'text-[9px] sm:text-[11px]'} font-black uppercase leading-tight font-vietnam break-words whitespace-normal ${theme.isBadgeLight ? 'text-slate-900' : theme.headerTextColor}`}>
                   {content.customRegionName || regionLogo.regionName || regionLogo.name}
                 </div>

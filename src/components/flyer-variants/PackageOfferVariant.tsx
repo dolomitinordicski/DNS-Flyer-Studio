@@ -86,13 +86,13 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
           )}
         </div>
       </div>
-      {/* Official DNS swoosh: a quiet signature, kept within the page margins. */}
-      <div className={`pointer-events-none relative shrink-0 overflow-hidden ${compact ? 'mx-5 h-7' : 'mx-9 h-11'}`} aria-hidden="true">
+      {/* Original DNS curves, shown whole rather than clipped by a narrow strip. */}
+      <div className={`pointer-events-none relative shrink-0 ${compact ? 'mx-6 h-12' : 'mx-10 h-16'}`} aria-hidden="true">
         <NordicSwooshGraphic
           variant="swoosh_only"
           color={accent}
-          className="absolute -right-5 -top-9 h-24 w-72 max-w-none"
-          style={{ opacity: 0.18 }}
+          className="absolute right-0 bottom-0 h-full w-52 object-contain"
+          style={{ opacity: 0.28 }}
         />
       </div>
       {visibility.footer !== false && (

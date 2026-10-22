@@ -1,6 +1,7 @@
 import React from 'react';
 import { FlyerVariantProps, getActiveOrder } from './VariantTypes';
 import { BlockStackRenderer } from '../blocks';
+import { TicketTemplateVariant } from './TicketTemplateVariant';
 
 export const OnlineTicketVariant: React.FC<FlyerVariantProps> = ({
   content,
@@ -10,6 +11,9 @@ export const OnlineTicketVariant: React.FC<FlyerVariantProps> = ({
   activeSportsIcons = [],
   visibility
 }) => {
+  if (content.layoutTemplateId === 'ticket_online_weekly_dns' || content.layoutTemplateId === 'ticket_online_weekly_area' || content.layoutTemplateId === 'ticket_online_daily') {
+    return <TicketTemplateVariant content={content} plt={plt} theme={theme} regionLogo={regionLogo} activeSportsIcons={activeSportsIcons} visibility={visibility} format={content.format} orientation={content.orientation} />;
+  }
   const fmt = content.format || 'A4';
   const isA5 = fmt === 'A5';
 

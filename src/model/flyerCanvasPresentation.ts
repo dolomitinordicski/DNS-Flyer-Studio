@@ -32,8 +32,8 @@ export function resolveFlyerBrand(content: FlyerContent) {
 
 export function resolveFlyerVisibility(content: FlyerContent) {
   // Visibility Configuration
-  const v1: SectionVisibility = content.sectionVisibility || {};
-  const v2: SectionVisibility = content.visibility || {};
+  const v1: Partial<SectionVisibility> = content.sectionVisibility || {};
+  const v2: Partial<SectionVisibility> = content.visibility || {};
 
   const visibility = {
     header: v1.header !== false && v2.header !== false,

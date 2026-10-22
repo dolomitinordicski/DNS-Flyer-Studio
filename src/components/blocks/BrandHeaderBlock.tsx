@@ -1,4 +1,5 @@
 import React from 'react';
+import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
 import { BlockProps } from './BlockTypes';
 import { DolomitiFullLogo, OFFICIAL_ASSET_PATHS } from '../CorporateVectors';
 import { isSvgUrl } from '../../utils/logoUtils';
@@ -15,6 +16,8 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
 
   const isDNSList = content.layoutTemplateId === 'official_price_list';
   const isRegionalList = content.layoutTemplateId === 'regional_price_list';
+  const isRegionalDocument = ['regional_price_list', 'ticket_online_weekly_area', 'ticket_online_daily'].includes(content.layoutTemplateId || '');
+  const identityAccent = isRegionalDocument ? resolveDNSRegionAccent(content.regionId) : null;
   const hasDualRegionalLogos = isRegionalList && !!regionLogo.secondaryLogoSrc;
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';
@@ -65,7 +68,8 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
               style={{
                 ...((content.logoCornerStyle || 'rounded') !== 'none' ? theme.headerBadgeBgStyle : {}),
                 transform: `scale(${(regionLogo.regionalLogoScale || 100) / 100})`,
-                transformOrigin: 'right center'
+                transformOrigin: 'right center',
+                ...(identityAccent && content.logoCornerStyle !== 'none' ? { borderBottomColor: identityAccent, borderBottomWidth: '3px' } : {})
               }}
             >
               <img 

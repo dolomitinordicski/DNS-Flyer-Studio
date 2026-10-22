@@ -95,6 +95,9 @@ export function optimizeLayout(content: FlyerContent): OptimizedLayoutResult {
     textScaleFactor = isLandscape ? 0.92 : (activeVisibleCount >= 8 ? 0.95 : 1.0);
   }
 
+  // The package renderer uses this factor to fit copy in landscape.
+  if (content.layoutTemplateId === 'hotel_skipass_package' && isLandscape) textScaleFactor = 0.82;
+
   // Clean up and optimize text line breaks
   const cleanText = (text: string | undefined): string => {
     if (!text) return '';

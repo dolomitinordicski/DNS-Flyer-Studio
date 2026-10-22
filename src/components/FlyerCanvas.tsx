@@ -183,6 +183,8 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
           {priceLoadState === 'loading' ? 'DNS: tariffe in caricamento' : 'DNS: tariffe non disponibili'}
         </div>
       )}
+      {/* Editorial typography adjusts with Make It Perfect across all flyer types. */}
+      <style>{`[data-dns-fit] h1, [data-dns-fit] h2, [data-dns-fit] h3, [data-dns-fit] p, [data-dns-fit] li { zoom: var(--dns-text-fit); }`}</style>
       {/* Render selected Variant */}
       {(() => {
         let effectiveGraphicStyle = graphicStyle;
@@ -190,7 +192,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
           effectiveGraphicStyle = 'package_offer_editorial';
         }
         const VariantComponent = FLYER_VARIANT_MAP[effectiveGraphicStyle] || ClassicVariant;
-        return <VariantComponent {...variantProps} />;
+        return <div data-dns-fit style={{ position: "absolute", inset: 0, ["--dns-text-fit" as string]: Math.max(0.72, Math.min(1.24, content.textScaleFactor ?? 1)) }}><VariantComponent {...variantProps} /></div>;
       })()}
 
       {/* Nordic Swoosh Overlay */}

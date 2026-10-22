@@ -88,7 +88,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
       </div>
       {visibility.footer !== false && (
         <footer className={`relative isolate flex shrink-0 items-end justify-between gap-5 border-t border-slate-200 ${compact ? 'px-6 py-4' : 'px-10 py-6'}`}>
-          <div className="pointer-events-none absolute inset-y-0 right-8 -z-10 w-48 overflow-hidden" aria-hidden="true">
+          <div className="pointer-events-none absolute inset-y-0 right-8 z-0 w-48 overflow-hidden" aria-hidden="true">
             <NordicSwooshGraphic variant="swoosh_only" color={accent} className="absolute right-0 top-1/2 h-32 w-48 -translate-y-1/2" style={{ opacity: 0.11 }} />
           </div>
           <div className="relative z-10 min-w-0 space-y-1">
@@ -96,7 +96,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
             <p className="text-[10px] text-slate-600">{[data.website, data.email, data.phone].filter(Boolean).join('  ·  ')}</p>
           </div>
           {visibility.qrCode !== false && content.qrCode?.enabled && qrUrl && (
-            <div className="shrink-0"><QRCodeSVG value={qrUrl} size={compact ? 44 : 60} fgColor={primary} bgColor="#FFFFFF" /></div>
+            <div className="relative z-10 shrink-0"><QRCodeSVG value={qrUrl} size={compact ? 44 : 60} fgColor={primary} bgColor="#FFFFFF" /></div>
           )}
         </footer>
       )}

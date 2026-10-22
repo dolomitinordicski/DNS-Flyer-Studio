@@ -31,7 +31,10 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
 
   const isDNSList = content.layoutTemplateId === 'official_price_list';
   const isRegionalList = content.layoutTemplateId === 'regional_price_list';
-  const identityAccent = isRegionalList ? resolveDNSRegionAccent(content.regionId) : null;
+  // Every area-branded flyer gets the same restrained identity detail.
+  // Network-wide flyers retain the DNS corporate palette only.
+  const identityAccent = content.layoutTemplateId === 'official_price_list' || content.layoutTemplateId === 'ticket_online_weekly_dns'
+    ? null : resolveDNSRegionAccent(content.regionId);
   const titleText = isPriceTable
     ? (plt?.mainTitle || content.title)
     : (content.title || plt?.mainTitle);

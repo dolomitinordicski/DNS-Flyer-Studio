@@ -161,7 +161,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       <div className="absolute inset-0 z-0 bg-white" />
       
       {/* Background Hero Image (if set to full background) */}
-      {visibility.heroImage && content.heroImagePosition === 'background' && localizedContent.heroImageUrl && (
+      {visibility.heroImage && content.layoutTemplateId !== 'hotel_skipass_package' && content.heroImagePosition === 'background' && localizedContent.heroImageUrl && (
         <div className="absolute inset-0 z-0">
           <img
             src={localizedContent.heroImageUrl}
@@ -184,8 +184,8 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       {/* Render selected Variant */}
       {(() => {
         let effectiveGraphicStyle = graphicStyle;
-        if (content.layoutTemplateId === 'hotel_skipass_package' && !graphicStyle?.startsWith('hotel_skipass')) {
-          effectiveGraphicStyle = 'hotel_skipass_package';
+        if (content.layoutTemplateId === 'hotel_skipass_package') {
+          effectiveGraphicStyle = 'package_offer_editorial';
         }
         const VariantComponent = FLYER_VARIANT_MAP[effectiveGraphicStyle] || ClassicVariant;
         return <VariantComponent {...variantProps} />;

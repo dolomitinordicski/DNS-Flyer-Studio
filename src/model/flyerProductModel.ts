@@ -160,8 +160,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     type: 'gutschein',
     templateId: 'gift_voucher',
     label: { de: 'Gutschein', it: 'Buono regalo', en: 'Gift certificate' },
-
-    graphicStyle: 'manifesto_voucher',
+    graphicStyle: 'gutschein_editorial',
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'qrCode', 'footer'],
     editableFields: [
       'title', 'subtitle', 'validityPeriod', 'heroImageUrl',

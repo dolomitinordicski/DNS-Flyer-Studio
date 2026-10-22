@@ -295,6 +295,21 @@ export interface FlyerContent {
     en?: MultilingualTextSet;
   };
 
+  /** Area that actually issues/sells the ticket, including DNS-wide weekly passes. */
+  issuingAreaId?: string;
+  ticketLocalLogoUrl?: string;
+  ticketLocalLogoName?: string;
+  ticketContent?: {
+    enabled: boolean;
+    type: 'promo' | 'info';
+    title?: string;
+    subtitle?: string;
+    body?: string;
+    imageUrl?: string;
+    qrImageUrl?: string;
+    qrLabel?: string;
+  };
+
   // Digital Pass Type (Weekly DNS, Daily Area, Weekly Area)
   digitalPassType?: 'weekly_dns' | 'daily_area' | 'weekly_area';
   selectedRegionOption?: string; // 'all' for 900+ km Carosello or regionId like '3_zinnen', 'anterselva', etc.

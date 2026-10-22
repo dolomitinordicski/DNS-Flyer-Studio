@@ -96,6 +96,13 @@ export default function App() {
 
   useEffect(() => foundation.subscribeLanguage(setUiLanguageState), [foundation]);
 
+  // Backend identity accent: the authorized area grant is the sole source.
+  // Flyer document area selection is handled separately in FlyerCanvas.
+  useEffect(() => {
+    foundation.setReportingAreaContext(currentReportingAreaId);
+    return () => foundation.setReportingAreaContext(null);
+  }, [foundation, currentReportingAreaId]);
+
   const setUiLanguage = (language: 'de' | 'it') => {
     foundation.setLanguage(language);
   };

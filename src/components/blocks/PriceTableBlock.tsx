@@ -36,7 +36,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
         {/* Regional rates: main section for area flyers, comparative section on network flyers. */}
         <div 
           className={`border bg-white/95 overflow-hidden flex flex-col ${isRegionalProduct ? "order-2" : "order-1"} ${isDNSList ? "rounded-sm" : isRegionalList ? "rounded-md border-2 shadow-xs" : "rounded-xl shadow-xs"}`} 
-          style={{ borderColor: isRegionalList ? primaryColor : `${accentColor}80` }}
+          style={{ borderColor: isRegionalList ? primaryColor : `${accentColor}80`, ...(isRegionalProduct && regionLogo?.accentColor ? { borderTopColor: regionLogo.accentColor, borderTopWidth: '3px' } : {}) }}
         >
           <div 
             className={`text-white ${isA5 ? 'p-1.5' : isA3 ? 'p-3' : 'p-2'} flex items-center justify-between uppercase shrink-0`} 

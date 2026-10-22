@@ -4,6 +4,7 @@ import {
   loadDesignsFromFirebase,
   type SavedDesign,
 } from '../lib/firebase';
+import { PrintProofControl } from './print-proof/PrintProofControl';
 import { EditorChrome, type EditorTabId } from './editor/EditorChrome';
 import { SimpleTemplatesEditorTab } from './editor/SimpleTemplatesEditorTab';
 import { SimpleContentEditorTab } from './editor/SimpleContentEditorTab';
@@ -118,6 +119,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             <ul className="list-disc pl-4 mt-1">{blockErrors.map((message, index) => <li key={index}>{message}</li>)}</ul>
           </div>
         )}
+        <PrintProofControl content={content} language={uiLanguage} />
         {activeTab === 'templates' && (
           <SimpleTemplatesEditorTab
             uiLanguage={uiLanguage}

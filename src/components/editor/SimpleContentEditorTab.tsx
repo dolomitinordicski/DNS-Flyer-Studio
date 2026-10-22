@@ -1,4 +1,5 @@
 import React from 'react';
+import { PACKAGE_OFFER_PRESETS, applyPackageOfferPreset } from '../../model/packageOfferPresets';
 import type { FlyerContent, LanguageCode } from '../../types';
 import { getContentForLanguage } from '../../utils/multilingual';
 import type { FlyerProductDefinition } from '../../model/flyerProductModel';
@@ -231,12 +232,28 @@ export function SimpleContentEditorTab({
           </div>
         </section>
       )}
+      {product?.type === 'hotel_package' && (
+        <section className="rounded-xl border border-[#AAD0D1] bg-slate-50 p-3 space-y-2">
+          <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Pakete & Angebote', 'Pacchetti e offerte')}</h4>
+          <p className="text-[11px] text-slate-600">{ui('Manuelle Vorlagen; vorhandene Texte werden bei Auswahl ersetzt.', 'Preset manuali; la selezione sostituisce i testi esistenti.')}</p>
+          <div className="grid grid-cols-3 gap-2">
+            {PACKAGE_OFFER_PRESETS.map(preset => <button key={preset.id} type="button"
+              className="rounded-lg border border-slate-200 bg-white p-2 text-[11px] font-semibold text-[#0D4D5E] hover:border-[#0D4D5E]"
+              onClick={() => onChangeContent(applyPackageOfferPreset(content, preset.id))}>{preset.label[uiLanguage]}</button>)}
+          </div>
+        </section>
+      )}
       {field('title', 'Titel', 'Titolo')}
       {field('subtitle', 'Untertitel', 'Sottotitolo', true)}
       {field('validityPeriod', 'Gültigkeit', 'Validità')}
+      {field('badgeText', 'Kennzeichnung', 'Etichetta')}
+      {field('location', 'Ort', 'Località')}
+      {field('pricePrefix', 'Preispräfix', 'Prefisso prezzo')}
       {field('priceAmount', 'Preis', 'Prezzo')}
       {field('priceSuffix', 'Preis-Zusatz', 'Dettaglio prezzo')}
       {field('priceNote', 'Preishinweis', 'Nota prezzo', true)}
+      {field('featuresTitle', 'Leistungen', 'Servizi inclusi')}
+      {field('ctaText', 'Aktion', 'Invito all’azione')}
       {field('contactEmail', 'E-Mail', 'Email')}
       {field('contactPhone', 'Telefon', 'Telefono')}
       {field('websiteUrl', 'Website', 'Sito web')}

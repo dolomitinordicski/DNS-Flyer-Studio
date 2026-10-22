@@ -324,9 +324,9 @@ export const FLYER_TEMPLATES: FlyerTemplate[] = [
   },
   {
     id: 'hotel_skipass_package',
-    name: '4. Pacchetto Hotel + Skipass',
-    tagline: 'Offerta Soggiorno per Strutture Ricettive',
-    description: 'Per hotel, residence e chalet che promuovono vacanze sulla neve con pernottamento, mezza pensione e Skipass unico Dolomiti NordicSki.',
+    name: '4. Pacchetti e offerte',
+    tagline: 'Pacchetti, promozioni ed esperienze',
+    description: 'Flyer per pacchetti turistici, offerte speciali ed esperienze nordiche. Contenuti e prezzi inseriti manualmente.',
     previewColor: '#0D4D5E',
     defaultContent: {
       regionId: '3_zinnen',

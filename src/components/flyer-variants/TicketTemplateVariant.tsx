@@ -44,7 +44,10 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
   const ui = UI[locale];
   const isArea = kind !== 'weekly_dns';
   const areaName = isArea ? (content.customRegionName || regionLogo?.regionName || regionLogo?.name || ui.noData) : 'Dolomiti NordicSki';
-  const logo = isArea ? regionLogo?.logoSrc : null;
+  // Regional tickets foreground the issuing area's official logo(s). DNS remains a network mark.
+  const regionalMarks = isArea
+    ? [regionLogo?.logoSrc, regionLogo?.secondaryLogoSrc].filter((src): src is string => typeof src === 'string' && src.length > 0)
+    : [];
   const coverage = COVERAGE[locale];
   const extraArea = isArea ? RECIPROCAL_AREAS[content.regionId] : undefined;
   const terms = locale === 'de' ? content.priceListTexts?.disclaimerDe
@@ -54,8 +57,18 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
   return (
     <article className="relative flex h-full w-full flex-col overflow-hidden border-[6px] border-solid bg-white font-vietnam text-slate-900" style={{ borderColor: theme.primaryHex }} aria-label={LABELS[locale][kind]}>
       <header className="flex items-center justify-between gap-5 border-b-4 px-8 py-6" style={{ borderColor: theme.primaryHex }}>
-        <img src={dnsLogo} alt="Dolomiti NordicSki" className="max-h-20 max-w-[55%] object-contain" />
-        {isArea && logo ? <img src={logo} alt={areaName} className="max-h-16 max-w-[35%] object-contain" /> : null}
+        {isArea ? (
+          <>
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-4" aria-label={areaName}>
+              {regionalMarks.length > 0 ? regionalMarks.map((src, index) => (
+                <img key={src + index} src={src} alt={regionalMarks.length > 1 ? `${areaName} · Logo ${index + 1}` : areaName} className="h-20 max-h-24 w-auto max-w-[46%] object-contain" />
+              )) : <span className="text-xl font-bold" style={{ color: theme.primaryHex }}>{areaName}</span>}
+            </div>
+            <img src={dnsLogo} alt="Dolomiti NordicSki network" className="h-12 max-w-[23%] shrink-0 object-contain" />
+          </>
+        ) : (
+          <img src={dnsLogo} alt="Dolomiti NordicSki" className="max-h-24 max-w-[72%] object-contain" />
+        )}
       </header>
       <div className="flex items-center justify-between gap-4 px-8 pt-7">
         <div className="min-w-0">

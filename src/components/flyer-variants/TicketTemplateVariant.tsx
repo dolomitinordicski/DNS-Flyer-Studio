@@ -43,17 +43,16 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
     ? content.activeLanguage : 'it';
   const ui = UI[locale];
   const isArea = kind !== 'weekly_dns';
-  const areaName = isArea ? (content.customRegionName || regionLogo?.regionName || regionLogo?.name || ui.noData) : 'Dolomiti NordicSki';
+  const areaName = content.customRegionName || regionLogo?.regionName || regionLogo?.name || ui.noData;
   // Regional tickets foreground the issuing area's official logo(s). DNS remains a network mark.
-  const regionalMarks = isArea
-    ? [regionLogo?.logoSrc, regionLogo?.secondaryLogoSrc].filter((src): src is string => typeof src === 'string' && src.length > 0)
-    : [];
+  const regionalMarks = [regionLogo?.logoSrc, regionLogo?.secondaryLogoSrc, content.ticketLocalLogoUrl].filter((src): src is string => typeof src === 'string' && src.length > 0);
   const coverage = COVERAGE[locale];
   const extraArea = isArea ? RECIPROCAL_AREAS[content.regionId] : undefined;
-  const issuer = isArea ? (content.issuerName?.trim() || areaName) : (content.issuerName?.trim() || '—');
+  const issuer = content.issuerName?.trim() || areaName;
   const contactParts = [content.contactEmail, content.contactPhone, content.websiteUrl]
     .map(value => value?.trim()).filter((value): value is string => Boolean(value) && !/dolomitinordicski\.com/i.test(value!));
-  const issuerContact = isArea ? contactParts : [];
+  const issuerContact = contactParts;
+  const editorial = content.ticketContent?.enabled && [content.ticketContent.title, content.ticketContent.subtitle, content.ticketContent.body, content.ticketContent.imageUrl, content.ticketContent.qrImageUrl].some(Boolean) ? content.ticketContent : null;
   const terms = locale === 'de' ? content.priceListTexts?.disclaimerDe
     : locale === 'en' ? content.priceListTexts?.disclaimerEn
     : content.priceListTexts?.disclaimerIt;
@@ -61,24 +60,18 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
   return (
     <article className="relative flex h-full w-full flex-col overflow-hidden border-[6px] border-solid bg-white font-vietnam text-slate-900" style={{ borderColor: theme.primaryHex }} aria-label={LABELS[locale][kind]}>
       <header className="flex items-center justify-between gap-5 border-b-4 px-8 py-6" style={{ borderColor: theme.primaryHex }}>
-        {isArea ? (
-          <>
-            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-4" aria-label={areaName}>
-              {regionalMarks.length > 0 ? regionalMarks.map((src, index) => (
-                <img key={src + index} src={src} alt={regionalMarks.length > 1 ? `${areaName} · Logo ${index + 1}` : areaName} className="h-20 max-h-24 w-auto max-w-[46%] object-contain" />
-              )) : <span className="text-xl font-bold" style={{ color: theme.primaryHex }}>{areaName}</span>}
-            </div>
-            <img src={dnsLogo} alt="Dolomiti NordicSki network" className="h-12 max-w-[23%] shrink-0 object-contain" />
-          </>
-        ) : (
-          <img src={dnsLogo} alt="Dolomiti NordicSki" className="max-h-24 max-w-[72%] object-contain" />
-        )}
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-4" aria-label={areaName}>
+          {regionalMarks.length > 0 ? regionalMarks.map((src, index) => (
+            <img key={src + index} src={src} alt={index === regionalMarks.length - 1 && content.ticketLocalLogoUrl === src ? (content.ticketLocalLogoName || 'Local tourism partner') : areaName} className="h-20 max-h-24 w-auto max-w-[40%] object-contain" />
+          )) : <span className="text-xl font-bold" style={{ color: theme.primaryHex }}>{areaName}</span>}
+        </div>
+        <img src={dnsLogo} alt="Dolomiti NordicSki network" className="h-12 max-w-[23%] shrink-0 object-contain" />
       </header>
       <div className="flex items-center justify-between gap-4 px-8 pt-7">
         <div className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: theme.primaryHex }}>OFFICIAL SKI TICKET · WINTER {content.validityPeriod || '2026/27'}</p>
           <h1 className="mt-2 break-words text-3xl font-extrabold leading-tight" style={{ color: theme.primaryHex }}>{LABELS[locale][kind]}</h1>
-          {isArea && <p className="mt-2 text-lg font-semibold">{areaName}</p>}
+          <p className="mt-2 text-lg font-semibold">{areaName}</p>
         </div>
       </div>
       <section className="relative mx-8 mt-6 overflow-hidden rounded-2xl border-2 shadow-sm" style={{ borderColor: theme.primaryHex }} aria-label="TicWeb runtime fields">
@@ -109,6 +102,20 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
           </div>
         </div>
       </section>
+      {editorial && (
+        <section className="mx-8 mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <div className="flex flex-wrap items-start gap-4 p-4">
+            {editorial.imageUrl && <img src={editorial.imageUrl} alt="" className="h-28 w-32 shrink-0 rounded-lg object-cover" />}
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: theme.primaryHex }}>{editorial.type === 'promo' ? 'DISCOVER MORE' : 'INFO'}</p>
+              {editorial.title && <h2 className="mt-1 text-lg font-extrabold">{editorial.title}</h2>}
+              {editorial.subtitle && <p className="mt-1 text-sm font-bold">{editorial.subtitle}</p>}
+              {editorial.body && <p className="mt-2 whitespace-pre-line break-words text-xs leading-relaxed">{editorial.body}</p>}
+            </div>
+            {editorial.qrImageUrl && <div className="w-24 shrink-0 text-center"><img src={editorial.qrImageUrl} alt={editorial.qrLabel || 'Local information QR'} className="h-24 w-24 object-contain" /><p className="mt-1 break-words text-[10px]">{editorial.qrLabel}</p></div>}
+          </div>
+        </section>
+      )}
       <section className="mx-8 mt-5 border-l-4 bg-slate-50 px-5 py-4" style={{ borderColor: theme.primaryHex }}>
         <h2 className="text-xs font-extrabold tracking-wider" style={{ color: theme.primaryHex }}>{coverage.title}</h2>
         <p className="mt-2 text-sm font-semibold">{isArea ? areaName : coverage.network}</p>

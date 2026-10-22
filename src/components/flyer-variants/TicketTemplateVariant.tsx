@@ -50,6 +50,10 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
     : [];
   const coverage = COVERAGE[locale];
   const extraArea = isArea ? RECIPROCAL_AREAS[content.regionId] : undefined;
+  const issuer = isArea ? (content.issuerName?.trim() || areaName) : (content.issuerName?.trim() || '—');
+  const contactParts = [content.contactEmail, content.contactPhone, content.websiteUrl]
+    .map(value => value?.trim()).filter((value): value is string => Boolean(value) && !/dolomitinordicski\.com/i.test(value!));
+  const issuerContact = isArea ? contactParts : [];
   const terms = locale === 'de' ? content.priceListTexts?.disclaimerDe
     : locale === 'en' ? content.priceListTexts?.disclaimerEn
     : content.priceListTexts?.disclaimerIt;
@@ -77,21 +81,31 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
           {isArea && <p className="mt-2 text-lg font-semibold">{areaName}</p>}
         </div>
       </div>
-      <section className="relative mx-8 mt-6 flex min-h-[36%] flex-1 flex-col justify-between border-2 border-dashed p-6" style={{ borderColor: theme.primaryHex }} aria-label="TicWeb runtime fields">
-        <div className="absolute inset-0 flex rotate-[-22deg] items-center justify-center overflow-hidden pointer-events-none">
-          <span className="whitespace-nowrap text-3xl font-black opacity-15">{ui.sample}</span>
+      <section className="relative mx-8 mt-6 overflow-hidden rounded-2xl border-2 shadow-sm" style={{ borderColor: theme.primaryHex }} aria-label="TicWeb runtime fields">
+        <div className="flex items-center justify-between gap-3 px-6 py-4 text-white" style={{ backgroundColor: theme.primaryHex }}>
+          <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">OFFICIAL TICKET</p>
+            <p className="mt-1 text-xl font-extrabold">{LABELS[locale][kind]}</p></div>
+          <p className="text-right text-xs font-semibold opacity-90">WINTER {content.validityPeriod || '2026/27'}</p>
         </div>
-        <div className="relative mb-6 flex items-center gap-2 border-b pb-3 text-sm font-black uppercase tracking-widest" style={{ borderColor: theme.accentHex, color: theme.primaryHex }}>TICKET · {LABELS[locale][kind]}</div>
-        <div className="relative grid grid-cols-2 gap-x-6 gap-y-7">
-          <div className="min-w-0"><p className="text-xs font-semibold uppercase opacity-65">{ui.id}</p><p className="mt-1 break-words font-semibold">{ui.noData}</p></div>
-          <div className="min-w-0"><p className="text-xs font-semibold uppercase opacity-65">{ui.valid}</p><p className="mt-1 break-words font-semibold">{ui.noData}</p></div>
-          <div className="min-w-0"><p className="text-xs font-semibold uppercase opacity-65">{ui.area}</p><p className="mt-1 break-words font-semibold">{areaName}</p></div>
-          <div className="min-w-0"><p className="text-xs font-semibold uppercase opacity-65">{ui.price}</p><p className="mt-1 break-words font-semibold">{ui.noData}</p></div>
-        </div>
-        <div className="relative mt-8 flex items-end justify-between gap-4 border-t pt-6">
-          <p className="max-w-[55%] text-sm leading-relaxed opacity-75">{ui.noData}</p>
-          <div className="flex h-28 w-28 shrink-0 items-center justify-center border-2 border-dashed text-center text-xs font-bold" style={{ borderColor: theme.primaryHex, color: theme.primaryHex }}>
-            TICWEB<br />SCAN AREA
+        <div className="relative px-6 py-5">
+          <div className="pointer-events-none absolute inset-0 flex -rotate-12 items-center justify-center">
+            <span className="text-2xl font-black opacity-10">{ui.sample}</span>
+          </div>
+          <div className="relative grid grid-cols-2 gap-5">
+            <div className="col-span-2 rounded-xl p-4" style={{ backgroundColor: theme.bgHex }}>
+              <p className="text-[11px] font-bold uppercase tracking-wider opacity-60">{ui.valid}</p>
+              <p className="mt-1 text-xl font-black" style={{ color: theme.primaryHex }}>{ui.noData}</p>
+            </div>
+            <div><p className="text-[11px] font-bold uppercase tracking-wider opacity-60">{ui.id}</p><p className="mt-1 break-words font-semibold">{ui.noData}</p></div>
+            <div><p className="text-[11px] font-bold uppercase tracking-wider opacity-60">{ui.price}</p><p className="mt-1 font-semibold">{ui.noData}</p></div>
+            <div className="col-span-2"><p className="text-[11px] font-bold uppercase tracking-wider opacity-60">{ui.area}</p><p className="mt-1 font-bold">{areaName}</p></div>
+          </div>
+          <div className="relative mt-5 flex items-center justify-between gap-4 border-t border-dashed pt-5">
+            <div className="max-w-[55%]">
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: theme.primaryHex }}>TicWeb</p>
+              <p className="mt-2 text-xs leading-relaxed opacity-70">{ui.noData}</p>
+            </div>
+            <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-lg border-2 border-dashed bg-white text-center text-xs font-bold" style={{ borderColor: theme.primaryHex, color: theme.primaryHex }}>TICWEB<br />SCAN AREA</div>
           </div>
         </div>
       </section>
@@ -106,7 +120,7 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
         <p className="mt-2 whitespace-pre-line text-[11px] leading-relaxed text-slate-700">{terms?.trim() || coverage.termsPending}</p>
       </section>
       <footer className="mx-8 mb-7 mt-6 border-t pt-4 text-xs font-medium" style={{ borderColor: theme.accentHex }}>
-        <div className="flex justify-between gap-3"><span>Dolomiti NordicSki</span><span>{ui.sample}</span></div>
+        <div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><p className="font-extrabold">{issuer}</p>{issuerContact.length > 0 ? <p className="mt-1 break-words text-[11px] leading-relaxed">{issuerContact.join(' · ')}</p> : <p className="mt-1 text-[11px] opacity-70">{locale === 'de' ? 'Kontaktdaten der ausstellenden Area aus Shared Data erforderlich' : locale === 'it' ? 'Contatti dell’area emittente da Shared Data necessari' : 'Issuing area contact details required from Shared Data'}</p>}</div><span className="text-[10px]">{ui.sample}</span></div>
       </footer>
     </article>
   );

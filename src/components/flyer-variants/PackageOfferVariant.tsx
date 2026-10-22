@@ -1,4 +1,5 @@
 import React from 'react';
+import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
 import { QRCodeSVG } from 'qrcode.react';
 import { DolomitiFullLogo, NordicSwooshGraphic } from '../CorporateVectors';
 import type { FlyerVariantProps } from './VariantTypes';
@@ -17,7 +18,9 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   const compact = content.format === 'A5';
   const primary = theme.primaryHex;
   const photoMargin = compact ? 'mx-5' : 'mx-9';
+  // Area identity only on small existing graphic accents; corporate palette stays intact.
   const accent = theme.accentHex;
+  const areaAccent = resolveDNSRegionAccent(content.regionId) || accent;
   const regionalLogo = regionLogo?.logoSrc;
   const partnerLogo = content.customRegionalLogoUrl;
   const hasPrice = Boolean(data.priceAmount.trim());
@@ -31,7 +34,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
       <img src={content.heroImageUrl} alt="" className="h-full w-full object-cover" style={{ objectPosition: focus }} referrerPolicy="no-referrer" />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
       <div className={`absolute bottom-0 left-0 right-0 ${compact ? 'p-5' : 'p-9'}`}>
-        <span className="inline-block h-1 w-12 mb-3" style={{ backgroundColor: accent }} />
+        <span className="inline-block h-1 w-12 mb-3" data-dns-area-accent="package-photo" style={{ backgroundColor: areaAccent }} />
         <p className="text-white text-xs font-semibold uppercase tracking-[0.22em]">{data.location || 'Dolomiti NordicSki'}</p>
       </div>
     </div>
@@ -59,7 +62,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
         {image}
         <div className={`flex min-h-0 min-w-0 flex-1 flex-col justify-between ${compact ? 'gap-3 px-6 py-5' : landscape ? 'gap-5 px-3 py-6' : 'gap-6 px-10 py-8'}`}>
           <div className="min-w-0">
-            <div className="mb-5 h-1 w-12" style={{ backgroundColor: accent }} />
+            <div className="mb-5 h-1 w-12" data-dns-area-accent="package-heading" style={{ backgroundColor: areaAccent }} />
             {data.badge && <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: primary }}>{data.badge}</p>}
             <h1 className={`${compact ? 'text-2xl' : landscape ? 'text-[38px]' : 'text-[44px]'} font-semibold leading-[1.08] tracking-tight break-words`}>{data.title}</h1>
             {data.subtitle && <p className={`${compact ? 'mt-2 text-xs' : 'mt-4 text-base'} leading-relaxed text-slate-600`}>{data.subtitle}</p>}

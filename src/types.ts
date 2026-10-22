@@ -297,6 +297,8 @@ export interface FlyerContent {
 
   /** Area that actually issues/sells the ticket, including DNS-wide weekly passes. */
   issuingAreaId?: string;
+  /** Ephemeral proof display only; never save to user drafts. */
+  ticketProofMode?: boolean;
   ticketLocalLogoUrl?: string;
   ticketLocalLogoName?: string;
   ticketContent?: {

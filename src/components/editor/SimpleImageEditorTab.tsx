@@ -23,6 +23,17 @@ export function SimpleImageEditorTab({
   const [loadingLibrary, setLoadingLibrary] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState(false);
+  const operationEpoch = useRef(0);
+  useEffect(() => {
+    setBusy(false);
+    setLoadingLibrary(false);
+    setError('');
+    setPendingPhoto(false);
+    return () => {
+      operationEpoch.current += 1;
+      clearTemporaryFlyerImage();
+    };
+  }, [content.regionId]);
   // Keep existing draft image references usable, even if Storage's list API
   // is unavailable (e.g. storage/retry-limit-exceeded).
   useEffect(() => {
@@ -37,18 +48,21 @@ export function SimpleImageEditorTab({
   }, [content.regionId]);
 
   const refreshLibrary = async () => {
+    const epoch = operationEpoch.current;
     setLoadingLibrary(true);
     setLibraryError('');
     try {
       const assets = await listFlyerImages(content.regionId);
+      if (epoch !== operationEpoch.current) return;
       setLibrary(previous => {
         const all = [...assets, ...previous];
         return all.filter((asset, index) => all.findIndex(other => other.url === asset.url) === index);
       });
     } catch (err: any) {
+      if (epoch !== operationEpoch.current) return;
       setLibraryError(err?.code || err?.message || 'IMAGE_LIBRARY_UNAVAILABLE');
     } finally {
-      setLoadingLibrary(false);
+      if (epoch === operationEpoch.current) setLoadingLibrary(false);
     }
   };
   const dragRef = useRef<{ x: number; y: number; focusX: number; focusY: number } | null>(null);
@@ -66,6 +80,7 @@ export function SimpleImageEditorTab({
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
+    const epoch = operationEpoch.current;
     setBusy(true);
     setError('');
     setImageError(false);
@@ -74,7 +89,7 @@ export function SimpleImageEditorTab({
     try {
       // Firestore document snapshots must never contain megabytes of base64.
       const asset = await uploadFlyerImage(file, content.regionId);
-      await verifyImage(asset.url);
+      if (epoch !== operationEpoch.current) return;
       setLibrary(old => [asset, ...old.filter(item => item.url !== asset.url)]);
       onChangeContent({
         heroImageUrl: asset.url,
@@ -84,11 +99,17 @@ export function SimpleImageEditorTab({
       });
       clearTemporaryFlyerImage();
       setPendingPhoto(false);
+      // Persist the durable URL as soon as Storage confirms the upload.
+      // A transient image download failure must not discard a successful upload.
+      void verifyImage(asset.url).catch(() => {
+        if (epoch === operationEpoch.current) setImageError(true);
+      });
     } catch (err: any) {
+      if (epoch !== operationEpoch.current) return;
       const code = err?.code || err?.message || 'IMAGE_UPLOAD_FAILED';
       setError(code);
     } finally {
-      setBusy(false);
+      if (epoch === operationEpoch.current) setBusy(false);
     }
   };
 

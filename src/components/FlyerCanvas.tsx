@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useState, useSyncExternalStore } from 'react';
 import { FlyerContent } from '../types';
+import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
 import { findReportingAreaLogo, defaultRegionalLogoOption } from '../data/regionalLogos';
 import { getFlyerProductByTemplate } from '../model/flyerProductModel';
 import { SPORTS_ICONS, getAllSportsIcons } from '../data/sportsIcons';
@@ -24,6 +25,8 @@ interface FlyerCanvasProps {
 export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ content, scale = 1 }, ref) => {
   // Selected regional logo info
   const baseRegionLogo = findReportingAreaLogo(content.regionId);
+  // Document context: accent follows selected area, independently of who edits.
+  const regionAccentColor = content.regionId === 'dns_central' ? null : resolveDNSRegionAccent(content.regionId);
   // Official regional flyers must display all approved partner marks automatically.
   // Older drafts may have persisted 'primary' or another single-logo choice.
   const selectedLogoOption = content.layoutTemplateId === 'regional_price_list'
@@ -34,6 +37,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
 
   const regionLogo = {
     ...baseRegionLogo,
+    accentColor: regionAccentColor,
     logoSrc: content.customRegionalLogoUrl || selectedLogoOption?.logoSrc || baseRegionLogo.logoSrc,
     logoWhiteSrc: content.customRegionalLogoUrl ? undefined : (selectedLogoOption?.logoWhiteSrc || baseRegionLogo.logoWhiteSrc),
     secondaryLogoSrc: content.customRegionalLogoUrl ? undefined : (selectedLogoOption?.secondaryLogoSrc || baseRegionLogo.secondaryLogoSrc),

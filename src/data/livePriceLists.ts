@@ -1,16 +1,7 @@
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { dnsCoreDb } from '../lib/dnsCore';
 import type { PriceListTexts } from '../types';
-
-// Historic Flyer Studio keys are not the DNS Core reporting-area IDs.
-const CORE_AREA_ID: Record<string, string> = {
-  anterselva: 'antholzertal',
-  gsiesertal: 'gsiesertal-welsberg-taisten',
-  '3_zinnen': 'drei-zinnen',
-  comelico: 'val-comelico',
-  cortina: 'cortina-d-ampezzo',
-  seiser_alm_val_gardena: 'seiser-alm-dolomites-val-gardena',
-};
+import { coreReportingAreaId } from './regionalLogos';
 
 interface PricingRow {
   seasonId: string;
@@ -65,7 +56,7 @@ export async function loadOfficialPriceTexts(
   // The network flyer deliberately leaves regional "ab / da / from" editorial
   // prices untouched; only its official DNS network table is hydrated.
   if (!isNetworkList) {
-    const reportingAreaId = CORE_AREA_ID[regionId] || regionId;
+    const reportingAreaId = coreReportingAreaId(regionId);
     result.regionalDayPrice = price('reportingArea', reportingAreaId, 'day');
     result.regionalDayTrackSupplement = difference('reportingArea', reportingAreaId, 'day');
     result.regionalWeekPrice = price('reportingArea', reportingAreaId, 'wk-area');

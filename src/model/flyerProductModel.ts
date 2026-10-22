@@ -144,10 +144,10 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     templateId: 'hotel_skipass_package',
     label: { de: 'Pakete & Angebote', it: 'Pacchetti e offerte', en: 'Packages & offers' },
     graphicStyle: 'package_offer_editorial',
-    blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
+    blockStack: ['header', 'heroImage', 'bigTitle', 'priceTables', 'servicesBox', 'qrCode', 'footer'],
     editableFields: [
       'title', 'subtitle', 'validityPeriod', 'heroImageUrl',
-      'badgeText', 'location', 'pricePrefix', 'priceAmount', 'priceSuffix', 'priceNote', 'featuresTitle', 'ctaText',
+      'badgeText', 'location', 'pricePrefix', 'priceAmount', 'priceCurrency', 'priceSuffix', 'priceNote', 'featuresTitle', 'ctaText',
       'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode', 'features',
     ],

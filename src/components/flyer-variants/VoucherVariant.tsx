@@ -54,7 +54,7 @@ export const VoucherVariant: React.FC<FlyerVariantProps> = ({
 
       {landscape ? (
         <div className="flex min-h-0 flex-1 gap-5">
-          <div className="min-h-0 min-w-0 flex-[0.85]">{photo}</div>
+          <div className="h-full min-h-0 min-w-0 flex-[0.85]">{photo}</div>
           <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-3">
             {accent && <span aria-hidden="true" className="h-[3px] w-8 rounded-full" style={{ backgroundColor: accent }} />}
             {stack(['bigTitle', 'promotionBox', 'servicesBox'])}
@@ -95,7 +95,7 @@ export const GutscheinVariant: React.FC<FlyerVariantProps> = ({
     <article data-voucher-layout="gutschein" className={`relative z-10 flex h-full min-w-0 flex-col overflow-hidden bg-white font-vietnam ${compact ? 'gap-3 p-4' : 'gap-5 p-8'}`} style={{ backgroundColor: theme.cardBgHex }}>
       <div className="shrink-0">{blocks(['header'])}</div>
       <div className={`flex min-h-0 flex-1 ${landscape ? 'flex-row gap-6' : 'flex-col gap-4'}`}>
-        <div className={`min-h-0 ${landscape ? 'w-1/2' : ''}`}>{photo}</div>
+        <div className={`min-h-0 ${landscape ? 'h-full w-1/2' : ''}`}>{photo}</div>
         <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 text-center">
           {identity && <span aria-hidden="true" className="h-[3px] w-10 rounded-full" style={{ backgroundColor: identity }} />}
           {blocks(['bigTitle', 'promotionBox'])}

@@ -198,28 +198,20 @@ export interface FlyerLayoutMeasurement {
 }
 
 export function measureFlyerLayout(canvas: HTMLElement): FlyerLayoutMeasurement {
-  const variant = Array.from(canvas.children).find(node =>
-    node instanceof HTMLElement && node.classList.contains('h-full')
-  ) as HTMLElement | undefined;
+  const variant = canvas.querySelector('[data-dns-fit] > .h-full') as HTMLElement | null;
   if (!variant) return { overflowPx: 0, overflowingBlocks: 0, measuredBlocks: 0 };
-
-  const blocks = Array.from(variant.children).filter((node): node is HTMLElement =>
-    node instanceof HTMLElement && getComputedStyle(node).position !== 'absolute'
-  );
+  const pageBottom = variant.getBoundingClientRect().bottom;
   let overflowPx = Math.max(0, variant.scrollHeight - variant.clientHeight);
   let overflowingBlocks = 0;
-
-  for (const block of blocks) {
-    const extra = Math.max(0, block.scrollHeight - block.clientHeight);
-    const beyondPage = Math.max(0, block.offsetTop + block.offsetHeight -
-      variant.clientHeight);
-    if (extra > 2 || beyondPage > 2) overflowingBlocks++;
-    overflowPx = Math.max(overflowPx, extra, beyondPage);
+  let measuredBlocks = 0;
+  // Check nested text and flex sections, not only top-level children.
+  for (const node of Array.from(variant.querySelectorAll('h1,h2,h3,p,li,section,footer'))) {
+    if (!(node instanceof HTMLElement)) continue;
+    measuredBlocks++;
+    const clipped = Math.max(0, node.scrollHeight - node.clientHeight);
+    const outside = Math.max(0, node.getBoundingClientRect().bottom - pageBottom);
+    if (clipped > 2 || outside > 2) overflowingBlocks++;
+    overflowPx = Math.max(overflowPx, clipped, outside);
   }
-
-  return {
-    overflowPx: Math.ceil(overflowPx),
-    overflowingBlocks,
-    measuredBlocks: blocks.length,
-  };
+  return { overflowPx: Math.ceil(overflowPx), overflowingBlocks, measuredBlocks };
 }

@@ -44,6 +44,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
   // The network/area rates are authoritative DNS Core data, not template constants.
   const isPriceList = content.layoutTemplateId === 'official_price_list' || content.layoutTemplateId === 'regional_price_list';
   const isNetworkPriceList = content.layoutTemplateId === 'official_price_list';
+  const isPackageOffer = content.layoutTemplateId === 'hotel_skipass_package';
   const isTicket = ['ticket_online_weekly_dns', 'ticket_online_weekly_area', 'ticket_online_daily'].includes(content.layoutTemplateId || '');
   const seasonId = /^\\d{4}[/-]\\d{2}$/.test(content.validityPeriod || '')
     ? content.validityPeriod.replace('/', '-') : '2026-27';
@@ -192,11 +193,11 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       })()}
 
       {/* Nordic Swoosh Overlay */}
-      {!isPriceList && !isTicket && <NordicSwooshOverlay config={content.nordicSwoosh} />}
-      {!isTicket && renderDNSCornerSkier()}
+      {!isPriceList && !isTicket && !isPackageOffer && <NordicSwooshOverlay config={content.nordicSwoosh} />}
+      {!isTicket && !isPackageOffer && renderDNSCornerSkier()}
 
       {/* Global Ornaments */}
-      {!isPriceList && !isTicket && renderOrnament()}
+      {!isPriceList && !isTicket && !isPackageOffer && renderOrnament()}
     </div>
   );
 });

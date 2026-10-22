@@ -6,7 +6,7 @@ import { ModernGlacierVariant } from './ModernGlacierVariant';
 import { NordicModernVariant } from './NordicModernVariant';
 import { OfficialPriceTableVariant } from './OfficialPriceTableVariant';
 import { OnlineTicketVariant } from './OnlineTicketVariant';
-import { VoucherVariant } from './VoucherVariant';
+import { VoucherVariant, GutscheinVariant } from './VoucherVariant';
 import { PackageOfferVariant } from './PackageOfferVariant';
 import { HotelSkipassVariant } from './HotelSkipassVariant';
 import { HotelSkipassPanoramaVariant } from './HotelSkipassPanoramaVariant';
@@ -41,6 +41,7 @@ export const FLYER_VARIANT_MAP: Record<string, React.FC<FlyerVariantProps>> = {
   official_price_table_v1: OfficialPriceTableVariant,
   online_ticket_manifesto: OnlineTicketVariant,
   online_ticket_manifesto_v1: OnlineTicketVariant,
+  gutschein_editorial: GutscheinVariant,
   manifesto_voucher: VoucherVariant,
   manifesto_voucher_v1: VoucherVariant,
   official_ticket_voucher: VoucherVariant,

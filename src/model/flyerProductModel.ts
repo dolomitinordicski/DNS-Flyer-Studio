@@ -9,6 +9,7 @@ export type FlyerProductType =
   | 'ticket_daily_area'
   | 'hotel_package'
   | 'voucher'
+  | 'gutschein'
   | 'promotion';
 
 export type FlyerAccessMode = 'dns-only' | 'area';
@@ -156,16 +157,27 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     exportPolicy: { code: 'html' } as const,
   },
   {
-    type: 'voucher',
+    type: 'gutschein',
     templateId: 'gift_voucher',
-    label: { de: 'Gutschein', it: 'Voucher', en: 'Voucher' },
-    graphicStyle: 'manifesto_voucher',
+    label: { de: 'Gutschein', it: 'Buono regalo', en: 'Gift certificate' },
+    graphicStyle: 'gutschein_editorial',
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'qrCode', 'footer'],
     editableFields: [
       'title', 'subtitle', 'validityPeriod', 'heroImageUrl',
       'priceAmount', 'priceNote', 'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
     ],
+    pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait', 'landscape'], magicLayout: true },
+    dataPolicy: { access: 'area', languageMode: 'monolingual' },
+    exportPolicy: { code: 'html' } as const,
+  },
+  {
+    type: 'voucher',
+    templateId: 'service_voucher',
+    label: { de: 'Leistungsvoucher', it: 'Voucher prestazione', en: 'Service voucher' },
+    graphicStyle: 'manifesto_voucher',
+    blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'disclaimer', 'footer'],
+    editableFields: ['title', 'subtitle', 'validityPeriod', 'heroImageUrl', 'priceAmount', 'priceNote', 'features', 'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode'],
     pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: { access: 'area', languageMode: 'monolingual' },
     exportPolicy: { code: 'html' } as const,

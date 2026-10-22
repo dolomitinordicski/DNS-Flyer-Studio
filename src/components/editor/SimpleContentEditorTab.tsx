@@ -21,6 +21,23 @@ export function SimpleContentEditorTab({
 }: SimpleContentEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const can = (field: string) => !product || product.editableFields.includes(field);
+  const uploadTicketImage = (target: 'ticketLocalLogoUrl' | 'imageUrl' | 'qrImageUrl') => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png,image/jpeg,image/webp,image/svg+xml';
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file || file.size > 2_000_000) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result !== 'string') return;
+        if (target === 'ticketLocalLogoUrl') onChangeContent({ ticketLocalLogoUrl: reader.result });
+        else onChangeContent({ ticketContent: { ...content.ticketContent!, [target]: reader.result } });
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
   const field = (
     key: keyof FlyerContent,
     labelDe: string,
@@ -125,6 +142,7 @@ export function SimpleContentEditorTab({
           <label className="block space-y-1"><span className="text-[10px] font-bold">{ui('Zusätzliches Tourismuslogo (URL)', 'Logo turistico aggiuntivo (URL)')}</span>
             <input className="w-full rounded-lg border p-2 text-xs" value={content.ticketLocalLogoUrl || ''} onChange={e => onChangeContent({ ticketLocalLogoUrl: e.target.value })} placeholder="https://…/logo.png" />
           </label>
+          <button type="button" className="rounded-lg border bg-white px-3 py-2 text-xs font-bold" onClick={() => uploadTicketImage('ticketLocalLogoUrl')}>{ui('Logo hochladen (max. 2 MB)', 'Carica logo (max 2 MB)')}</button>
           <label className="block space-y-1"><span className="text-[10px] font-bold">{ui('Name Zusatzlogo', 'Nome logo aggiuntivo')}</span>
             <input className="w-full rounded-lg border p-2 text-xs" value={content.ticketLocalLogoName || ''} onChange={e => onChangeContent({ ticketLocalLogoName: e.target.value })} />
           </label>
@@ -145,6 +163,10 @@ export function SimpleContentEditorTab({
                     onChange={e => onChangeContent({ ticketContent: { ...content.ticketContent!, [key]: e.target.value } })} />}
               </label>
             ))}
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="rounded-lg border bg-white px-3 py-2 text-xs font-bold" onClick={() => uploadTicketImage('imageUrl')}>{ui('Bild hochladen', 'Carica immagine')}</button>
+              <button type="button" className="rounded-lg border bg-white px-3 py-2 text-xs font-bold" onClick={() => uploadTicketImage('qrImageUrl')}>{ui('QR-Bild hochladen', 'Carica QR')}</button>
+            </div>
           </div>}
         </section>
       )}

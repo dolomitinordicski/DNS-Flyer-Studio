@@ -15,6 +15,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
 
   const isDNSList = content.layoutTemplateId === 'official_price_list';
   const isRegionalList = content.layoutTemplateId === 'regional_price_list';
+  const regionAccent = isRegionalList ? regionLogo.accentColor : undefined;
   const hasDualRegionalLogos = isRegionalList && !!regionLogo.secondaryLogoSrc;
   const fmt = format || content.format || 'A4';
   const isA5 = fmt === 'A5';
@@ -64,6 +65,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
               }`}
               style={{
                 ...((content.logoCornerStyle || 'rounded') !== 'none' ? theme.headerBadgeBgStyle : {}),
+                ...(regionAccent ? { borderLeft: `4px solid ${regionAccent}` } : {}),
                 transform: `scale(${(regionLogo.regionalLogoScale || 100) / 100})`,
                 transformOrigin: 'right center'
               }}

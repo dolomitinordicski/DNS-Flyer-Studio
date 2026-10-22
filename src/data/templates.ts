@@ -36,7 +36,7 @@ export const DIGITAL_PASS_PRESETS = {
         subtitle: 'Gültig für 7 aufeinanderfolgende Tage in allen 8 Gebieten des Karussells'
       },
       en: {
-        title: 'WEEK DOLOMITI NORDICSKI',
+        title: 'DNS WEEKLY PASS',
         badgeText: 'DOLOMITI NORDICSKI CAROUSEL PASS 900+ KM',
         subtitle: 'Valid for 7 consecutive days in all 8 Carousel areas'
       }
@@ -88,12 +88,12 @@ export const DIGITAL_PASS_PRESETS = {
         subtitle: 'Valido 1 Giorno solare sulle piste da fondo dell\'area selezionata'
       },
       de: {
-        title: 'TAGESKARTE AREA',
+        title: 'AREA TAGESKARTE',
         badgeText: 'OFFIZIELLES TAGES-TICKET',
         subtitle: 'Gültig für 1 Kalendertag auf den Langlaufloipen des gewählten Gebiets'
       },
       en: {
-        title: 'DAY AREA',
+        title: 'AREA DAY PASS',
         badgeText: 'OFFICIAL DAY AREA PASS',
         subtitle: 'Valid for 1 day on cross-country trails in the selected area'
       }
@@ -145,12 +145,12 @@ export const DIGITAL_PASS_PRESETS = {
         subtitle: 'Valido 7 Giorni consecutivi nella singola area di fondo selezionata'
       },
       de: {
-        title: 'WOCHENKARTE AREA',
+        title: 'AREA WOCHENKARTE',
         badgeText: 'OFFIZIELLE AREA WOCHENKARTE 7 TAGE',
         subtitle: 'Gültig für 7 aufeinanderfolgende Tage im gewählten Langlaufgebiet'
       },
       en: {
-        title: 'WEEK AREA',
+        title: 'AREA WEEKLY PASS',
         badgeText: 'OFFICIAL WEEK AREA PASS',
         subtitle: 'Valid for 7 consecutive days in the selected cross-country area'
       }
@@ -404,7 +404,7 @@ export const FLYER_TEMPLATES: FlyerTemplate[] = [
   {
     id: 'ticket_online_weekly_area',
     name: '4. Ticket Settimanale di Area',
-    tagline: 'WOCHENKARTE GEBIET • SETTIMANALE AREA • AREA WEEKLY',
+    tagline: 'AREA WOCHENKARTE • SETTIMANALE AREA • AREA WEEKLY',
     description: 'Modulo monolingua per il ticket settimanale valido nella singola area.',
     previewColor: '#0D4D5E',
     defaultContent: {
@@ -450,7 +450,7 @@ export const FLYER_TEMPLATES: FlyerTemplate[] = [
   {
     id: 'ticket_online_daily',
     name: '5. Ticket Giornaliero di Area',
-    tagline: 'TAGESKARTE • GIORNALIERO • DAILY TICKET',
+    tagline: 'AREA TAGESKARTE • GIORNALIERO AREA • AREA DAY PASS',
     description: 'Modulo monolingua per il ticket giornaliero della singola area.',
     previewColor: '#0D4D5E',
     defaultContent: {

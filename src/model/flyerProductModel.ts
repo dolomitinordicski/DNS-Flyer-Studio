@@ -102,7 +102,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
   {
     type: 'ticket_weekly_area',
     templateId: 'ticket_online_weekly_area',
-    label: { de: 'Gebiets-Wochenkarte', it: 'Settimanale area', en: 'Area weekly ticket' },
+    label: { de: 'Area Wochenkarte', it: 'Settimanale area', en: 'Area weekly ticket' },
     graphicStyle: 'online_ticket_manifesto',
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
     editableFields: [
@@ -119,7 +119,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
   {
     type: 'ticket_daily_area',
     templateId: 'ticket_online_daily',
-    label: { de: 'Tageskarte', it: 'Giornaliero', en: 'Daily ticket' },
+    label: { de: 'Area Tageskarte', it: 'Giornaliero Area', en: 'Daily ticket' },
     graphicStyle: 'online_ticket_manifesto',
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
     editableFields: [

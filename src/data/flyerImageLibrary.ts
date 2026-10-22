@@ -1,13 +1,18 @@
 import { getDownloadURL, getStorage, listAll, ref, uploadBytes } from 'firebase/storage';
-import { dnsCoreApp, getDNSCoreUser } from '../lib/dnsCore';
+import { dnsCoreApp, dnsCoreAuth, getDNSCoreUser } from '../lib/dnsCore';
 
 const storage = getStorage(dnsCoreApp);
+// Surface a missing bucket or unavailable service instead of retrying for minutes.
+storage.maxUploadRetryTime = 30_000;
+storage.maxOperationRetryTime = 15_000;
 const MAX_BYTES = 12 * 1024 * 1024;
 const MAX_DIMENSION = 2400;
 
 export interface FlyerImageAsset { url: string; name: string; path: string }
 
-function ownedFolder(areaId: string): string {
+async function ownedFolder(areaId: string): Promise<string> {
+  // Firebase restores the account asynchronously after a page refresh.
+  await dnsCoreAuth.authStateReady();
   const user = getDNSCoreUser();
   if (!user) throw new Error('DNS_CORE_AUTH_REQUIRED');
   // Only a signed-in user's own library; the document's reportingArea
@@ -38,7 +43,7 @@ async function optimizeImage(file: File): Promise<Blob> {
 }
 
 export async function uploadFlyerImage(file: File, regionId: string): Promise<FlyerImageAsset> {
-  const folder = ownedFolder(regionId);
+  const folder = await ownedFolder(regionId);
   const optimized = await optimizeImage(file);
   const name = file.name.replace(/[^a-zA-Z0-9_.-]/g, '_').slice(0, 90) || 'image';
   const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 9)}_${name}.jpg`;
@@ -48,7 +53,7 @@ export async function uploadFlyerImage(file: File, regionId: string): Promise<Fl
 }
 
 export async function listFlyerImages(regionId: string): Promise<FlyerImageAsset[]> {
-  const folder = ownedFolder(regionId);
+  const folder = await ownedFolder(regionId);
   const result = await listAll(ref(storage, folder));
   const items = await Promise.all(result.items.map(async item => ({
     path: item.fullPath,

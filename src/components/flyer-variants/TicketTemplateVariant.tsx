@@ -1,6 +1,7 @@
 import React from 'react';
 import type { FlyerVariantProps } from './VariantTypes';
 import dnsLogo from '../../assets/logo_farbe_2025.svg';
+import { QRCodeSVG } from 'qrcode.react';
 
 type TicketKind = 'weekly_dns' | 'weekly_area' | 'daily_area';
 type Locale = 'de' | 'it' | 'en';
@@ -52,6 +53,10 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
   const contactParts = [content.contactEmail, content.contactPhone, content.websiteUrl]
     .map(value => value?.trim()).filter((value): value is string => Boolean(value) && !/dolomitinordicski\.com/i.test(value!));
   const issuerContact = contactParts;
+  const proof = content.ticketProofMode === true;
+  const mockId = `SAMPLE-${(content.issuingAreaId || content.regionId).toUpperCase()}-000184`;
+  const mockDate = kind === 'daily_area' ? '15.12.2026' : '15.12.2026 – 21.12.2026';
+  const mockPrice = kind === 'weekly_dns' ? '65,00 €' : 'DEMO €';
   const editorial = content.ticketContent?.enabled && [content.ticketContent.title, content.ticketContent.subtitle, content.ticketContent.body, content.ticketContent.imageUrl, content.ticketContent.qrImageUrl].some(Boolean) ? content.ticketContent : null;
   const terms = locale === 'de' ? content.priceListTexts?.disclaimerDe
     : locale === 'en' ? content.priceListTexts?.disclaimerEn
@@ -87,18 +92,18 @@ export const TicketTemplateVariant: React.FC<FlyerVariantProps> = ({ content, th
           <div className="relative grid grid-cols-2 gap-5">
             <div className="col-span-2 rounded-xl p-4" style={{ backgroundColor: theme.bgHex }}>
               <p className="text-[11px] font-bold uppercase tracking-wider opacity-60">{ui.valid}</p>
-              <p className="mt-1 text-xl font-black" style={{ color: theme.primaryHex }}>{ui.noData}</p>
+              <p className="mt-1 text-xl font-black" style={{ color: theme.primaryHex }}>{proof ? mockDate : ui.noData}</p>
             </div>
-            <div><p className="text-[11px] font-bold uppercase tracking-wider opacity-60">{ui.id}</p><p className="mt-1 break-words font-semibold">{ui.noData}</p></div>
-            <div><p className="text-[11px] font-bold uppercase tracking-wider opacity-60">{ui.price}</p><p className="mt-1 font-semibold">{ui.noData}</p></div>
+            <div><p className="text-[11px] font-bold uppercase tracking-wider opacity-60">{ui.id}</p><p className="mt-1 break-words font-semibold">{proof ? mockId : ui.noData}</p></div>
+            <div><p className="text-[11px] font-bold uppercase tracking-wider opacity-60">{ui.price}</p><p className="mt-1 font-semibold">{proof ? mockPrice : ui.noData}</p></div>
             <div className="col-span-2"><p className="text-[11px] font-bold uppercase tracking-wider opacity-60">{ui.area}</p><p className="mt-1 font-bold">{areaName}</p></div>
           </div>
           <div className="relative mt-5 flex items-center justify-between gap-4 border-t border-dashed pt-5">
             <div className="max-w-[55%]">
               <p className="text-xs font-bold uppercase tracking-wide" style={{ color: theme.primaryHex }}>TicWeb</p>
-              <p className="mt-2 text-xs leading-relaxed opacity-70">{ui.noData}</p>
+              <p className="mt-2 text-xs leading-relaxed opacity-70">{proof ? (locale === 'de' ? 'Max Mustermann · Ausgestellt am 15.12.2026' : locale === 'it' ? 'Mario Rossi · Emesso il 15.12.2026' : 'John Smith · Issued 15 Dec 2026') : ui.noData}</p>
             </div>
-            <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-lg border-2 border-dashed bg-white text-center text-xs font-bold" style={{ borderColor: theme.primaryHex, color: theme.primaryHex }}>TICWEB<br />SCAN AREA</div>
+            <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-lg border-2 border-dashed bg-white text-center text-xs font-bold" style={{ borderColor: theme.primaryHex, color: theme.primaryHex }}>{proof ? <QRCodeSVG value={`DEMO:NOT_VALID:${mockId}`} size={96} level="M" marginSize={0} /> : <>TICWEB<br />SCAN AREA</>}</div>
           </div>
         </div>
       </section>

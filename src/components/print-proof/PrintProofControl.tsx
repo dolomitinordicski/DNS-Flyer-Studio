@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import type { FlyerContent } from '../../types';
 import { FlyerCanvas } from '../FlyerCanvas';
-
-const SUPPORTED = new Set(['ticket_online_weekly_dns', 'ticket_online_weekly_area', 'ticket_online_daily']);
-
-function makeProofContent(content: FlyerContent): FlyerContent {
-  return { ...content, ticketProofMode: true };
-}
+import { supportsPrintProof, createPrintProofContent } from './printProofModel';
 
 /** Standalone, product-gated print-proof feature; never persists demo data. */
 export function PrintProofControl({ content, language }: { content: FlyerContent; language: 'de' | 'it' }) {
   const [open, setOpen] = useState(false);
-  if (!SUPPORTED.has(content.layoutTemplateId || '')) return null;
+  if (!supportsPrintProof(content.layoutTemplateId)) return null;
   const de = language === 'de';
   return (
     <>
@@ -24,7 +19,7 @@ export function PrintProofControl({ content, language }: { content: FlyerContent
           <div className="text-sm font-bold">{de ? 'MUSTER · NICHT GÜLTIG' : 'FACSIMILE · NON VALIDO'}</div>
           <button type="button" className="rounded-lg bg-[#0D4D5E] px-4 py-2 text-sm font-bold text-white" onClick={() => setOpen(false)}>{de ? 'Schließen' : 'Chiudi'}</button>
         </div>
-        <div className="origin-top scale-[0.58] sm:scale-[0.75]"><FlyerCanvas content={makeProofContent(content)} scale={1} /></div>
+        <div className="origin-top scale-[0.58] sm:scale-[0.75]"><FlyerCanvas content={createPrintProofContent(content)} scale={1} /></div>
       </div>}
     </>
   );

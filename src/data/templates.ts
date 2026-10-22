@@ -1,6 +1,7 @@
 import { FlyerTemplate } from '../types';
 
-export { DIGITAL_PASS_PRESETS } from './ticketDemoPresets';
+import { DIGITAL_PASS_PRESETS } from './ticketDemoPresets';
+export { DIGITAL_PASS_PRESETS };
 
 export const DEFAULT_PRICE_LIST_TEXTS_IT = {
   seasonYear: '2026/27',

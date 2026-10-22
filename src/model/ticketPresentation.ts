@@ -1,4 +1,4 @@
-import type { FlyerContent, RegionalLogo } from '../../types';
+import type { FlyerContent, RegionalLogo } from '../types';
 
 export type TicketKind = 'weekly_dns' | 'weekly_area' | 'daily_area';
 export type TicketLocale = 'de' | 'it' | 'en';

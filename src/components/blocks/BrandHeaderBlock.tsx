@@ -64,6 +64,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
               }`}
               style={{
                 ...((content.logoCornerStyle || 'rounded') !== 'none' ? theme.headerBadgeBgStyle : {}),
+                ...(isRegionalList && regionLogo.accentColor ? { borderLeft: `4px solid ${regionLogo.accentColor}` } : {}),
                 transform: `scale(${(regionLogo.regionalLogoScale || 100) / 100})`,
                 transformOrigin: 'right center'
               }}

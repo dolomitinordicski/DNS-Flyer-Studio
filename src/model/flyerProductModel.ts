@@ -143,7 +143,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     type: 'hotel_package',
     templateId: 'hotel_skipass_package',
     label: { de: 'Pakete & Angebote', it: 'Pacchetti e offerte', en: 'Packages & offers' },
-    graphicStyle: 'hotel_skipass_package',
+    graphicStyle: 'package_offer_editorial',
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'servicesBox', 'qrCode', 'footer'],
     editableFields: [
       'title', 'subtitle', 'validityPeriod', 'heroImageUrl',

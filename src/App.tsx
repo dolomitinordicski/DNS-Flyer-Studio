@@ -96,6 +96,12 @@ export default function App() {
 
   useEffect(() => foundation.subscribeLanguage(setUiLanguageState), [foundation]);
 
+  // Area accent follows the authenticated DNS Core access scope, never an
+  // unverified area picked from a flyer or an old browser session.
+  useEffect(() => {
+    foundation.setReportingAreaContext(currentReportingAreaId);
+  }, [foundation, currentReportingAreaId]);
+
   const setUiLanguage = (language: 'de' | 'it') => {
     foundation.setLanguage(language);
   };

@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useState, useSyncExternalStore } from 'react';
 import { FlyerContent } from '../types';
-import { findReportingAreaLogo, defaultRegionalLogoOption } from '../data/regionalLogos';
+import { findReportingAreaLogo, defaultRegionalLogoOption, coreReportingAreaId } from '../data/regionalLogos';
+import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
 import { getFlyerProductByTemplate } from '../model/flyerProductModel';
 import { SPORTS_ICONS, getAllSportsIcons } from '../data/sportsIcons';
 import { DEFAULT_PRICE_LIST_TEXTS } from '../data/templates';
@@ -34,6 +35,10 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
 
   const regionLogo = {
     ...baseRegionLogo,
+    // Contextual website color: micro-accent only, not DNS palette replacement.
+    accentColor: content.layoutTemplateId === 'regional_price_list'
+      ? resolveDNSRegionAccent(coreReportingAreaId(content.regionId)) ?? undefined
+      : undefined,
     logoSrc: content.customRegionalLogoUrl || selectedLogoOption?.logoSrc || baseRegionLogo.logoSrc,
     logoWhiteSrc: content.customRegionalLogoUrl ? undefined : (selectedLogoOption?.logoWhiteSrc || baseRegionLogo.logoWhiteSrc),
     secondaryLogoSrc: content.customRegionalLogoUrl ? undefined : (selectedLogoOption?.secondaryLogoSrc || baseRegionLogo.secondaryLogoSrc),

@@ -20,6 +20,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
   // For both official price lists all commercial descriptions are printed
   // together in DE / IT / EN, independently of the editor UI language.
   const isRegionalProduct = content.layoutTemplateId === 'regional_price_list';
+  const regionAccent = isRegionalProduct ? regionLogo?.accentColor : undefined;
   const regionCompact = isRegionalProduct && content.orientation === 'landscape'
     && !content.regionalLocalText?.trim() && !(content.regionalLocalServices?.length);
   const fmt = format || content.format || 'A4';
@@ -46,8 +47,11 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
               <span className={`${isA5 ? 'text-[6.5px]' : isA3 ? 'text-xs' : 'text-[7.5px]'} font-bold opacity-80 tracking-widest leading-none`}>
                 {presentation.areaHeader}
               </span>
-              <span className={`${isA5 ? 'text-[9.5px]' : isA3 ? 'text-base' : 'text-[11px]'} font-black tracking-tight leading-tight break-words`}>
+              <span className="flex items-center gap-1.5">
+                {regionAccent && <span aria-hidden="true" className="w-1.5 self-stretch min-h-3 rounded-sm shrink-0" style={{ backgroundColor: regionAccent }} />}
+                <span className={`${isA5 ? 'text-[9.5px]' : isA3 ? 'text-base' : 'text-[11px]'} font-black tracking-tight leading-tight break-words`}>
                 {presentation.areaName || (regionLogo?.id === 'dns_central' ? regionLogo.regionName : regionLogo?.regionName || regionLogo?.name) || 'REGIONAL AREA'}
+                </span>
               </span>
             </div>
             {regionLogo && regionLogo.id !== 'dns_central' && (

@@ -45,6 +45,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
   const isPriceList = content.layoutTemplateId === 'official_price_list' || content.layoutTemplateId === 'regional_price_list';
   const isNetworkPriceList = content.layoutTemplateId === 'official_price_list';
   const isPackageOffer = content.layoutTemplateId === 'hotel_skipass_package';
+  const isVoucherDocument = content.layoutTemplateId === 'gift_voucher' || content.layoutTemplateId === 'service_voucher';
   const isTicket = ['ticket_online_weekly_dns', 'ticket_online_weekly_area', 'ticket_online_daily'].includes(content.layoutTemplateId || '');
   const seasonId = /^\\d{4}[/-]\\d{2}$/.test(content.validityPeriod || '')
     ? content.validityPeriod.replace('/', '-') : '2026-27';
@@ -163,7 +164,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       <div className="absolute inset-0 z-0 bg-white" />
       
       {/* Background Hero Image (if set to full background) */}
-      {visibility.heroImage && content.layoutTemplateId !== 'hotel_skipass_package' && content.heroImagePosition === 'background' && localizedContent.heroImageUrl && (
+      {visibility.heroImage && content.layoutTemplateId !== 'hotel_skipass_package' && !isVoucherDocument && content.heroImagePosition === 'background' && localizedContent.heroImageUrl && (
         <div className="absolute inset-0 z-0">
           <img
             src={localizedContent.heroImageUrl}
@@ -196,11 +197,11 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       })()}
 
       {/* Nordic Swoosh Overlay */}
-      {!isPriceList && !isTicket && !isPackageOffer && <NordicSwooshOverlay config={content.nordicSwoosh} />}
-      {!isTicket && !isPackageOffer && renderDNSCornerSkier()}
+      {!isPriceList && !isTicket && !isPackageOffer && !isVoucherDocument && <NordicSwooshOverlay config={content.nordicSwoosh} />}
+      {!isTicket && !isPackageOffer && !isVoucherDocument && renderDNSCornerSkier()}
 
       {/* Global Ornaments */}
-      {!isPriceList && !isTicket && !isPackageOffer && renderOrnament()}
+      {!isPriceList && !isTicket && !isPackageOffer && !isVoucherDocument && renderOrnament()}
     </div>
   );
 });

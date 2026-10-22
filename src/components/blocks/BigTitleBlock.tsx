@@ -1,4 +1,5 @@
 import React from 'react';
+import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
 import { BlockProps } from './BlockTypes';
 import * as LucideIcons from 'lucide-react';
 
@@ -30,6 +31,7 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
 
   const isDNSList = content.layoutTemplateId === 'official_price_list';
   const isRegionalList = content.layoutTemplateId === 'regional_price_list';
+  const identityAccent = isRegionalList ? resolveDNSRegionAccent(content.regionId) : null;
   const titleText = isPriceTable
     ? (plt?.mainTitle || content.title)
     : (content.title || plt?.mainTitle);
@@ -79,6 +81,8 @@ export const BigTitleBlock: React.FC<BlockProps> = ({
         {safeTitleText}
       </h2>
       
+      {identityAccent && <div aria-hidden="true" data-dns-area-accent="title" style={{ width: '24px', height: '3px', backgroundColor: identityAccent, borderRadius: '2px' }} />}
+
       {safeSubtitleText && (
         <p 
           className={`mt-0.5 ${isDNSList || isRegionalList ? 'text-sm sm:text-base' : isLandscape ? (isA5 ? 'text-xs' : isA3 ? 'text-base' : 'text-sm') : subtitleSize} font-semibold leading-relaxed max-w-2xl break-words`}

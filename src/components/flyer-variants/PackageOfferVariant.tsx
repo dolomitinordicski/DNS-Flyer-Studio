@@ -1,6 +1,6 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { DolomitiFullLogo } from '../CorporateVectors';
+import { DolomitiFullLogo, NordicSwooshGraphic } from '../CorporateVectors';
 import type { FlyerVariantProps } from './VariantTypes';
 import { resolveHotelPackageData } from './resolveFlyerData';
 
@@ -85,6 +85,15 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
             </div>
           )}
         </div>
+      </div>
+      {/* Official DNS swoosh: a quiet signature, kept within the page margins. */}
+      <div className={`pointer-events-none relative shrink-0 overflow-hidden ${compact ? 'mx-5 h-7' : 'mx-9 h-11'}`} aria-hidden="true">
+        <NordicSwooshGraphic
+          variant="swoosh_only"
+          color={accent}
+          className="absolute -right-5 -top-9 h-24 w-72 max-w-none"
+          style={{ opacity: 0.18 }}
+        />
       </div>
       {visibility.footer !== false && (
         <footer className={`flex shrink-0 items-end justify-between gap-5 border-t border-slate-200 ${compact ? 'px-6 py-4' : 'px-10 py-6'}`}>

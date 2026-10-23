@@ -73,7 +73,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
         <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${landscape ? 'justify-start' : 'justify-between'} ${compact ? 'gap-2 px-6 py-3' : landscape ? 'gap-2 px-1 py-2' : denseCopy ? 'gap-3 px-10 py-5' : 'gap-5 px-10 py-7'}`}>
           <div className="min-w-0">
             <div className={landscape ? 'mb-2 h-1 w-12' : 'mb-5 h-1 w-12'} data-dns-area-accent="package-heading" style={{ backgroundColor: areaAccent }} />
-            {data.badge && <p className={`${tight ? `mb-1 ${printType.label}` : `mb-3 ${printType.label}`} font-semibold uppercase tracking-[0.17em]`} style={{ color: primary }}>{data.badge}</p>}
+            {data.badge && <p className={`${tight ? `mb-1 ${printType.label}` : `mb-3 ${printType.label}`} font-semibold uppercase tracking-wide`} style={{ color: primary, fontSize: printSizes.label }}>{data.badge}</p>}
             <h1 className={`${compact ? 'text-2xl' : landscape ? (longCopy ? 'text-[26px]' : 'text-[32px]') : 'text-[44px]'} font-semibold leading-[1.08] tracking-tight break-words`} style={landscape ? { fontSize: `${Math.round((longCopy ? 28 : 34) * layoutScale)}px` } : undefined}>{data.title}</h1>
             {data.subtitle && <p className={`${tight ? `mt-1 ${printType.body} leading-snug` : `mt-4 ${printType.body} leading-snug`} text-slate-600 break-words`} style={{fontSize:printSizes.body}}>{data.subtitle}</p>}
             {(data.location || data.validityPeriod) && <p className={`${tight ? `mt-2 ${printType.detail}` : `mt-4 ${printType.detail}`} tracking-wide text-slate-500 break-words`} style={{fontSize:printSizes.detail}}>{[data.location, data.validityPeriod].filter(Boolean).join('  ·  ')}</p>}

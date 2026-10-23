@@ -1,3 +1,4 @@
+import { resolveDNSFlyerPhoto } from '../../data/dnsStockPhotos';
 import React from 'react';
 import { BlockProps } from './BlockTypes';
 
@@ -17,7 +18,7 @@ export const HeroMediaBlock: React.FC<BlockProps> = ({
   const isRegionalList = content.layoutTemplateId === 'regional_price_list';
   const showSeasonOverlay = (isDNSList || isRegionalList) && content.heroImagePosition !== 'background';
   const season = content.validityPeriod ?? '';
-  const imageUrl = content.heroImageUrl || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80';
+  const imageUrl = resolveDNSFlyerPhoto(content.heroImageUrl, content.layoutTemplateId);
 
   return (
     <div 

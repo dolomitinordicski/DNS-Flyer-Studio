@@ -1,3 +1,4 @@
+import { resolveDNSFlyerPhoto } from '../data/dnsStockPhotos';
 import React, { forwardRef, useEffect, useState, useSyncExternalStore } from 'react';
 import { FlyerContent } from '../types';
 import { getAllSportsIcons } from '../data/sportsIcons';
@@ -164,10 +165,10 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       <div className="absolute inset-0 z-0 bg-white" />
       
       {/* Background Hero Image (if set to full background) */}
-      {visibility.heroImage && content.layoutTemplateId !== 'hotel_skipass_package' && !isVoucherDocument && content.heroImagePosition === 'background' && localizedContent.heroImageUrl && (
+      {visibility.heroImage && content.layoutTemplateId !== 'hotel_skipass_package' && !isVoucherDocument && content.heroImagePosition === 'background' && resolveDNSFlyerPhoto(localizedContent.heroImageUrl, content.layoutTemplateId) && (
         <div className="absolute inset-0 z-0">
           <img
-            src={localizedContent.heroImageUrl}
+            src={resolveDNSFlyerPhoto(localizedContent.heroImageUrl, content.layoutTemplateId)}
             alt="Background"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"

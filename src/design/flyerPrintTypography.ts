@@ -31,3 +31,16 @@ export function getFlyerPrintTypography(format: PrintFormat = 'A4'): FlyerPrintT
     callToAction: 'text-[19px]',
   };
 }
+
+/** Inline sizes are deliberately numeric: Make it perfect can resize print copy at runtime. */
+export function getFlyerPrintFontSizes(format: PrintFormat = 'A4', factor = 1) {
+  const base = format === 'A5'
+    ? { label: 13, body: 15, detail: 14, footer: 12, callToAction: 16 }
+    : format === 'A3'
+      ? { label: 19, body: 23, detail: 19, footer: 17, callToAction: 21 }
+      : { label: 16, body: 19, detail: 17, footer: 15, callToAction: 19 };
+  const multiplier = Math.max(0.9, Math.min(1.24, factor));
+  return Object.fromEntries(
+    Object.entries(base).map(([key, size]) => [key, Math.round(size * multiplier * 10) / 10])
+  ) as typeof base;
+}

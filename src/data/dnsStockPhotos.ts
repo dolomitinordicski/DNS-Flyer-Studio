@@ -1,11 +1,11 @@
 /** Curated DNS presentation photos. Local, versioned assets: never random stock. */
 export const DNS_STOCK_PHOTOS = [
-  '/stock/dns/kottersteger-trail-sun.webp',
-  '/stock/dns/kottersteger-skiers-portrait.webp',
-  '/stock/dns/kottersteger-panorama.webp',
-  '/stock/dns/kottersteger-trail-aerial.webp',
-  '/stock/dns/roschan-fill-138.jpg',
-  '/stock/dns/roschan-fill-060.jpg',
+  '/stock/kottersteger-trail-sun.webp',
+  '/stock/kottersteger-skiers-portrait.webp',
+  '/stock/kottersteger-panorama.webp',
+  '/stock/kottersteger-trail-aerial.webp',
+  '/stock/roschan-fill-138.jpg',
+  '/stock/roschan-fill-060.jpg',
 ] as const;
 
 /** Default only; a user-selected photo always takes priority. */

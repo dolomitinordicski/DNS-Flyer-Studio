@@ -1,3 +1,4 @@
+import { resolveDNSFlyerPhoto } from '../data/dnsStockPhotos';
 import type { FlyerContent, FlyerSectionId } from '../types';
 import type { BlockValidationIssue } from './blockDataContract';
 import type { FlyerProductDefinition } from './flyerProductModel';
@@ -30,7 +31,10 @@ export function inspectProductBlocks(content: FlyerContent, product: FlyerProduc
     if (!visible) return [];
     // Prices come from authoritative Data Entry via DNS Core at render time.
     // Inline priceListTexts may hold editorial copy, not official tariff evidence.
-    const issues = definition.dataContract?.validate(content) ?? [];
+    const validatedContent = sectionId === 'heroImage'
+      ? { ...content, heroImageUrl: resolveDNSFlyerPhoto(content.heroImageUrl, content.layoutTemplateId) }
+      : content;
+    const issues = definition.dataContract?.validate(validatedContent) ?? [];
     return issues.length ? [{ sectionId, componentId: definition.componentId, issues }] : [];
   });
 }

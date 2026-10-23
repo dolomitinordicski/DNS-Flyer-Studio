@@ -143,6 +143,30 @@ export function SimpleContentEditorTab({
           {!isDNSAdmin && <p className="text-[10px] text-slate-500">{ui('Gebiet wird von DNS Core vorgegeben.', 'Area assegnata da DNS Core.')}</p>}
         </section>
       )}
+      {(product?.type === 'gutschein' || product?.type === 'voucher') && (
+        <section className="space-y-3 border-t border-slate-200 pt-4">
+          {product.type === 'gutschein' ? <>
+            <label className="block space-y-1"><span className="text-[10px] font-bold">{ui('Saisonkarte Geltungsbereich', 'Ambito skipass stagionale')}</span>
+              <select className="w-full rounded-lg border p-2 text-xs" value={content.documentScope || 'dns'}
+                onChange={e => onChangeContent({ documentScope: e.target.value as 'dns' | 'area' })}>
+                <option value="dns">Dolomiti NordicSki</option><option value="area">{ui('Area-Saisonkarte', 'Skipass stagionale Area')}</option>
+              </select>
+            </label>
+            {field('holderName', 'Name', 'Nominativo')}
+            {field('issueDate', 'Ausstellungsdatum', 'Data emissione')}
+          </> : <>
+            {field('partnerName', 'Partnerbetrieb', 'Struttura partner')}
+            {field('guestName', 'Gast', 'Ospite')}
+            {field('stayPeriod', 'Aufenthaltszeitraum', 'Periodo soggiorno')}
+            <label className="block space-y-1"><span className="text-[10px] font-bold">{ui('Leistungen (eine je Zeile)', 'Prestazioni incluse (una per riga)')}</span>
+              <textarea rows={6} className="w-full rounded-lg border p-2 text-xs"
+                value={(content.voucherServices || []).join('\n')}
+                onChange={e => onChangeContent({ voucherServices: e.target.value.split('\n') })} />
+            </label>
+          </>}
+          {field('documentCode', 'Dokumentcode (optional)', 'Codice documento (facoltativo)')}
+        </section>
+      )}
       {product?.dataPolicy.ticketType && (
         <section className="space-y-3 rounded-xl border border-[#AAD0D1] bg-slate-50 p-3">
           <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Ticket · Ausstellendes Gebiet', 'Ticket · Area emittente')}</h4>

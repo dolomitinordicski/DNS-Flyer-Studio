@@ -1,3 +1,4 @@
+import { getFlyerPrintTypography } from '../../design/flyerPrintTypography';
 import { resolveDNSFlyerPhoto } from '../../data/dnsStockPhotos';
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -21,6 +22,7 @@ export const HotelSkipassVariant: React.FC<FlyerVariantProps> = ({
 }) => {
   const heroImageUrl = resolveDNSFlyerPhoto(content.heroImageUrl, 'hotel_skipass_package');
   const fmt = content.format || 'A4';
+  const printType = getFlyerPrintTypography(fmt);
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
   const isLandscape = content.orientation === 'landscape';
@@ -129,7 +131,7 @@ export const HotelSkipassVariant: React.FC<FlyerVariantProps> = ({
                 {displayTitle}
               </h1>
               {displaySubtitle && (
-                <p className="text-xs sm:text-sm font-semibold text-slate-100/95 leading-snug">
+                <p className={`${printType.body} font-semibold text-slate-100/95 leading-snug`}>
                   {displaySubtitle}
                 </p>
               )}

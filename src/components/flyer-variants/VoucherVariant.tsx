@@ -83,9 +83,9 @@ const PrintDocument: React.FC<Props & { gift: boolean }> = ({ gift, content, plt
           </div>}
           {(clean(content.guestName) || clean(content.stayPeriod)) && <div className="mt-4 grid grid-cols-2 gap-4 border-t border-slate-300 py-3">
             {clean(content.guestName) && <div><p className={`${type.label} font-bold uppercase tracking-wide text-slate-600`}>{label('GAST', 'OSPITE', 'GUEST')}</p><p className={`mt-1 ${type.body} font-semibold break-words`}>{content.guestName}</p></div>}
-            {clean(content.stayPeriod) && <div><p className="text-[9px] font-bold tracking-widest text-slate-500">{label('AUFENTHALT', 'SOGGIORNO', 'STAY')}</p><p className="mt-1 text-sm font-semibold`}>{content.stayPeriod}</p></div>}
+            {clean(content.stayPeriod) && <div><p className={`${type.label} font-bold uppercase tracking-wide text-slate-600`}>{label('AUFENTHALT', 'SOGGIORNO', 'STAY')}</p><p className={`mt-1 ${type.body} font-semibold break-words`}>{content.stayPeriod}</p></div>}
           </div>}
-          {services.length > 0 && <div className="mt-4 min-h-0 overflow-hidden">
+          {services.length > 0 && <div className="mt-4 min-h-0">
             <p className={`mb-2 ${type.label} font-bold uppercase tracking-wide text-slate-600`}>{label('INKLUSIVE LEISTUNGEN', 'PRESTAZIONI INCLUSE', 'INCLUDED SERVICES')}</p>
             <ul className="space-y-1.5">{services.map((item, index) => <li key={index} className={`flex gap-3 border-b border-slate-100 pb-2 ${type.detail} leading-snug`}><span className="text-slate-400 tabular-nums">{String(index + 1).padStart(2, '0')}</span><span className="break-words">{item}</span></li>)}</ul>
           </div>}

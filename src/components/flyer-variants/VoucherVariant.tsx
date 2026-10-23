@@ -1,3 +1,4 @@
+import { resolveDNSFlyerPhoto } from '../../data/dnsStockPhotos';
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { REPORTING_AREAS, resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
@@ -22,7 +23,8 @@ const PrintDocument: React.FC<Props & { gift: boolean }> = ({ gift, content, plt
   const scope = scopeArea ? areaName : 'DOLOMITI NORDICSKI';
   const qr = clean(content.qrCode?.url);
   const showQr = visibility.qrCode !== false && content.qrCode?.enabled && !!qr;
-  const photo = visibility.heroImage !== false && clean(content.heroImageUrl);
+  const photoUrl = resolveDNSFlyerPhoto(content.heroImageUrl, gift ? 'gift_voucher' : 'service_voucher');
+  const photo = visibility.heroImage !== false && !!photoUrl;
   const services = (content.voucherServices || []).map(item => item.trim()).filter(Boolean);
   const contact = [content.contactEmail, content.contactPhone, content.websiteUrl].map(item => clean(item)).filter(Boolean).join(' · ');
   const shared = { content, plt, theme, regionLogo, activeSportsIcons, visibility,
@@ -35,7 +37,7 @@ const PrintDocument: React.FC<Props & { gift: boolean }> = ({ gift, content, plt
     </div>}
     <div className={`min-h-0 flex-1 flex ${horizontal ? 'flex-row gap-7' : 'flex-col gap-4'} pt-4`}>
       {photo && <div className={horizontal ? (gift ? 'w-[44%] shrink-0 min-h-0' : 'w-[32%] shrink-0 min-h-0') : (gift ? 'h-[28%] min-h-[80px] shrink-0' : 'h-[18%] min-h-[70px] shrink-0')}>
-        <img src={content.heroImageUrl} alt="" className="h-full w-full object-cover"
+        <img src={photoUrl} alt="" className="h-full w-full object-cover"
           style={{ objectPosition: `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%` }}
           referrerPolicy="no-referrer" />
       </div>}

@@ -5,7 +5,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { DolomitiFullLogo, NordicSwooshGraphic } from '../CorporateVectors';
 import type { FlyerVariantProps } from './VariantTypes';
 import { resolveHotelPackageData, officialPackageAreaName } from './resolveFlyerData';
-import { getFlyerPrintTypography } from '../../design/flyerPrintTypography';
+import { getFlyerPrintTypography, getFlyerPrintFontSizes } from '../../design/flyerPrintTypography';
 
 /**
  * Print-first package composition. Editorial content only: no tariff lookup,
@@ -20,7 +20,8 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   const compact = content.format === 'A5';
   const tight = landscape || compact;
   const printType = getFlyerPrintTypography(content.format || 'A4');
-  const layoutScale = Math.max(0.90, Math.min(1.12, content.textScaleFactor ?? 1));
+  const layoutScale = Math.max(0.90, Math.min(1.24, content.textScaleFactor ?? 1));
+  const printSizes = getFlyerPrintFontSizes(content.format || 'A4', layoutScale);
   const longCopy = data.title.length > 46 || data.subtitle.length > 110;
   const visibleFeatures = data.features.filter(feature => feature.text?.trim());
   const denseCopy = data.subtitle.length > 110 || visibleFeatures.length > 3 || Boolean(data.priceNote);
@@ -44,7 +45,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
       <div className={`absolute bottom-0 left-0 right-0 ${compact ? 'p-5' : 'p-9'}`}>
         <span className="inline-block h-1 w-12 mb-3" data-dns-area-accent="package-photo" style={{ backgroundColor: areaAccent }} />
-        <p className={`text-white ${printType.label} font-semibold uppercase tracking-wide`}>{data.location || 'Dolomiti NordicSki'}</p>
+        <p className={`text-white ${printType.label} font-semibold uppercase tracking-wide`} style={{fontSize:printSizes.label}}>{data.location || 'Dolomiti NordicSki'}</p>
       </div>
     </div>
   ) : null;
@@ -74,13 +75,13 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
             <div className={landscape ? 'mb-2 h-1 w-12' : 'mb-5 h-1 w-12'} data-dns-area-accent="package-heading" style={{ backgroundColor: areaAccent }} />
             {data.badge && <p className={`${tight ? `mb-1 ${printType.label}` : `mb-3 ${printType.label}`} font-semibold uppercase tracking-[0.17em]`} style={{ color: primary }}>{data.badge}</p>}
             <h1 className={`${compact ? 'text-2xl' : landscape ? (longCopy ? 'text-[26px]' : 'text-[32px]') : 'text-[44px]'} font-semibold leading-[1.08] tracking-tight break-words`} style={landscape ? { fontSize: `${Math.round((longCopy ? 28 : 34) * layoutScale)}px` } : undefined}>{data.title}</h1>
-            {data.subtitle && <p className={`${tight ? `mt-1 ${printType.body} leading-snug` : `mt-4 ${printType.body} leading-snug`} text-slate-600 break-words`}>{data.subtitle}</p>}
-            {(data.location || data.validityPeriod) && <p className={`${tight ? `mt-2 ${printType.detail}` : `mt-4 ${printType.detail}`} tracking-wide text-slate-500 break-words`}>{[data.location, data.validityPeriod].filter(Boolean).join('  ·  ')}</p>}
+            {data.subtitle && <p className={`${tight ? `mt-1 ${printType.body} leading-snug` : `mt-4 ${printType.body} leading-snug`} text-slate-600 break-words`} style={{fontSize:printSizes.body}}>{data.subtitle}</p>}
+            {(data.location || data.validityPeriod) && <p className={`${tight ? `mt-2 ${printType.detail}` : `mt-4 ${printType.detail}`} tracking-wide text-slate-500 break-words`} style={{fontSize:printSizes.detail}}>{[data.location, data.validityPeriod].filter(Boolean).join('  ·  ')}</p>}
           </div>
           {showServices && (
             <div className="min-w-0">
-              {data.featuresTitle && <p className={`mb-2 ${printType.label} font-semibold uppercase tracking-wide text-slate-600`}>{data.featuresTitle}</p>}
-              <p className={`${printType.body} leading-relaxed text-slate-700`}>
+              {data.featuresTitle && <p className={`mb-2 ${printType.label} font-semibold uppercase tracking-wide text-slate-600`} style={{fontSize:printSizes.label}}>{data.featuresTitle}</p>}
+              <p className={`${printType.body} leading-snug text-slate-700 break-words`} style={{fontSize:printSizes.body}}>
                 {visibleFeatures.map(feature => feature.text).join('  ·  ')}
               </p>
             </div>
@@ -89,12 +90,12 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
             <div className={`flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 break-words ${landscape ? "mt-auto pt-2" : ""}`}>
               {hasPrice ? (
                 <>
-                  {data.pricePrefix && <span className={`${printType.detail} uppercase tracking-wide text-slate-600`}>{data.pricePrefix}</span>}
+                  {data.pricePrefix && <span className={`${printType.detail} uppercase tracking-wide text-slate-600`} style={{fontSize:printSizes.detail}}>{data.pricePrefix}</span>}
                   <span className={`${compact ? 'text-3xl' : landscape ? 'text-4xl' : 'text-5xl'} font-semibold tracking-tight`} style={{ color: primary }}>{data.priceAmount} {data.priceCurrency}</span>
-                  {data.priceSuffix && <span className={`${printType.detail} text-slate-600`}>{data.priceSuffix}</span>}
+                  {data.priceSuffix && <span className={`${printType.detail} text-slate-600`} style={{fontSize:printSizes.detail}}>{data.priceSuffix}</span>}
                 </>
               ) : <span className="text-lg font-medium" style={{ color: primary }}>{data.priceNote || 'Preis auf Anfrage'}</span>}
-              {hasPrice && data.priceNote && <p className={`w-full ${printType.detail} leading-snug text-slate-600`}>{data.priceNote}</p>}
+              {hasPrice && data.priceNote && <p className={`w-full ${printType.detail} leading-snug text-slate-600`} style={{fontSize:printSizes.detail}}>{data.priceNote}</p>}
             </div>
           )}
         </div>
@@ -105,8 +106,8 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
             <NordicSwooshGraphic variant="swoosh_only" color={accent} className="absolute right-0 top-1/2 h-32 w-full -translate-y-1/2" style={{ opacity: 0.17 }} />
           </div>
           <div className="relative z-10 min-w-0 space-y-1">
-            <div className={`${printType.callToAction} font-semibold`} style={{ color: primary }}>{content.ctaText || 'Jetzt anfragen'}</div>
-            <p className={`${printType.footer} text-slate-600 break-words`}>{[data.website, data.email, data.phone].filter(Boolean).join('  ·  ')}</p>
+            <div className={`${printType.callToAction} font-semibold`} style={{ color: primary, fontSize: printSizes.callToAction }}>{content.ctaText || 'Jetzt anfragen'}</div>
+            <p className={`${printType.footer} text-slate-600 break-words`} style={{fontSize:printSizes.footer}}>{[data.website, data.email, data.phone].filter(Boolean).join('  ·  ')}</p>
           </div>
           {visibility.qrCode !== false && content.qrCode?.enabled && qrUrl && (
             <div className="relative z-10 shrink-0"><QRCodeSVG value={qrUrl} size={compact ? 44 : 60} fgColor={primary} bgColor="#FFFFFF" /></div>

@@ -1,3 +1,4 @@
+import { getFlyerPrintTypography } from '../../design/flyerPrintTypography';
 import { resolveDNSFlyerPhoto } from '../../data/dnsStockPhotos';
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -19,7 +20,9 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
   activeSportsIcons = [],
   visibility = {} as any
 }) => {
+  const heroImageUrl = resolveDNSFlyerPhoto(content.heroImageUrl, 'hotel_skipass_package');
   const fmt = content.format || 'A4';
+  const printType = getFlyerPrintTypography(fmt);
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
 
@@ -106,7 +109,7 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
                 {displayTitle}
               </h1>
               {displaySubtitle && (
-                <p className="text-xs font-medium text-slate-100/90 leading-snug">
+                <p className={`${printType.body} font-medium text-slate-100/90 leading-snug`}>
                   {displaySubtitle}
                 </p>
               )}
@@ -119,13 +122,13 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
         )}
 
         {/* HERO IMAGE (IF ACTIVE) */}
-        {visibility?.heroImage !== false && content.heroImageUrl && (
+        {visibility?.heroImage !== false && heroImageUrl && (
           <div 
             className="relative rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs shrink-0"
             style={{ height: content.heroImageHeightPx ? `${content.heroImageHeightPx}px` : '110px' }}
           >
             <img 
-              src={content.heroImageUrl} 
+              src={heroImageUrl} 
               alt="Hotel Special Package" 
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"

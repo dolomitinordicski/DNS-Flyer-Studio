@@ -1,0 +1,1 @@
+Six user-supplied DNS images for github repository dolomitinordicski/DNS-Flyer-Studio. Copy public/stock/dns/* into the same repository path on branch feat/official-dns-stock-photos. Credit photography according to supplied file names: Manuel Kottersteger / IDM Südtirol and Roschan Fill. Check publication usage rights before public release. Do not use unrelated stock photographs.

@@ -1,3 +1,4 @@
+import { resolveDNSFlyerPhoto } from '../../data/dnsStockPhotos';
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Phone, Mail, Globe, MapPin, CheckCircle2, Hotel, Sparkles, Tag, ArrowRight, Star, Calendar } from 'lucide-react';
@@ -52,8 +53,7 @@ export const HotelSkipassFusionVariant: React.FC<FlyerVariantProps> = ({
   const website = data.website;
 
   const paddingClass = isA5 ? 'p-2.5' : 'p-4 sm:p-6';
-  const defaultHeroUrl = 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80';
-  const heroUrl = content.heroImageUrl || defaultHeroUrl;
+  const heroUrl = resolveDNSFlyerPhoto(content.heroImageUrl, 'hotel_skipass_package');
 
   return (
     <div 
@@ -101,20 +101,20 @@ export const HotelSkipassFusionVariant: React.FC<FlyerVariantProps> = ({
 
               {/* Top Floating Badge & Location Pill */}
               <div className="absolute top-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 z-10">
-                <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase inline-flex items-center gap-1.5 shadow-md bg-[#AAD0D1] text-[#0D4D5E]">
+                <span className="px-3 py-1 rounded-full text-[14px] font-black tracking-wider uppercase inline-flex items-center gap-1.5 shadow-md bg-[#AAD0D1] text-[#0D4D5E]">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>{displayBadge}</span>
                 </span>
 
                 <div className="flex flex-wrap items-center gap-1.5">
                   {displayLocation && (
-                    <span className="text-[10px] font-bold text-white bg-black/50 px-2.5 py-1 rounded-lg backdrop-blur-md flex items-center gap-1 border border-white/20">
+                    <span className="text-[14px] font-bold text-white bg-black/50 px-2.5 py-1 rounded-lg backdrop-blur-md flex items-center gap-1 border border-white/20">
                       <MapPin className="w-3 h-3 text-[#AAD0D1]" />
                       <span>{displayLocation}</span>
                     </span>
                   )}
                   {displayValidityPeriod && (
-                    <span className="text-[10px] font-bold text-white bg-black/50 px-2.5 py-1 rounded-lg backdrop-blur-md flex items-center gap-1 border border-white/20">
+                    <span className="text-[14px] font-bold text-white bg-black/50 px-2.5 py-1 rounded-lg backdrop-blur-md flex items-center gap-1 border border-white/20">
                       <Calendar className="w-3 h-3 text-[#AAD0D1]" />
                       <span>{displayValidityPeriod}</span>
                     </span>
@@ -158,7 +158,7 @@ export const HotelSkipassFusionVariant: React.FC<FlyerVariantProps> = ({
               {/* PRICE HIGHLIGHT CARD */}
               {showPrice && (
                 <div className={`${showServices ? 'col-span-5' : 'col-span-12'} bg-gradient-to-br from-[#0D4D5E] via-[#0D4D5E] to-[#0A3A47] text-white rounded-2xl p-3.5 border-2 border-[#AAD0D1] shadow-sm flex flex-col justify-between text-center relative overflow-hidden`}>
-                  <div className="text-[9.5px] sm:text-[10.5px] font-black uppercase tracking-widest text-[#AAD0D1] font-vietnam">
+                  <div className="text-[12px] sm:text-[14px] font-black uppercase tracking-widest text-[#AAD0D1] font-vietnam">
                     {displayPricePrefix}
                   </div>
 
@@ -169,12 +169,12 @@ export const HotelSkipassFusionVariant: React.FC<FlyerVariantProps> = ({
                     </div>
                   </div>
 
-                  <div className="text-[10px] sm:text-[11px] font-black text-[#AAD0D1] uppercase font-vietnam bg-white/10 py-1 px-2 rounded-lg border border-white/15">
+                  <div className="text-[14px] sm:text-[14px] font-black text-[#AAD0D1] uppercase font-vietnam bg-white/10 py-1 px-2 rounded-lg border border-white/15">
                     {displayPriceSuffix}
                   </div>
 
                   {displayPriceNote && (
-                    <p className="text-[8.5px] font-medium text-slate-200 mt-2 pt-1.5 border-t border-white/15 leading-tight">
+                    <p className="text-[12px] font-medium text-slate-200 mt-2 pt-1.5 border-t border-white/15 leading-tight">
                       {displayPriceNote}
                     </p>
                   )}
@@ -194,7 +194,7 @@ export const HotelSkipassFusionVariant: React.FC<FlyerVariantProps> = ({
                       {displayFeatures.slice(0, 5).map((feat, idx) => (
                         <div 
                           key={feat.id || idx}
-                          className={`flex items-start gap-1.5 text-[10px] sm:text-[11px] font-bold leading-tight p-1.5 rounded-lg ${
+                          className={`flex items-start gap-1.5 text-[14px] sm:text-[14px] font-bold leading-tight p-1.5 rounded-lg ${
                             feat.highlight 
                               ? 'bg-[#AAD0D1]/30 text-[#0D4D5E] border border-[#AAD0D1]' 
                               : 'text-slate-800 bg-slate-50/80'
@@ -213,7 +213,7 @@ export const HotelSkipassFusionVariant: React.FC<FlyerVariantProps> = ({
                       {activeSportsIcons.slice(0, 5).map((iconObj, idx) => (
                         <span 
                           key={idx} 
-                          className="px-2 py-0.5 rounded-full bg-[#0D4D5E]/10 text-[#0D4D5E] text-[8.5px] font-extrabold flex items-center gap-1 border border-[#0D4D5E]/20"
+                          className="px-2 py-0.5 rounded-full bg-[#0D4D5E]/10 text-[#0D4D5E] text-[12px] font-extrabold flex items-center gap-1 border border-[#0D4D5E]/20"
                         >
                           <WireframeIcon icon={iconObj} className="w-3 h-3 text-[#0D4D5E]" />
                           <span>{getSportsIconName(iconObj, activeLang)}</span>
@@ -236,12 +236,12 @@ export const HotelSkipassFusionVariant: React.FC<FlyerVariantProps> = ({
             </div>
             <div className="min-w-0 flex-1">
               {displayPromoBannerTitle && (
-                <div className="text-[10px] font-black uppercase text-[#0D4D5E] tracking-wider font-vietnam">
+                <div className="text-[14px] font-black uppercase text-[#0D4D5E] tracking-wider font-vietnam">
                   {displayPromoBannerTitle}
                 </div>
               )}
               {displayPromoBannerText && (
-                <p className="text-[9px] sm:text-[10px] text-slate-700 font-semibold leading-snug">
+                <p className="text-[12px] sm:text-[14px] text-slate-700 font-semibold leading-snug">
                   {displayPromoBannerText}
                 </p>
               )}
@@ -253,13 +253,13 @@ export const HotelSkipassFusionVariant: React.FC<FlyerVariantProps> = ({
         {visibility?.qrCode !== false && (
           <div className="bg-white rounded-2xl p-3 sm:p-3.5 border-2 border-[#0D4D5E] shadow-xs flex items-center justify-between gap-3 mt-auto">
             <div className="min-w-0 flex-1 space-y-1">
-              <span className="text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-[#0D4D5E] text-white font-vietnam">
+              <span className="text-[12px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-[#0D4D5E] text-white font-vietnam">
                 STRUTTURA & RECEPTION CONVENZIONATA
               </span>
               <h4 className="text-sm sm:text-base font-black text-slate-900 truncate font-vietnam">
                 {hotelName}
               </h4>
-              <div className="flex flex-wrap items-center gap-2.5 text-[10px] font-bold text-slate-700">
+              <div className="flex flex-wrap items-center gap-2.5 text-[14px] font-bold text-slate-700">
                 {phone && (
                   <span className="flex items-center gap-1 text-[#0D4D5E]">
                     <Phone className="w-3 h-3 text-[#417483]" />
@@ -291,7 +291,7 @@ export const HotelSkipassFusionVariant: React.FC<FlyerVariantProps> = ({
                   bgColor="#FFFFFF"
                   level="H"
                 />
-                <span className="text-[7.5px] font-black uppercase text-[#0D4D5E] mt-1 text-center max-w-[80px] leading-none font-vietnam">
+                <span className="text-[12px] font-black uppercase text-[#0D4D5E] mt-1 text-center max-w-[80px] leading-none font-vietnam">
                   {content.qrCode?.label || 'PRENOTA ORA'}
                 </span>
               </div>

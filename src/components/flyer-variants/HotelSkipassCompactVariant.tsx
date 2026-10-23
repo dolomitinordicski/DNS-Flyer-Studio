@@ -1,3 +1,4 @@
+import { resolveDNSFlyerPhoto } from '../../data/dnsStockPhotos';
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Phone, Mail, Globe, MapPin, CheckCircle2, Hotel, Sparkles, QrCode, Tag } from 'lucide-react';
@@ -86,16 +87,16 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
           <div className="bg-[#0D4D5E] text-white rounded-2xl p-4 border-2 border-[#AAD0D1] shadow-md flex items-center justify-between gap-3 relative overflow-hidden">
             <div className="space-y-1 z-10 min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#AAD0D1] text-[#0D4D5E]">
+                <span className="px-2.5 py-0.5 rounded-full text-[14px] font-black uppercase tracking-wider bg-[#AAD0D1] text-[#0D4D5E]">
                   {displayBadge}
                 </span>
                 {displayLocation && (
-                  <span className="text-[10px] font-bold text-white/90 bg-white/10 px-2 py-0.5 rounded">
+                  <span className="text-[14px] font-bold text-white/90 bg-white/10 px-2 py-0.5 rounded">
                     {displayLocation}
                   </span>
                 )}
                 {displayValidityPeriod && (
-                  <span className="text-[10px] font-bold text-white/90 bg-white/10 px-2 py-0.5 rounded">
+                  <span className="text-[14px] font-bold text-white/90 bg-white/10 px-2 py-0.5 rounded">
                     {displayValidityPeriod}
                   </span>
                 )}
@@ -146,7 +147,7 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
               {/* XXL HIGH VISIBILITY PRICE BOX */}
               {showPrice && (
                 <div className={`${showServices ? 'col-span-6' : 'col-span-12'} bg-white rounded-2xl p-4 border-2 border-[#0D4D5E] shadow-sm flex flex-col justify-center items-center text-center relative overflow-hidden`}>
-                  <div className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-[#0D4D5E] font-vietnam mb-1">
+                  <div className="text-[14px] sm:text-xs font-black uppercase tracking-widest text-[#0D4D5E] font-vietnam mb-1">
                     {displayPricePrefix}
                   </div>
 
@@ -160,7 +161,7 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
                   </div>
 
                   {displayPriceNote && (
-                    <p className="text-[9.5px] font-bold text-slate-600 mt-2 pt-2 border-t border-slate-200 leading-tight">
+                    <p className="text-[12px] font-bold text-slate-600 mt-2 pt-2 border-t border-slate-200 leading-tight">
                       {displayPriceNote}
                     </p>
                   )}
@@ -179,11 +180,11 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
                       level="H"
                     />
                   </div>
-                  <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#AAD0D1] font-vietnam flex items-center gap-1">
+                  <span className="text-[12px] sm:text-[14px] font-black uppercase tracking-wider text-[#AAD0D1] font-vietnam flex items-center gap-1">
                     <QrCode className="w-3.5 h-3.5" />
                     <span>{content.qrCode?.label || 'SCANSIONA CON LO SMARTPHONE'}</span>
                   </span>
-                  <span className="text-[8px] sm:text-[9px] font-bold text-slate-200 mt-0.5">
+                  <span className="text-[12px] sm:text-[12px] font-bold text-slate-200 mt-0.5">
                     Offerta & Dettagli Skipass Live
                   </span>
                 </div>
@@ -205,7 +206,7 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
               {displayFeatures.slice(0, 6).map((feat, idx) => (
                 <div 
                   key={feat.id || idx}
-                  className={`flex items-start gap-1.5 text-[10px] sm:text-[10.5px] font-bold leading-tight p-1.5 rounded-lg ${
+                  className={`flex items-start gap-1.5 text-[14px] sm:text-[14px] font-bold leading-tight p-1.5 rounded-lg ${
                     feat.highlight 
                       ? 'bg-[#0D4D5E]/10 text-[#0D4D5E] border border-[#0D4D5E]/20' 
                       : 'text-slate-800 bg-slate-50'
@@ -223,7 +224,7 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
                 {activeSportsIcons.slice(0, 5).map((iconObj, idx) => (
                   <span 
                     key={idx} 
-                    className="px-2 py-0.5 rounded-full bg-[#0D4D5E]/10 text-[#0D4D5E] text-[8.5px] font-extrabold flex items-center gap-1 border border-[#0D4D5E]/20"
+                    className="px-2 py-0.5 rounded-full bg-[#0D4D5E]/10 text-[#0D4D5E] text-[12px] font-extrabold flex items-center gap-1 border border-[#0D4D5E]/20"
                   >
                     <WireframeIcon icon={iconObj} className="w-3 h-3 text-[#0D4D5E]" />
                     <span>{getSportsIconName(iconObj, activeLang)}</span>
@@ -242,12 +243,12 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
             </div>
             <div className="min-w-0 flex-1">
               {displayPromoBannerTitle && (
-                <div className="text-[9.5px] font-black uppercase text-[#0D4D5E] tracking-wider font-vietnam">
+                <div className="text-[12px] font-black uppercase text-[#0D4D5E] tracking-wider font-vietnam">
                   {displayPromoBannerTitle}
                 </div>
               )}
               {displayPromoBannerText && (
-                <p className="text-[9px] text-slate-700 font-medium leading-tight">
+                <p className="text-[12px] text-slate-700 font-medium leading-tight">
                   {displayPromoBannerText}
                 </p>
               )}
@@ -259,7 +260,7 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
         {visibility?.qrCode !== false && (
           <div className="rounded-2xl p-3 border-2 border-[#0D4D5E] bg-white shadow-2xs flex items-center justify-between gap-3 mt-auto">
             <div className="min-w-0 flex-1">
-              <span className="text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-[#0D4D5E] text-white font-vietnam">
+              <span className="text-[12px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-[#0D4D5E] text-white font-vietnam">
                 HOTEL & RECEPTION CONVENZIONATA
               </span>
               <h4 className="text-sm font-black text-slate-900 truncate font-vietnam mt-0.5">
@@ -267,7 +268,7 @@ export const HotelSkipassCompactVariant: React.FC<FlyerVariantProps> = ({
               </h4>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold text-slate-800 shrink-0">
+            <div className="flex flex-wrap items-center gap-3 text-[14px] font-bold text-slate-800 shrink-0">
               {phone && (
                 <span className="flex items-center gap-1 text-[#0D4D5E]">
                   <Phone className="w-3.5 h-3.5 text-[#417483]" />

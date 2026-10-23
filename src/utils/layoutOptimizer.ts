@@ -209,9 +209,19 @@ export function measureFlyerLayout(canvas: HTMLElement): FlyerLayoutMeasurement 
     if (!(node instanceof HTMLElement)) continue;
     measuredBlocks++;
     const clipped = Math.max(0, node.scrollHeight - node.clientHeight);
-    const outside = Math.max(0, node.getBoundingClientRect().bottom - pageBottom);
-    if (clipped > 2 || outside > 2) overflowingBlocks++;
-    overflowPx = Math.max(overflowPx, clipped, outside);
+    const nodeRect = node.getBoundingClientRect();
+    const outside = Math.max(0, nodeRect.bottom - pageBottom);
+    // A clipping parent (e.g. the voucher's flex main) can hide text without
+    // increasing the visible page's scrollHeight. Inspect its clip bounds too.
+    let ancestorClip = 0;
+    for (let parent = node.parentElement; parent && parent !== variant.parentElement; parent = parent.parentElement) {
+      const style = window.getComputedStyle(parent);
+      if (!/(hidden|clip)/.test(style.overflowY)) continue;
+      const bounds = parent.getBoundingClientRect();
+      ancestorClip = Math.max(ancestorClip, nodeRect.bottom - bounds.bottom, bounds.top - nodeRect.top, 0);
+    }
+    if (clipped > 2 || outside > 2 || ancestorClip > 2) overflowingBlocks++;
+    overflowPx = Math.max(overflowPx, clipped, outside, ancestorClip);
   }
   return { overflowPx: Math.ceil(overflowPx), overflowingBlocks, measuredBlocks };
 }

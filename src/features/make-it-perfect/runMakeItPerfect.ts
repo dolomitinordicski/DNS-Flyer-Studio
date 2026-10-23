@@ -23,14 +23,18 @@ export async function runMakeItPerfect({
     const canvas = getCanvas();
     return canvas ? measureFlyerLayout(canvas) : null;
   };
+  // Printed hotel/voucher copy must not be reduced to unreadable sizes.
+  // Report unresolved overflow rather than silently shrinking below this floor.
+  const printDocument = ['hotel_skipass_package', 'gift_voucher', 'service_voucher'].includes(optimized.layoutTemplateId || '');
+  const minimumFactor = printDocument ? 0.90 : 0.72;
   // Start from a conservative size, grow when whitespace permits, shrink on overflow.
-  let factor = Math.max(0.72, Math.min(1.12, optimized.textScaleFactor ?? 1));
+  let factor = Math.max(minimumFactor, Math.min(1.12, optimized.textScaleFactor ?? 1));
   let measurement = await fit(factor);
   if (!measurement) return 'Make It Perfect: anteprima non disponibile.';
 
   if (measurement.overflowPx > 2) {
-    for (let i = 0; i < 7 && measurement.overflowPx > 2 && factor > 0.72; i++) {
-      factor = Math.max(0.72, factor - 0.06);
+    for (let i = 0; i < 7 && measurement.overflowPx > 2 && factor > minimumFactor; i++) {
+      factor = Math.max(minimumFactor, factor - 0.06);
       measurement = (await fit(factor)) ?? measurement;
     }
   } else {
@@ -48,6 +52,6 @@ export async function runMakeItPerfect({
   }
   const page = `${optimized.format} · ${optimized.orientation === 'landscape' ? 'orizzontale' : 'verticale'}`;
   return measurement.overflowPx > 2
-    ? `Attenzione: ${page} — ${measurement.overflowPx}px fuori pagina anche con il testo ridotto.`
+    ? `Attenzione: ${page} — ${measurement.overflowPx}px fuori pagina. La tipografia è già alla soglia minima leggibile: ridurre contenuti o riequilibrare il layout.`
     : `Layout ${page}: tipografia ${Math.round(factor * 100)}%, ${measurement.measuredBlocks} blocchi verificati.`;
 }

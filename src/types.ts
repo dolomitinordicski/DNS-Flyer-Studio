@@ -269,12 +269,6 @@ export interface MultilingualTextSet {
   featuresTitle?: string;
   ctaText?: string;
   addressInfo?: string;
-  documentScope?: 'dns' | 'area';
-  guestName?: string;
-  partnerName?: string;
-  stayPeriod?: string;
-  documentCode?: string;
-  voucherServices?: string[];
   holderName?: string;
   issueDate?: string;
   ticketStatus?: string;

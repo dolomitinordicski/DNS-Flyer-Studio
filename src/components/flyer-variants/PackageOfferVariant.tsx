@@ -1,3 +1,4 @@
+import { resolveDNSFlyerPhoto } from '../../data/dnsStockPhotos';
 import React from 'react';
 import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
 import { QRCodeSVG } from 'qrcode.react';
@@ -28,14 +29,15 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   const regionalLogo = regionLogo?.logoSrc;
   const partnerLogo = content.customRegionalLogoUrl;
   const hasPrice = Boolean(data.priceAmount.trim());
-  const showPhoto = visibility.heroImage !== false && Boolean(content.heroImageUrl);
+  const heroImageUrl = resolveDNSFlyerPhoto(content.heroImageUrl, 'hotel_skipass_package');
+  const showPhoto = visibility.heroImage !== false && Boolean(heroImageUrl);
   const showServices = visibility.servicesBox !== false && data.features.length > 0;
   const qrUrl = content.qrCode?.url || (data.website ? (data.website.startsWith('http') ? data.website : `https://${data.website}`) : '');
   const focus = `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%`;
 
   const image = showPhoto ? (
     <div className={`relative overflow-hidden min-h-0 bg-slate-100 ${landscape ? '' : photoMargin}`} style={{ flex: landscape ? '0 0 40%' : '0 0 49%' }}>
-      <img src={content.heroImageUrl} alt="" className="h-full w-full object-cover" style={{ objectPosition: focus }} referrerPolicy="no-referrer" />
+      <img src={heroImageUrl} alt="" className="h-full w-full object-cover" style={{ objectPosition: focus }} referrerPolicy="no-referrer" />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
       <div className={`absolute bottom-0 left-0 right-0 ${compact ? 'p-5' : 'p-9'}`}>
         <span className="inline-block h-1 w-12 mb-3" data-dns-area-accent="package-photo" style={{ backgroundColor: areaAccent }} />

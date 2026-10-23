@@ -396,6 +396,12 @@ export interface FlyerContent {
   contactPhone: string;
   websiteUrl: string;
   addressInfo: string;
+  documentScope?: 'dns' | 'area';
+  guestName?: string;
+  partnerName?: string;
+  stayPeriod?: string;
+  documentCode?: string;
+  voucherServices?: string[];
   holderName?: string;
   issueDate?: string;
   

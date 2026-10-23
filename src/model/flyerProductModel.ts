@@ -164,7 +164,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'qrCode', 'footer'],
     editableFields: [
       'title', 'subtitle', 'validityPeriod', 'heroImageUrl',
-      'priceAmount', 'priceCurrency', 'priceSuffix', 'priceNote', 'customPrimaryColor', 'customAccentColor',
+      'documentScope', 'holderName', 'documentCode', 'issueDate', 'priceNote', 'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
     ],
     pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait', 'landscape'], magicLayout: true },
@@ -177,7 +177,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     label: { de: 'Leistungsvoucher', it: 'Voucher prestazione', en: 'Service voucher' },
     graphicStyle: 'manifesto_voucher',
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'qrCode', 'footer'],
-    editableFields: ['title', 'subtitle', 'validityPeriod', 'heroImageUrl', 'priceAmount', 'priceCurrency', 'priceSuffix', 'priceNote', 'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode'],
+    editableFields: ['title', 'subtitle', 'validityPeriod', 'heroImageUrl', 'guestName', 'partnerName', 'stayPeriod', 'documentCode', 'voucherServices', 'priceNote', 'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode'],
     pagePolicy: { formats: ['A4', 'A5'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: { access: 'area', languageMode: 'monolingual' },
     exportPolicy: { code: 'html' } as const,

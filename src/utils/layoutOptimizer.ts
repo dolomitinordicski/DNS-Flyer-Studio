@@ -200,7 +200,8 @@ export interface FlyerLayoutMeasurement {
 export function measureFlyerLayout(canvas: HTMLElement): FlyerLayoutMeasurement {
   const variant = canvas.querySelector('[data-dns-fit] > .h-full') as HTMLElement | null;
   if (!variant) return { overflowPx: 0, overflowingBlocks: 0, measuredBlocks: 0 };
-  const pageBottom = variant.getBoundingClientRect().bottom;
+  const pageRect = variant.getBoundingClientRect();
+  const pageBottom = pageRect.bottom;
   let overflowPx = Math.max(0, variant.scrollHeight - variant.clientHeight);
   let overflowingBlocks = 0;
   let measuredBlocks = 0;
@@ -208,17 +209,19 @@ export function measureFlyerLayout(canvas: HTMLElement): FlyerLayoutMeasurement 
   for (const node of Array.from(variant.querySelectorAll('h1,h2,h3,p,li,section,footer'))) {
     if (!(node instanceof HTMLElement)) continue;
     measuredBlocks++;
-    const clipped = Math.max(0, node.scrollHeight - node.clientHeight);
+    const clipped = Math.max(0, node.scrollHeight - node.clientHeight, node.scrollWidth - node.clientWidth);
     const nodeRect = node.getBoundingClientRect();
-    const outside = Math.max(0, nodeRect.bottom - pageBottom);
+    const outside = Math.max(0, nodeRect.bottom - pageBottom, nodeRect.right - pageRect.right, pageRect.left - nodeRect.left);
     // A clipping parent (e.g. the voucher's flex main) can hide text without
     // increasing the visible page's scrollHeight. Inspect its clip bounds too.
     let ancestorClip = 0;
     for (let parent = node.parentElement; parent && parent !== variant.parentElement; parent = parent.parentElement) {
       const style = window.getComputedStyle(parent);
-      if (!/(hidden|clip)/.test(style.overflowY)) continue;
+      const clipsY = /(hidden|clip)/.test(style.overflowY);
+      const clipsX = /(hidden|clip)/.test(style.overflowX);
+      if (!clipsY && !clipsX) continue;
       const bounds = parent.getBoundingClientRect();
-      ancestorClip = Math.max(ancestorClip, nodeRect.bottom - bounds.bottom, bounds.top - nodeRect.top, 0);
+      ancestorClip = Math.max(ancestorClip, clipsY ? nodeRect.bottom - bounds.bottom : 0, clipsY ? bounds.top - nodeRect.top : 0, clipsX ? nodeRect.right - bounds.right : 0, clipsX ? bounds.left - nodeRect.left : 0, 0);
     }
     if (clipped > 2 || outside > 2 || ancestorClip > 2) overflowingBlocks++;
     overflowPx = Math.max(overflowPx, clipped, outside, ancestorClip);

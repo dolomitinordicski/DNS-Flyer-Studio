@@ -1,3 +1,4 @@
+import { DNS_STOCK_PHOTOS, resolveDNSFlyerPhoto } from '../../data/dnsStockPhotos';
 import React, { useEffect, useRef, useState } from 'react';
 import { listFlyerImages, uploadFlyerImage, type FlyerImageAsset } from '../../data/flyerImageLibrary';
 import { Image as ImageIcon, Upload } from 'lucide-react';
@@ -147,13 +148,22 @@ export function SimpleImageEditorTab({
         </p>
       )}
       {imageError && <div role="alert" className="text-xs text-red-700">{ui('Bild-URL nicht erreichbar. Bitte anderes Bild auswählen.', 'Immagine non raggiungibile tramite URL. Seleziona un’altra fotografia.')}</div>}
+      <div className="space-y-2">
+        <p className="text-[10px] font-bold uppercase text-slate-600">{ui('DNS Bildauswahl', 'Fotografie DNS')}</p>
+        <div className="grid grid-cols-3 gap-2">
+          {DNS_STOCK_PHOTOS.map((url, index) => <button key={url} type="button" className="overflow-hidden border border-slate-200 rounded-md"
+            onClick={() => onChangeContent({ heroImageUrl: url, heroImageFocusX: 50, heroImageFocusY: 50 })}>
+            <img src={url} alt={`DNS ${index + 1}`} className="aspect-video w-full object-cover" />
+          </button>)}
+        </div>
+      </div>
       <div className="aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50 select-none touch-none cursor-grab active:cursor-grabbing"
         onPointerDown={e => { if (!content.heroImageUrl) return; dragRef.current = { x: e.clientX, y: e.clientY, focusX: content.heroImageFocusX ?? 50, focusY: content.heroImageFocusY ?? 50 }; e.currentTarget.setPointerCapture(e.pointerId); }}
         onPointerMove={e => { const drag = dragRef.current; if (!drag) return; const rect = e.currentTarget.getBoundingClientRect(); onChangeContent({ heroImageFocusX: clamp(drag.focusX - 100 * (e.clientX - drag.x) / rect.width), heroImageFocusY: clamp(drag.focusY - 100 * (e.clientY - drag.y) / rect.height) }); }}
         onPointerUp={() => { dragRef.current = null; }}
         onPointerCancel={() => { dragRef.current = null; }}>
-        {content.heroImageUrl ? (
-          <img src={content.heroImageUrl} alt="" onLoad={() => setImageError(false)} onError={() => setImageError(true)} draggable={false} className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%` }} />
+        {resolveDNSFlyerPhoto(content.heroImageUrl, content.layoutTemplateId) ? (
+          <img src={resolveDNSFlyerPhoto(content.heroImageUrl, content.layoutTemplateId)} alt="" onLoad={() => setImageError(false)} onError={() => setImageError(true)} draggable={false} className="w-full h-full object-cover pointer-events-none" style={{ objectPosition: `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%` }} />
         ) : (
           <div className="h-full flex items-center justify-center text-slate-400">
             <ImageIcon className="w-8 h-8" />

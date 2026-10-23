@@ -26,14 +26,15 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   const visibleFeatures = data.features.filter(feature => feature.text?.trim());
   const denseCopy = data.subtitle.length > 110 || visibleFeatures.length > 3 || Boolean(data.priceNote);
   const landscapeHotel = landscape && content.format === 'A4';
-  const featureColumns = landscapeHotel && visibleFeatures.length >= 5 && !denseCopy ? 2 : 1;
+  const featureColumns = landscapeHotel && visibleFeatures.length >= 5 && visibleFeatures.every(feature => (feature.text || '').length <= 65) ? 2 : 1;
+  const compactSpacing = denseCopy || layoutScale < 1;
   const primary = theme.primaryHex;
   const photoMargin = compact ? 'mx-5' : 'mx-9';
   // Area identity only on small existing graphic accents; corporate palette stays intact.
   const accent = theme.accentHex;
   const areaAccent = resolveDNSRegionAccent(content.regionId) || accent;
   const regionalLogo = regionLogo?.logoSrc;
-  const partnerLogo = content.customRegionalLogoUrl;
+  const partnerLogo = regionLogo?.secondaryLogoSrc;
   const hasPrice = Boolean(data.priceAmount.trim());
   const heroImageUrl = resolveDNSFlyerPhoto(content.heroImageUrl, 'hotel_skipass_package');
   const showPhoto = visibility.heroImage !== false && Boolean(heroImageUrl);
@@ -42,7 +43,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
   const focus = `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%`;
 
   const image = showPhoto ? (
-    <div className={`relative overflow-hidden min-h-0 bg-slate-100 ${landscape ? '' : photoMargin}`} style={{ flex: landscapeHotel ? (denseCopy ? '0 0 34%' : '0 0 36%') : landscape ? '0 0 38%' : `0 0 ${denseCopy ? 36 : 45}%` }}>
+    <div className={`relative overflow-hidden min-h-0 bg-slate-100 ${landscape ? '' : photoMargin}`} style={{ flex: landscapeHotel ? (compactSpacing ? '0 0 32%' : '0 0 36%') : landscape ? '0 0 38%' : `0 0 ${denseCopy ? 36 : 45}%` }}>
       <img src={heroImageUrl} alt="" className="h-full w-full object-cover" style={{ objectPosition: focus }} referrerPolicy="no-referrer" />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
       <div className={`absolute bottom-0 left-0 right-0 ${compact ? 'p-5' : 'p-9'}`}>
@@ -61,7 +62,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
               <img src={regionalLogo} alt={areaName || regionLogo?.regionName || 'Area partner'}
                 className={compact ? 'h-11 max-w-[170px] object-contain' : 'h-16 max-w-[280px] object-contain'} />
             ) : <span className="text-sm font-semibold" style={{ color: primary }}>{areaName || 'Dolomiti NordicSki'}</span>}
-            {partnerLogo && <img src={partnerLogo} alt="Partner" className={compact ? 'h-8 max-w-[75px] object-contain' : 'h-10 max-w-[100px] object-contain'} />}
+            {partnerLogo && <img src={partnerLogo} alt="Partner" className={compact ? 'h-8 max-w-[75px] object-contain' : 'h-10 max-w-[110px] object-contain'} />}
           </div>
           <div className="shrink-0 opacity-80">
             <DolomitiFullLogo variant={content.logoVariant} isDarkHeader={false}
@@ -72,7 +73,7 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
       )}
       <div className={`flex min-h-0 flex-1 ${landscape ? 'flex-row px-7 gap-4' : 'flex-col'}`}>
         {image}
-        <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${landscape ? 'justify-start' : 'justify-between'} ${compact ? 'gap-2 px-6 py-3' : landscapeHotel ? 'gap-4 px-2 py-3' : landscape ? 'gap-2 px-1 py-2' : denseCopy ? 'gap-3 px-10 py-5' : 'gap-5 px-10 py-7'}`}>
+        <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${landscape ? 'justify-start' : 'justify-between'} ${compact ? 'gap-2 px-6 py-3' : landscapeHotel ? (compactSpacing ? 'gap-2 px-2 py-2' : 'gap-3 px-2 py-3') : landscape ? 'gap-2 px-1 py-2' : denseCopy ? 'gap-3 px-10 py-5' : 'gap-5 px-10 py-7'}`}>
           <div className="min-w-0 shrink-0">
             <div className={landscape ? 'mb-2 h-1 w-12' : 'mb-5 h-1 w-12'} data-dns-area-accent="package-heading" style={{ backgroundColor: areaAccent }} />
             {data.badge && <p className={`${tight ? `mb-1 ${printType.label}` : `mb-3 ${printType.label}`} font-semibold uppercase tracking-wide`} style={{ color: primary, fontSize: printSizes.label }}>{data.badge}</p>}
@@ -81,10 +82,10 @@ export const PackageOfferVariant: React.FC<FlyerVariantProps> = ({
             {(data.location || data.validityPeriod) && <p className={`${tight ? `mt-2 ${printType.detail}` : `mt-4 ${printType.detail}`} tracking-wide text-slate-500 break-words`} style={{fontSize:printSizes.detail}}>{[data.location, data.validityPeriod].filter(Boolean).join('  ·  ')}</p>}
           </div>
           {showServices && (
-            <section className={`min-w-0 ${landscapeHotel ? 'flex flex-1 flex-col justify-center py-2' : ''}`}>
+            <section className={`min-w-0 ${landscapeHotel ? 'flex flex-1 flex-col justify-center' : ''} ${compactSpacing ? 'py-1' : 'py-2'}`}>
               {data.featuresTitle && <h2 className={`mb-3 ${printType.label} font-semibold uppercase tracking-wide text-slate-600`} style={{fontSize:printSizes.label}}>{data.featuresTitle}</h2>}
               {landscape ? (
-                <ul className={`grid gap-x-5 gap-y-2 ${featureColumns === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                <ul className={`grid gap-x-5 ${compactSpacing ? 'gap-y-1' : 'gap-y-2'} ${featureColumns === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                   {visibleFeatures.map((feature, index) => (
                     <li key={index} className="flex min-w-0 items-start gap-3 leading-snug text-slate-700" style={{fontSize:printSizes.body}}>
                       <span className="mt-[0.42em] h-1.5 w-1.5 shrink-0 rounded-full" style={{backgroundColor:areaAccent}} />

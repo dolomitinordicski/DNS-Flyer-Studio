@@ -1,3 +1,4 @@
+import { resolveDNSFlyerPhoto } from '../../data/dnsStockPhotos';
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Phone, Mail, Globe, MapPin, CheckCircle2, Hotel, Sparkles, Calendar, Tag, ShieldCheck } from 'lucide-react';
@@ -18,6 +19,7 @@ export const HotelSkipassVariant: React.FC<FlyerVariantProps> = ({
   activeSportsIcons = [],
   visibility = {} as any
 }) => {
+  const heroImageUrl = resolveDNSFlyerPhoto(content.heroImageUrl, 'hotel_skipass_package');
   const fmt = content.format || 'A4';
   const isA5 = fmt === 'A5';
   const isA3 = fmt === 'A3';
@@ -136,13 +138,13 @@ export const HotelSkipassVariant: React.FC<FlyerVariantProps> = ({
         )}
 
         {/* HERO IMAGE (IF ACTIVE) */}
-        {visibility?.heroImage !== false && content.heroImageUrl && (
+        {visibility?.heroImage !== false && heroImageUrl && (
           <div 
             className="relative rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs shrink-0"
             style={{ height: content.heroImageHeightPx ? `${content.heroImageHeightPx}px` : '125px' }}
           >
             <img 
-              src={content.heroImageUrl} 
+              src={heroImageUrl} 
               alt="Hotel Special Package" 
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"

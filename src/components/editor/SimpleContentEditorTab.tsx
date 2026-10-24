@@ -169,7 +169,7 @@ export function SimpleContentEditorTab({
             <label className="flex items-center justify-between gap-3 text-xs font-semibold">
               {ui('QR-Code auf dem Dokument anzeigen', 'Mostra QR Code sul documento')}
               <input type="checkbox" checked={content.qrCode?.enabled === true}
-                onChange={e => onChangeContent({ qrCode: { ...content.qrCode!, enabled: e.target.checked, url: content.qrCode?.url ?? '', label: content.qrCode?.label ?? '' } })} />
+                onChange={e => onChangeContent({ qrCode: { enabled: e.target.checked, url: content.qrCode?.url ?? '', label: content.qrCode?.label ?? '', fgColor: content.qrCode?.fgColor ?? '#0D4D5E', bgColor: content.qrCode?.bgColor ?? '#FFFFFF', centerLogo: content.qrCode?.centerLogo ?? 'none', position: content.qrCode?.position ?? 'bottom_right' } })} />
             </label>
             {content.qrCode?.enabled && <>
               <label className="block space-y-1"><span className="text-[10px] font-bold">{ui('QR-Zieladresse (URL)', 'Link di destinazione QR')}</span>

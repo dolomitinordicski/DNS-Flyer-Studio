@@ -25,23 +25,23 @@ export function QRCodeEditorTab({ content, onChangeContent }: QRCodeEditorTabPro
           <label className="font-bold text-slate-900">Attiva QR Code nel Flyer</label>
           <input
             type="checkbox"
-            checked={content.qrCode.enabled}
+            checked={content.qrCode?.enabled === true}
             onChange={(e) => onChangeContent({
-              qrCode: { ...content.qrCode, enabled: e.target.checked },
+              qrCode: { enabled: e.target.checked, url: content.qrCode?.url ?? '', label: content.qrCode?.label ?? '', fgColor: content.qrCode?.fgColor ?? '#0D4D5E', bgColor: content.qrCode?.bgColor ?? '#FFFFFF', centerLogo: content.qrCode?.centerLogo ?? 'none', position: content.qrCode?.position ?? 'bottom_right' },
             })}
             className="w-4 h-4 accent-[#0D4D5E] rounded cursor-pointer"
           />
         </div>
 
-        {content.qrCode.enabled && (
+        {content.qrCode?.enabled && (
           <>
             <div>
               <label className="block text-slate-700 font-bold mb-1">Link / URL dell'Offerta</label>
               <input
                 type="text"
-                value={content.qrCode.url}
+                value={content.qrCode?.url ?? ''}
                 onChange={(e) => onChangeContent({
-                  qrCode: { ...content.qrCode, url: e.target.value },
+                  qrCode: { ...content.qrCode!, url: e.target.value },
                 })}
                 placeholder="https://www.dolomitinordicski.com/offerta"
                 className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900"
@@ -52,9 +52,9 @@ export function QRCodeEditorTab({ content, onChangeContent }: QRCodeEditorTabPro
               <label className="block text-slate-700 font-bold mb-1">Etichetta Sotto QR Code</label>
               <input
                 type="text"
-                value={content.qrCode.label}
+                value={content.qrCode?.label ?? ''}
                 onChange={(e) => onChangeContent({
-                  qrCode: { ...content.qrCode, label: e.target.value },
+                  qrCode: { ...content.qrCode!, label: e.target.value },
                 })}
                 placeholder="Scansiona per prenotare"
                 className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900"

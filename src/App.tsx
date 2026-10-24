@@ -210,6 +210,8 @@ export default function App() {
   
   // Canvas DOM Reference for PDF & PNG capture
   const flyerRef = useRef<HTMLDivElement>(null);
+  const exportFlyerRef = useRef<HTMLDivElement>(null);
+  const [exportContent, setExportContent] = useState<FlyerContent | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
@@ -422,25 +424,36 @@ export default function App() {
   // State for Multilingual Export Modal
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
-  // Helper function to render a flyer canvas snapshot for a specific language
+  // Export from a separate, native-size render: never rasterize the zoomed editor preview.
+  // Language changes do not mutate the working draft or trigger autosave.
   const renderCanvasForLang = async (lang: LanguageCode) => {
-    const flyerElement = flyerRef.current;
-    if (!flyerElement) return null;
-
-    const langContent = getContentForLanguage(content, lang);
-    setContent(langContent);
-    // Wait for React re-render tick
-    await new Promise(r => setTimeout(r, 450));
-
-    const canvas = await html2canvas(flyerElement, {
-      scale: 3, // 300 DPI clarity
+    setExportContent({ ...getContentForLanguage(content, lang), activeLanguage: lang });
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    const flyerElement = exportFlyerRef.current;
+    if (!flyerElement) throw new Error('Export canvas not mounted');
+    await document.fonts.ready;
+    await Promise.all(Array.from(flyerElement.querySelectorAll('img')).map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise<void>(resolve => {
+        img.addEventListener('load', () => resolve(), { once: true });
+        img.addEventListener('error', () => resolve(), { once: true });
+        setTimeout(resolve, 4000);
+      });
+    }));
+    // Official price lists may fetch data asynchronously.
+    for (let i = 0; i < 40 && flyerElement.dataset.pricingState === 'loading'; i++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    if (flyerElement.dataset.pricingState !== 'ready') throw new Error('Official prices unavailable during export');
+    return html2canvas(flyerElement, {
+      scale: 3,
       useCORS: true,
-      allowTaint: true,
+      allowTaint: false,
       backgroundColor: '#ffffff',
-      logging: false
+      logging: false,
+      width: flyerElement.clientWidth,
+      height: flyerElement.clientHeight,
     });
-
-    return canvas;
   };
 
   // 1. Export PDF Bundle (3 Pages: DE, IT, EN)
@@ -451,7 +464,6 @@ export default function App() {
       return;
     }
     setIsExporting(true);
-    const originalContent = { ...content };
 
     try {
       const doc = new jsPDF({
@@ -478,7 +490,7 @@ export default function App() {
       console.error('Error exporting PDF bundle:', err);
       window.print();
     } finally {
-      setContent(originalContent);
+      setExportContent(null);
       setIsExporting(false);
     }
   };
@@ -811,6 +823,13 @@ export default function App() {
         onLoadDesign={handleOpenSavedDraft}
         onSaveCurrentDesign={handleSaveDraftNow}
       />
+
+      {/* Native-sized print rasterization. Outside the editor preview and without CSS scale. */}
+      {isExporting && exportContent && (
+        <div aria-hidden="true" style={{ position: 'fixed', left: '-20000px', top: 0, pointerEvents: 'none' }}>
+          <FlyerCanvas ref={exportFlyerRef} content={exportContent} scale={1} designPolicy={designPolicy} />
+        </div>
+      )}
 
       {/* Multilingual Export & Print Modal */}
       <ExportModal

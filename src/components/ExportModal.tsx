@@ -11,7 +11,6 @@ interface ExportModalProps {
   onExportPdfBundle: () => Promise<void>;
   onExportPdfSeparate: () => Promise<void>;
   onExportPdfSingle: (lang: LanguageCode) => Promise<void>;
-  onDNSVectorProof?: () => Promise<void>;
   onDNSNativeVectorPrint?: () => Promise<void>;
   onExportPngSeparate: () => Promise<void>;
   onExportPngSingle: (lang: LanguageCode) => Promise<void>;
@@ -30,7 +29,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   onExportPdfBundle,
   onExportPdfSeparate,
   onExportPdfSingle,
-  onDNSVectorProof,
   onDNSNativeVectorPrint,
   onExportPngSeparate,
   onExportPngSingle,
@@ -77,7 +75,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <div>
                 <span className="font-bold text-xs text-[#0D4D5E] block">{ui('DNS- und Gebiets-Preisliste (einheitliche Struktur)', 'Modello Listino DNS e Regioni (Struttura Unificata)')}</span>
                 <span className="text-[11px] text-slate-700 leading-relaxed block mt-0.5">
-                  {ui('Für dieses Modell ist die Ausgabe in drei getrennten Sprachen deaktiviert. Es wird eine einzige offizielle hochauflösende Version erzeugt.', 'La compilazione in 3 lingue separate è disattivata per questo modello. Verrà generata la versione ufficiale unica ad alta risoluzione pronta per la stampa tipografica.')}
+                  {ui('Die offizielle Preisliste wird direkt aus dem Browser als Vektor-PDF gedruckt; Fotos bleiben Bilder.', 'Il listino ufficiale si stampa dal browser con testo e grafica vettoriale; le fotografie restano immagini.')}
                 </span>
               </div>
             </div>
@@ -93,39 +91,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </div>
           )}
 
-          {isPriceTable && onDNSNativeVectorPrint && (
-            <button type="button" disabled={isExporting} onClick={onDNSNativeVectorPrint}
-              className="w-full rounded-xl border border-[#0D4D5E] bg-white p-3 text-left text-xs font-bold text-[#0D4D5E] disabled:opacity-50">
-              {ui('Vektor-PDF über Browser drucken (Als PDF speichern)', 'Stampa PDF vettoriale dal browser (Salva come PDF)')}
-            </button>
-          )}
-          {isPriceTable && onDNSVectorProof && <button type="button" disabled={isExporting} onClick={onDNSVectorProof} className="w-full rounded-xl border-2 border-dashed border-[#0D4D5E] bg-[#E8F4F6] p-3 text-left text-xs font-bold text-[#0D4D5E] disabled:opacity-50">{ui('Vektor-PDF Test (noch nicht druckfertig)', 'Test PDF vettoriale (non ancora pronto per la stampa)')}</button>}
           <div className="space-y-3 pt-1">
             <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">{ui('PDF-Exportoptionen:', 'Opzioni Esportazione PDF:')}</span>
 
             {isPriceTable ? (
-              <button
-                onClick={async () => {
-                  await onExportPdfSingle(activeLanguage);
-                  onClose();
-                }}
-                disabled={isExporting}
-                className="w-full text-left p-4 bg-white hover:bg-slate-50 border border-[#0D4D5E] rounded-xl shadow-xs transition-all flex items-center justify-between group disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-[#0D4D5E] text-white rounded-lg">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-slate-900 text-xs block group-hover:text-[#0D4D5E]">
-                      {ui('📄 Offizielle Preisliste als PDF herunterladen (300 DPI)', '📄 Scarica PDF Listino Prezzi Ufficiale (300 DPI)')}
-                    </span>
-                    <span className="text-[11px] text-slate-500">
-                      {ui('Aktuell rasterbasiertes Druck-PDF. Vektorexport in Entwicklung.', 'PDF di stampa raster attuale. Esportazione vettoriale in sviluppo.')}
-                    </span>
-                  </div>
-                </div>
-                <span className="text-xs font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 px-2.5 py-1 rounded-md shrink-0">{ui('HQ-Druck', 'Stampa HQ')}</span>
+              <button type="button" disabled={isExporting || !onDNSNativeVectorPrint}
+                onClick={() => { void onDNSNativeVectorPrint?.(); }}
+                className="w-full text-left p-4 bg-white hover:bg-slate-50 border border-[#0D4D5E] rounded-xl shadow-xs disabled:opacity-50">
+                <span className="font-bold text-[#0D4D5E] block">{ui('PDF drucken / Als PDF speichern', 'Stampa PDF / Salva come PDF')}</span>
+                <span className="text-[11px] text-slate-600">{ui('Vektordruck über den Browser. Im Druckdialog „Als PDF speichern“ wählen.', 'Stampa vettoriale del browser. Seleziona «Salva come PDF» nella finestra di stampa.')}</span>
               </button>
             ) : (
               <>

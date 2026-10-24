@@ -1,7 +1,7 @@
 import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
 import { createDNSCapabilityRuntime, type DNSCapabilityAdapter } from '@dolomitinordicski/dns-shared-data/capability-runtime';
-import type { PaperFormat, PaperOrientation } from '../types';
+import type { PaperFormat, PaperOrientation } from '../../types';
 
 /** Foundation governs capability registration; Flyer Studio owns creative geometry/rendering. */
 export interface CreativeExportGeometry { format: PaperFormat; orientation: PaperOrientation }

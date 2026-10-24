@@ -85,7 +85,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <div>
                 <span className="font-bold text-slate-900 block">{ui('3 Sprachen konfiguriert (DE / IT / EN)', '3 Lingue Configurate (DE / IT / EN)')}</span>
                 <span className="text-[11px] text-slate-500">
-                  {ui('Du kannst ein dreisprachiges PDF mit 3 Seiten, 3 getrennte Dateien oder nur die aktive Sprache herunterladen', 'Puoi scaricare un singolo PDF trilingue con 3 pagine ordinate, 3 file distinti per ciascuna lingua, oppure solo la lingua attiva')} (<strong>{activeLanguage.toUpperCase()}</strong>).
+                  {ui('Du kannst ein dreiseitiges PDF oder eine einzelne Sprache als Vektor-PDF drucken', 'Puoi stampare un PDF trilingue di tre pagine oppure una singola lingua')} (<strong>{activeLanguage.toUpperCase()}</strong>).
                 </span>
               </div>
             </div>
@@ -121,35 +121,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                         📄 Documento Unico PDF (3 Pagine Trilingue: DE + IT + EN)
                       </span>
                       <span className="text-[11px] text-slate-500">
-                        Un unico file PDF ad alta risoluzione (300 DPI) con Pagina 1: Tedesco, Pagina 2: Italiano, Pagina 3: Inglese.
+                        Stampa vettoriale dal browser: un solo PDF con pagine DE, IT ed EN. Seleziona «Salva come PDF».
                       </span>
                     </div>
                   </div>
                   <span className="text-xs font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 px-2.5 py-1 rounded-md shrink-0">Consigliato</span>
-                </button>
-
-                {/* Option 2: 3 Separate PDF Files */}
-                <button
-                  onClick={async () => {
-                    await onExportPdfSeparate();
-                    onClose();
-                  }}
-                  disabled={isExporting}
-                  className="w-full text-left p-3.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-[#0D4D5E] rounded-xl shadow-2xs transition-all flex items-center justify-between group disabled:opacity-50"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-50 text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white rounded-lg transition-all">
-                      <Layers className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="font-bold text-slate-900 text-xs block group-hover:text-emerald-700 transition-colors">
-                        📁 3 File PDF Separati (DE.pdf, IT.pdf, EN.pdf)
-                      </span>
-                      <span className="text-[11px] text-slate-500">
-                        Genera e scarica 3 file PDF indipendenti, uno per ogni lingua.
-                      </span>
-                    </div>
-                  </div>
                 </button>
 
                 {/* Option 3: Single Active Language PDF */}

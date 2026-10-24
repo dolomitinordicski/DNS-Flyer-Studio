@@ -11,13 +11,17 @@ export function flyerPageMm({format, orientation}: CreativeExportGeometry): [num
 }
 export async function captureCreativeFlyer(element: HTMLElement): Promise<HTMLCanvasElement> {
   await document.fonts.ready;
-  await Promise.all(Array.from(element.querySelectorAll('img')).map(img => {
-    if (img.complete) return Promise.resolve();
-    return new Promise<void>(resolve => {
-      img.addEventListener('load', () => resolve(), {once:true});
-      img.addEventListener('error', () => resolve(), {once:true});
-      setTimeout(resolve, 4000);
-    });
+  await Promise.all(Array.from(element.querySelectorAll('img')).map(async img => {
+    if (!img.complete) {
+      await new Promise<void>((resolve, reject) => {
+        const timeout = window.setTimeout(() => reject(new Error('Image timed out: ' + img.currentSrc)), 10000);
+        const cleanup = () => window.clearTimeout(timeout);
+        img.addEventListener('load', () => { cleanup(); resolve(); }, { once: true });
+        img.addEventListener('error', () => { cleanup(); reject(new Error('Image failed: ' + img.currentSrc)); }, { once: true });
+      });
+    }
+    if (img.naturalWidth === 0 || img.naturalHeight === 0) throw new Error('Image unavailable for export: ' + img.currentSrc);
+    if (img.decode) await img.decode();
   }));
   return html2canvas(element, {
     scale: 3, useCORS: true, allowTaint: false, logging: false,
@@ -38,10 +42,21 @@ const adapters: DNSCapabilityAdapter[] = [{
     if(!canvases.length) throw new Error('No rendered flyer pages');
     if(context.capability === 'export.pdf') {
       const [w,h]=flyerPageMm(geometry);
-      const pdf=new jsPDF({unit:'mm',orientation:geometry.orientation,format:[w,h]});
+      const pdf=new jsPDF({unit:'mm',orientation:geometry.orientation,format:[w,h],compress:true});
       canvases.forEach((canvas,i)=>{
+        if (!canvas.width || !canvas.height) throw new Error('Empty flyer export canvas');
         if(i) pdf.addPage([w,h],geometry.orientation);
-        pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,w,h);
+        const pageW=pdf.internal.pageSize.getWidth();
+        const pageH=pdf.internal.pageSize.getHeight();
+        const rasterRatio=canvas.width/canvas.height;
+        const paperRatio=pageW/pageH;
+        // Never stretch typography or images. A mismatch is a layout error, not a scaling opportunity.
+        if (Math.abs(rasterRatio-paperRatio)/paperRatio > 0.012) {
+          throw new Error(`Flyer export dimensions differ from ${geometry.format} ${geometry.orientation}: image ${canvas.width}x${canvas.height}, page ${pageW.toFixed(1)}x${pageH.toFixed(1)}mm`);
+        }
+        const imageHeight=pageW/rasterRatio;
+        const top=(pageH-imageHeight)/2;
+        pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,top,pageW,imageHeight);
       });
       pdf.save(filename);
       return {filename,pages:canvases.length};

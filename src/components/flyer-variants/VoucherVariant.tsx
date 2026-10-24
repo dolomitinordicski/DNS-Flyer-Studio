@@ -34,7 +34,8 @@ const PrintDocument: React.FC<Props & { gift: boolean }> = ({ gift, content, plt
   const secondaryAreaLogo = showAreaBrand ? regionLogo?.secondaryLogoSrc : undefined;
   const scope = scopeArea ? areaName : 'DOLOMITI NORDICSKI';
   const qr = clean(content.qrCode?.url);
-  const showQr = visibility.qrCode !== false && content.qrCode?.enabled && !!qr;
+  const showQr = visibility.qrCode !== false && content.qrCode?.enabled === true && !!qr;
+  const qrLabel = clean(content.qrCode?.label);
   const photoUrl = resolveDNSFlyerPhoto(content.heroImageUrl, gift ? 'gift_voucher' : 'service_voucher');
   const photo = visibility.heroImage !== false && !!photoUrl;
   const services = (content.voucherServices || []).map(item => item.trim()).filter(Boolean);
@@ -93,19 +94,19 @@ const PrintDocument: React.FC<Props & { gift: boolean }> = ({ gift, content, plt
         </>}
       </main>
     </div>
-    <footer className="relative mt-3 shrink-0 border-t-2 pt-3" style={{borderColor:theme.primaryHex}}>
+    {(visibility.footer !== false || showQr) && <footer className="relative mt-3 shrink-0 border-t-2 pt-3" style={{borderColor:theme.primaryHex}}>
       <div className="pointer-events-none absolute right-0 bottom-0 h-12 w-1/2 opacity-15" aria-hidden="true"><NordicSwooshGraphic variant="swoosh_only" color={theme.accentHex} className="h-full w-full" /></div>
       <div className="relative flex items-end justify-between gap-4">
         <div className={`min-w-0 flex-1 space-y-1 ${type.footer} leading-snug`}>
-          {(gift ? clean(content.validityPeriod) : clean(content.validityPeriod)) && <p><strong>{label('GÜLTIGKEIT', 'VALIDITÀ', 'VALIDITY')}:</strong> {content.validityPeriod}</p>}
-          {gift && clean(content.issueDate) && <p><strong>{label('AUSGESTELLT', 'EMESSO', 'ISSUED')}:</strong> {content.issueDate}</p>}
-          {clean(content.documentCode) && <p><strong>CODE:</strong> {content.documentCode}</p>}
-          {!gift && clean(content.priceNote) && <p className="text-slate-600">{content.priceNote}</p>}
+          {visibility.footer !== false && clean(content.validityPeriod) && <p><strong>{label('GÜLTIGKEIT', 'VALIDITÀ', 'VALIDITY')}:</strong> {content.validityPeriod}</p>}
+          {visibility.footer !== false && gift && clean(content.issueDate) && <p><strong>{label('AUSGESTELLT', 'EMESSO', 'ISSUED')}:</strong> {content.issueDate}</p>}
+          {visibility.footer !== false && clean(content.documentCode) && <p><strong>CODE:</strong> {content.documentCode}</p>}
+          {visibility.footer !== false && clean(content.priceNote) && <p className="text-slate-600">{content.priceNote}</p>}
           {visibility.footer !== false && contact && <p className="break-words text-slate-500">{contact}</p>}
         </div>
-        {showQr && <QRCodeSVG value={qr} size={isA5 ? 44 : 64} fgColor={theme.primaryHex} bgColor="#FFFFFF" />}
+        {showQr && <div className="flex shrink-0 flex-col items-center gap-1 text-center"><QRCodeSVG value={qr} size={isA5 ? 54 : 78} fgColor={theme.primaryHex} bgColor="#FFFFFF" />{qrLabel && <p className="max-w-[140px] break-words text-[11px] leading-tight text-slate-600">{qrLabel}</p>}</div>}
       </div>
-    </footer>
+    </footer>}
   </article>;
 };
 

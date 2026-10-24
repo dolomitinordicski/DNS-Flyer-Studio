@@ -165,6 +165,24 @@ export function SimpleContentEditorTab({
             </label>
           </>}
           {field('documentCode', 'Dokumentcode (optional)', 'Codice documento (facoltativo)')}
+          <div className="space-y-2 rounded-lg border border-slate-200 p-3">
+            <label className="flex items-center justify-between gap-3 text-xs font-semibold">
+              {ui('QR-Code auf dem Dokument anzeigen', 'Mostra QR Code sul documento')}
+              <input type="checkbox" checked={content.qrCode?.enabled === true}
+                onChange={e => onChangeContent({ qrCode: { ...content.qrCode!, enabled: e.target.checked, url: content.qrCode?.url ?? '', label: content.qrCode?.label ?? '' } })} />
+            </label>
+            {content.qrCode?.enabled && <>
+              <label className="block space-y-1"><span className="text-[10px] font-bold">{ui('QR-Zieladresse (URL)', 'Link di destinazione QR')}</span>
+                <input type="url" className="w-full rounded-lg border p-2 text-xs" placeholder="https://…"
+                  value={content.qrCode?.url ?? ''} onChange={e => onChangeContent({ qrCode: { ...content.qrCode!, url: e.target.value } })} />
+              </label>
+              <label className="block space-y-1"><span className="text-[10px] font-bold">{ui('Text unter QR-Code', 'Testo sotto il QR Code')}</span>
+                <input className="w-full rounded-lg border p-2 text-xs"
+                  value={content.qrCode?.label ?? ''} onChange={e => onChangeContent({ qrCode: { ...content.qrCode!, label: e.target.value } })} />
+              </label>
+              {!content.qrCode?.url?.trim() && <p className="text-[10px] text-amber-700">{ui('Bitte URL eingeben: kein erfundener QR-Code wird erzeugt.', 'Inserisci un URL: non viene generato un QR Code inventato.')}</p>}
+            </>}
+          </div>
         </section>
       )}
       {product?.dataPolicy.ticketType && (

@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { captureCreativeFlyer, exportCreativePDF, exportCreativePNG } from './features/creative-export/creativeExport';
-import { buildDnsPriceListVectorProof } from './features/creative-export/dnsPriceListVectorProof';
-import { renderVectorPdf } from './features/creative-export/vectorPdf';
 import { printVectorFlyerFromDOM } from './features/creative-export/nativeVectorPrint';
 import { Navbar } from './components/Navbar';
 import { initWorkspaceShell } from './lib/workspaceShell';
@@ -496,29 +494,6 @@ export default function App() {
       setIsExporting(false);
     }
   };
-  const handleDNSVectorProof = async () => {
-    if (isExporting || content.layoutTemplateId !== 'official_price_list') return;
-    setIsExporting(true);
-    try {
-      flushSync(() => setExportContent({ ...getContentForLanguage(content, content.activeLanguage || 'de') }));
-      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-      const stage = exportFlyerRef.current;
-      if (!stage) throw new Error('Print stage unavailable');
-      for (let i=0; i<50 && stage.dataset.pricingState === 'loading'; i++) await new Promise(resolve => setTimeout(resolve, 100));
-      const result = await buildDnsPriceListVectorProof(stage,{format:content.format,orientation:content.orientation});
-      if (result.warnings.length) {
-        throw new Error('PDF vector proof incomplete: ' + result.warnings.slice(0,5).join('; '));
-      }
-      renderVectorPdf([result.page],`DNS_Listino_Vector_PROOF_${content.format}_${Date.now()}.pdf`);
-    } catch (error) {
-      console.error('DNS vector PDF proof failed:',error);
-      window.alert('Prova PDF vettoriale non completata: ' + (error instanceof Error ? error.message : String(error)));
-    } finally {
-      setExportContent(null);
-      setIsExporting(false);
-    }
-  };
-
   const handleExportPng = () => handleExportPngSingle(content.activeLanguage || 'it');
 
   const handleExportCode = async () => {
@@ -746,7 +721,6 @@ export default function App() {
         onExportPdfBundle={handleExportPdfBundle}
         onExportPdfSeparate={handleExportPdfSeparate}
         onExportPdfSingle={handleExportPdfSingle}
-        onDNSVectorProof={content.layoutTemplateId === 'official_price_list' ? handleDNSVectorProof : undefined}
         onDNSNativeVectorPrint={content.layoutTemplateId === 'official_price_list' ? handleDNSNativePrint : undefined}
         onExportPngSeparate={handleExportPngSeparate}
         onExportPngSingle={handleExportPngSingle}

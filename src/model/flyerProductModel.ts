@@ -163,7 +163,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     graphicStyle: 'gutschein_editorial',
     blockStack: ['header', 'heroImage', 'bigTitle', 'promotionBox', 'qrCode', 'footer'],
     editableFields: [
-      'title', 'subtitle', 'validityPeriod', 'heroImageUrl',
+      'validityPeriod', 'heroImageUrl',
       'documentScope', 'holderName', 'documentCode', 'issueDate', 'priceNote', 'customPrimaryColor', 'customAccentColor',
       'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode',
     ],

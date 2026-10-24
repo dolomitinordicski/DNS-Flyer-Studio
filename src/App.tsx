@@ -503,7 +503,6 @@ export default function App() {
       return;
     }
     setIsExporting(true);
-    const originalContent = { ...content };
 
     try {
       const languages: LanguageCode[] = ['de', 'it', 'en'];
@@ -536,7 +535,6 @@ export default function App() {
       return;
     }
     setIsExporting(true);
-    const originalContent = { ...content };
 
     try {
       const canvas = await renderCanvasForLang(lang);
@@ -566,7 +564,6 @@ export default function App() {
       return;
     }
     setIsExporting(true);
-    const originalContent = { ...content };
 
     try {
       const languages: LanguageCode[] = ['de', 'it', 'en'];
@@ -596,7 +593,6 @@ export default function App() {
       return;
     }
     setIsExporting(true);
-    const originalContent = { ...content };
 
     try {
       const canvas = await renderCanvasForLang(lang);

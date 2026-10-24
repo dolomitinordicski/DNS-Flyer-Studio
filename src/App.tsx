@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
 import { Navbar } from './components/Navbar';
+import { DNSDesignControl } from './components/DNSDesignControl';
+import { DEFAULT_POLICY, subscribeDesignPolicy, type DNSFlyerDesignPolicy } from './data/dnsFlyerDesignPolicy';
 import { FlyerCanvas } from './components/FlyerCanvas';
 import { EditorPanel } from './components/EditorPanel';
 import { LegacyEditorPanel } from './components/LegacyEditorPanel';
@@ -36,6 +38,9 @@ export default function App() {
   const [coreAuthError, setCoreAuthError] = useState<string | null>(null);
   const [currentReportingAreaId, setCurrentReportingAreaId] = useState<string | null>(null);
   const [isDNSAdmin, setIsDNSAdmin] = useState(false);
+  const [designPolicy, setDesignPolicy] = useState<DNSFlyerDesignPolicy>(DEFAULT_POLICY);
+  const [designPanelOpen, setDesignPanelOpen] = useState(false);
+  useEffect(() => subscribeDesignPolicy(setDesignPolicy, error => console.warn('DNS Design Control configuration not available:', error)), []);
   const [hasDNSNetworkAccess, setHasDNSNetworkAccess] = useState(false);
   const [isLegacyMode, setIsLegacyMode] = useState(() => new URLSearchParams(window.location.search).get('legacy') === '1');
 
@@ -665,6 +670,8 @@ export default function App() {
         </div>
       )}
 
+      {isDNSAdmin && !isLegacyMode && <div className="no-print flex justify-end border-b bg-white px-5 py-2"><button type="button" onClick={() => setDesignPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">DNS Design Control</button></div>}
+      {isDNSAdmin && designPanelOpen && <DNSDesignControl policy={designPolicy} onClose={() => setDesignPanelOpen(false)} />}
       {/* Main View Switching */}
       {activeView === 'dashboard' ? (
         <FlyerDashboard 
@@ -753,6 +760,7 @@ export default function App() {
 
             {/* The WYSIWYG Flyer Canvas */}
             <FlyerCanvas
+              designPolicy={designPolicy}
               ref={flyerRef}
               content={content}
               scale={scale}

@@ -1,6 +1,7 @@
 import { resolveDNSFlyerPhoto } from '../data/dnsStockPhotos';
 import React, { forwardRef, useEffect, useState, useSyncExternalStore } from 'react';
 import { FlyerContent } from '../types';
+import { DEFAULT_POLICY, resolveFlyerDesign, type DNSFlyerDesignPolicy } from '../data/dnsFlyerDesignPolicy';
 import { getAllSportsIcons } from '../data/sportsIcons';
 import { DEFAULT_PRICE_LIST_TEXTS } from '../data/templates';
 import { loadOfficialPriceTexts } from '../data/livePriceLists';
@@ -19,10 +20,14 @@ import { resolveFlyerBrand, resolveFlyerVisibility, resolveFlyerTheme, resolveFl
 interface FlyerCanvasProps {
   content: FlyerContent;
   scale?: number;
+  designPolicy?: DNSFlyerDesignPolicy;
 }
 
-export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ content, scale = 1 }, ref) => {
+export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ content, scale = 1, designPolicy = DEFAULT_POLICY }, ref) => {
   const regionLogo = resolveFlyerBrand(content);
+  const design = resolveFlyerDesign(designPolicy, content.layoutTemplateId || 'custom');
+  const fadeDirection = { none: '', top: 'to bottom', right: 'to left', bottom: 'to top', left: 'to right' }[design.heroFade];
+  const imageMask = fadeDirection ? `linear-gradient(${fadeDirection}, transparent, black 35%)` : 'none';
 
   // Map selected sports icons (standard + custom)
   const allIcons = getAllSportsIcons();
@@ -187,6 +192,16 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
       )}
       {/* Editorial typography adjusts with Make It Perfect across all flyer types. */}
       <style>{`[data-dns-fit] h1, [data-dns-fit] h2, [data-dns-fit] h3, [data-dns-fit] p, [data-dns-fit] li { zoom: var(--dns-text-fit); }`}</style>
+      {/* Scoped print effects: never modify app UI or DNS Foundation. */}
+      <style>{`
+        [data-dns-design-corners="square"] [class*="rounded"]:not([class*="rounded-full"]) { border-radius: 0 !important; }
+        [data-dns-design-corners="soft"] [class*="rounded"]:not([class*="rounded-full"]) { border-radius: 6px !important; }
+        [data-dns-design-corners="round"] [class*="rounded"]:not([class*="rounded-full"]) { border-radius: 16px !important; }
+        [data-dns-design-pills="square"] .rounded-full { border-radius: 0 !important; }
+        [data-dns-design-pills="soft"] .rounded-full { border-radius: 6px !important; }
+        [data-dns-design-pills="pill"] .rounded-full { border-radius: 9999px !important; }
+        [data-dns-design-fade]:not([data-dns-design-fade="none"]) img.object-cover { -webkit-mask-image: var(--dns-hero-mask); mask-image: var(--dns-hero-mask); }
+      `}</style>
       {/* Render selected Variant */}
       {(() => {
         let effectiveGraphicStyle = graphicStyle;
@@ -194,7 +209,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
           effectiveGraphicStyle = 'package_offer_editorial';
         }
         const VariantComponent = FLYER_VARIANT_MAP[effectiveGraphicStyle] || ClassicVariant;
-        return <div data-dns-fit style={{ position: "absolute", inset: 0, ["--dns-text-fit" as string]: Math.max(0.72, Math.min(1.24, content.textScaleFactor ?? 1)) }}><VariantComponent {...variantProps} /></div>;
+        return <div data-dns-fit data-dns-design-corners={design.corners} data-dns-design-pills={design.pills} data-dns-design-fade={design.heroFade} style={{ position: "absolute", inset: 0, ["--dns-text-fit" as string]: Math.max(0.72, Math.min(1.24, content.textScaleFactor ?? 1)), ["--dns-hero-mask" as string]: imageMask }}><VariantComponent {...variantProps} /></div>;
       })()}
 
       {/* Nordic Swoosh Overlay */}

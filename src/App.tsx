@@ -453,6 +453,10 @@ export default function App() {
       logging: false,
       width: flyerElement.clientWidth,
       height: flyerElement.clientHeight,
+      onclone: clonedDocument => {
+        const stage = clonedDocument.querySelector<HTMLElement>('[data-dns-export-stage]');
+        if (stage) { stage.style.left = '0px'; stage.style.top = '0px'; }
+      },
     });
   };
 
@@ -822,7 +826,7 @@ export default function App() {
 
       {/* Native-sized print rasterization. Outside the editor preview and without CSS scale. */}
       {isExporting && exportContent && (
-        <div aria-hidden="true" style={{ position: 'fixed', left: '-20000px', top: 0, pointerEvents: 'none' }}>
+        <div data-dns-export-stage aria-hidden="true" style={{ position: 'fixed', left: '-20000px', top: 0, pointerEvents: 'none' }}>
           <FlyerCanvas ref={exportFlyerRef} content={exportContent} scale={1} designPolicy={designPolicy} />
         </div>
       )}

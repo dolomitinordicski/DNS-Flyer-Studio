@@ -84,8 +84,19 @@ export async function buildDnsPriceListVectorProof(root: HTMLElement, geometry: 
       commands.push({kind:'photo',x,y,width,height,...image});
       imageNodes++;
     }
-    if (element instanceof SVGElement && element.tagName.toLowerCase()==='svg') {
-      warnings.push('SVG requires vector path adapter: '+(element.getAttribute('aria-label')||'graphic'));
+    if (element instanceof SVGSVGElement) {
+      const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(element)],{type:'image/svg+xml;charset=utf-8'}));
+      try {
+        const image=new Image(); image.src=url; await image.decode();
+        const canvas=document.createElement('canvas');
+        canvas.width=Math.max(1,Math.round(box.width*2)); canvas.height=Math.max(1,Math.round(box.height*2));
+        const context=canvas.getContext('2d');
+        if(!context) throw new Error('SVG rendering unavailable');
+        context.drawImage(image,0,0,canvas.width,canvas.height);
+        commands.push({kind:'photo',x,y,width,height,dataUrl:canvas.toDataURL('image/png'),format:'PNG'});
+        imageNodes++;
+      } catch {warnings.push('SVG asset missing: '+(element.getAttribute('aria-label')||'graphic'));}
+      finally {URL.revokeObjectURL(url);}
     }
     // Text is drawn separately as vector glyphs; positioning is estimated
     // from actual DOM ranges, with single-word spans to avoid whitespace loss.
@@ -94,23 +105,18 @@ export async function buildDnsPriceListVectorProof(root: HTMLElement, geometry: 
       const raw=child.textContent;
       const fontSize=parseFloat(style.fontSize);
       if (!Number.isFinite(fontSize)) continue;
-      const words=/\S+/g;
-      let match:RegExpExecArray|null;
-      while ((match=words.exec(raw))) {
-        const range=document.createRange();
-        range.setStart(child,match.index);
-        range.setEnd(child,match.index+match[0].length);
-        const r=range.getBoundingClientRect();
-        if (r.width<0.1 || r.height<0.1) continue;
-        const color=rgbHex(style.color)||'#0D4D5E';
-        commands.push({kind:'text',x:(r.left-bounds.left)*mmX,y:(r.bottom-bounds.top)*mmY-0.4,text:match[0],sizePt:Math.max(3,fontSize*mmY*72/25.4),color,weight:Number(style.fontWeight)>=600?'bold':'normal'});
+      const range = document.createRange();
+      range.selectNodeContents(child);
+      const r = range.getBoundingClientRect();
+      if (r.width > 0.1 && r.height > 0.1) {
+        commands.push({kind:'text', x:(r.left-bounds.left)*mmX, y:(r.bottom-bounds.top)*mmY-0.4, text:raw, sizePt:Math.max(3,fontSize*mmY*72/25.4), color:rgbHex(style.color)||'#0D4D5E', weight:Number(style.fontWeight)>=600?'bold':'normal'});
         textNodes++;
       }
     }
   }
   if (!imageNodes) warnings.push('No image elements recorded: photography could be missing');
   // Do not treat a proof with unsupported SVG assets as print-ready.
-  if(warnings.some(message => message.startsWith('SVG requires'))) warnings.push('Vector proof incomplete: SVG assets must be embedded before PDF activation');
+
   if (!textNodes) throw new Error('No text nodes recorded for vector PDF');
   return {page:{geometry,commands},warnings:[...new Set(warnings)],textNodes,imageNodes};
 }

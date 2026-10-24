@@ -191,7 +191,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
         </div>
       )}
       {/* Editorial typography adjusts with Make It Perfect across all flyer types. */}
-      <style>{`[data-dns-fit] h1, [data-dns-fit] h2, [data-dns-fit] h3, [data-dns-fit] p, [data-dns-fit] li { zoom: var(--dns-text-fit); }`}</style>
+      <style>{`[data-dns-fit]:not([data-dns-price-list='true']) h1, [data-dns-fit]:not([data-dns-price-list]) h2, [data-dns-fit]:not([data-dns-price-list]) h3, [data-dns-fit]:not([data-dns-price-list]) p, [data-dns-fit]:not([data-dns-price-list]) li { zoom: var(--dns-text-fit); }`}</style>
       {/* Scoped print effects: never modify app UI or DNS Foundation. */}
       <style>{`
         [data-dns-design-corners="square"] [class*="rounded"]:not([class*="rounded-full"]) { border-radius: 0 !important; }
@@ -209,7 +209,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
           effectiveGraphicStyle = 'package_offer_editorial';
         }
         const VariantComponent = FLYER_VARIANT_MAP[effectiveGraphicStyle] || ClassicVariant;
-        return <div data-dns-fit data-dns-design-corners={design.corners} data-dns-design-pills={design.pills} data-dns-design-fade={design.heroFade} style={{ position: "absolute", inset: 0, ["--dns-text-fit" as string]: Math.max(0.72, Math.min(1.24, content.textScaleFactor ?? 1)), ["--dns-hero-mask" as string]: imageMask }}><VariantComponent {...variantProps} /></div>;
+        return <div data-dns-fit data-dns-price-list={isPriceList ? 'true' : undefined} data-dns-design-corners={design.corners} data-dns-design-pills={design.pills} data-dns-design-fade={design.heroFade} style={{ position: "absolute", inset: 0, ["--dns-text-fit" as string]: Math.max(0.72, Math.min(1.24, content.textScaleFactor ?? 1)), ["--dns-hero-mask" as string]: imageMask }}><VariantComponent {...variantProps} /></div>;
       })()}
 
       {/* Nordic Swoosh Overlay */}

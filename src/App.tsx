@@ -40,7 +40,13 @@ export default function App() {
   const [isDNSAdmin, setIsDNSAdmin] = useState(false);
   const [designPolicy, setDesignPolicy] = useState<DNSFlyerDesignPolicy>(DEFAULT_POLICY);
   const [designPanelOpen, setDesignPanelOpen] = useState(false);
-  useEffect(() => subscribeDesignPolicy(setDesignPolicy, error => console.warn('DNS Design Control configuration not available:', error)), []);
+  useEffect(() => {
+    if (!coreUserId) {
+      setDesignPolicy(DEFAULT_POLICY);
+      return;
+    }
+    return subscribeDesignPolicy(setDesignPolicy, error => console.warn('DNS Design Control configuration not available:', error));
+  }, [coreUserId]);
   const [hasDNSNetworkAccess, setHasDNSNetworkAccess] = useState(false);
   const [isLegacyMode, setIsLegacyMode] = useState(() => new URLSearchParams(window.location.search).get('legacy') === '1');
 

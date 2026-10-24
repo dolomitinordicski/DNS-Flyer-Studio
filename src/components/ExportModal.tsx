@@ -110,7 +110,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                       {ui('📄 Offizielle Preisliste als PDF herunterladen (300 DPI)', '📄 Scarica PDF Listino Prezzi Ufficiale (300 DPI)')}
                     </span>
                     <span className="text-[11px] text-slate-500">
-                      {ui('Hochauflösendes PDF-Dokument für den Druck.', 'Documento PDF vettoriale ad alta definizione per la stampa.')}
+                      {ui('Aktuell rasterbasiertes Druck-PDF. Vektorexport in Entwicklung.', 'PDF di stampa raster attuale. Esportazione vettoriale in sviluppo.')}
                     </span>
                   </div>
                 </div>

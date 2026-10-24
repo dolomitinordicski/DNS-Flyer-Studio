@@ -523,7 +523,7 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting separate PDFs:', err);
     } finally {
-      setContent(originalContent);
+      setExportContent(null);
       setIsExporting(false);
     }
   };
@@ -553,7 +553,7 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting single PDF:', err);
     } finally {
-      setContent(originalContent);
+      setExportContent(null);
       setIsExporting(false);
     }
   };
@@ -583,7 +583,7 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting separate PNGs:', err);
     } finally {
-      setContent(originalContent);
+      setExportContent(null);
       setIsExporting(false);
     }
   };
@@ -609,7 +609,7 @@ export default function App() {
     } catch (err) {
       console.error('Error exporting single PNG:', err);
     } finally {
-      setContent(originalContent);
+      setExportContent(null);
       setIsExporting(false);
     }
   };

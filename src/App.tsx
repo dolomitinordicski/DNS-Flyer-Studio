@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { flushSync } from 'react-dom';
-import { captureCreativeFlyer, exportCreativePDF, exportCreativePNG } from './features/creative-export/creativeExport';
+import { captureCreativeFlyer, exportCreativePNG } from './features/creative-export/creativeExport';
 import { printVectorFlyerFromDOM } from './features/creative-export/nativeVectorPrint';
 import { Navbar } from './components/Navbar';
 import { initWorkspaceShell } from './lib/workspaceShell';
@@ -440,60 +440,58 @@ export default function App() {
     return captureCreativeFlyer(flyerElement);
   };
 
-  // All creative outputs use the Foundation capability registry and one Flyer-owned renderer.
-  const exportPages = async (kind: 'pdf' | 'png', languages: LanguageCode[], bundled: boolean) => {
-    if (isExporting || !flyerRef.current) return;
-    if (flyerRef.current.dataset.pricingState !== 'ready') {
-      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili.');
-      return;
-    }
-    setIsExporting(true);
-    try {
-      const geometry = {format: content.format, orientation: content.orientation};
-      if (bundled && kind === 'pdf') {
-        const canvases: HTMLCanvasElement[] = [];
-        for (const language of languages) canvases.push(await renderCanvasForLang(language));
-        await exportCreativePDF({canvases,geometry,filename:`Dolomiti_NordicSki_3Pagine_DE_IT_EN_${content.format}_${Date.now()}.pdf`});
-      } else {
-        for (const language of languages) {
-          const canvas = await renderCanvasForLang(language);
-          const filename = `Dolomiti_NordicSki_${language.toUpperCase()}_${content.format}_${Date.now()}.${kind}`;
-          if(kind==='pdf') await exportCreativePDF({canvases:[canvas],geometry,filename});
-          else await exportCreativePNG({canvases:[canvas],geometry,filename});
-        }
-      }
-    } catch (error) {
-      console.error('Creative export failed:',error);
-      window.alert(uiLanguage === 'de' ? 'Export fehlgeschlagen. Bitte Layout und Bilder prüfen.' : 'Esportazione non riuscita. Controlla impaginazione e immagini.');
-    } finally {
-      setExportContent(null);
-      setIsExporting(false);
-    }
+  // One PDF engine for every flyer. PNG remains a raster export.
+  const renderPrintPageForLang = async (lang: LanguageCode): Promise<HTMLElement> => {
+    flushSync(() => setExportContent({ ...getContentForLanguage(content, lang), activeLanguage: lang }));
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    const element=exportFlyerRef.current;
+    if (!element) throw new Error('Export canvas not mounted');
+    for(let i=0;i<50 && element.dataset.pricingState==='loading';i++) await new Promise(resolve=>setTimeout(resolve,100));
+    if(element.dataset.pricingState && element.dataset.pricingState!=='ready') throw new Error('Official prices unavailable during export');
+    return element.cloneNode(true) as HTMLElement;
   };
-  const handleExportPdfBundle = () => exportPages('pdf',['de','it','en'],true);
-  const handleExportPdfSeparate = () => exportPages('pdf',['de','it','en'],false);
-  const handleExportPdfSingle = (language:LanguageCode) => exportPages('pdf',[language],false);
-  const handleExportPngSeparate = () => exportPages('png',['de','it','en'],false);
-  const handleExportPngSingle = (language:LanguageCode) => exportPages('png',[language],false);
-
-  const handleDNSNativePrint = async () => {
-    if (isExporting || content.layoutTemplateId !== 'official_price_list') return;
+  const exportVectorPages = async (languages:LanguageCode[]) => {
+    if(isExporting||!flyerRef.current) return;
     setIsExporting(true);
     try {
-      flushSync(() => setExportContent({ ...getContentForLanguage(content, content.activeLanguage || 'de') }));
-      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-      const element = exportFlyerRef.current;
-      if (!element) throw new Error('Print stage unavailable');
-      for (let i=0; i<50 && element.dataset.pricingState==='loading'; i++) await new Promise(resolve => setTimeout(resolve,100));
-      await printVectorFlyerFromDOM(element,{format:content.format,orientation:content.orientation});
+      const pages:HTMLElement[]=[];
+      for(const language of languages) pages.push(await renderPrintPageForLang(language));
+      await printVectorFlyerFromDOM(pages,{format:content.format,orientation:content.orientation});
     } catch(error) {
-      console.error(error);
-      window.alert('PDF vettoriale: '+String(error));
+      console.error('Native PDF export failed:',error);
+      window.alert(uiLanguage==='de'?'PDF-Druck fehlgeschlagen. Bitte Bilder und Layout prüfen.':'Stampa PDF non riuscita. Controlla immagini e impaginazione.');
     } finally {
       setExportContent(null);
       setIsExporting(false);
     }
   };
+  const exportPngPages = async (languages:LanguageCode[]) => {
+    if(isExporting||!flyerRef.current) return;
+    setIsExporting(true);
+    try {
+      const geometry={format:content.format,orientation:content.orientation};
+      for(const language of languages){
+        const canvas=await renderCanvasForLang(language);
+        await exportCreativePNG({canvases:[canvas],geometry,filename:`Dolomiti_NordicSki_${language.toUpperCase()}_${content.format}_${Date.now()}.png`});
+      }
+    } catch(error) {
+      console.error('PNG export failed:',error);
+      window.alert(uiLanguage==='de'?'PNG-Export fehlgeschlagen.':'Esportazione PNG non riuscita.');
+    } finally {
+      setExportContent(null);
+      setIsExporting(false);
+    }
+  };
+  const handleExportPdfBundle = () => exportVectorPages(['de','it','en']);
+  const handleExportPdfSeparate = async () => {
+    // The browser supports only one print dialog at a time.
+    await exportVectorPages(['de','it','en']);
+  };
+  const handleExportPdfSingle = (language:LanguageCode) => exportVectorPages([language]);
+  const handleExportPngSeparate = () => exportPngPages(['de','it','en']);
+  const handleExportPngSingle = (language:LanguageCode) => exportPngPages([language]);
+  const handleDNSNativePrint = () => exportVectorPages([content.activeLanguage || 'de']);
+
   const handleExportPng = () => handleExportPngSingle(content.activeLanguage || 'it');
 
   const handleExportCode = async () => {
@@ -721,7 +719,7 @@ export default function App() {
         onExportPdfBundle={handleExportPdfBundle}
         onExportPdfSeparate={handleExportPdfSeparate}
         onExportPdfSingle={handleExportPdfSingle}
-        onDNSNativeVectorPrint={content.layoutTemplateId === 'official_price_list' ? handleDNSNativePrint : undefined}
+        onDNSNativeVectorPrint={handleDNSNativePrint}
         onExportPngSeparate={handleExportPngSeparate}
         onExportPngSingle={handleExportPngSingle}
         isExporting={isExporting}

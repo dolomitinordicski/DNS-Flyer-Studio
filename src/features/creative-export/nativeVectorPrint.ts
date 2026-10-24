@@ -6,10 +6,14 @@ import { flyerPageMm, type CreativeExportGeometry } from './creativeExport';
  *
  * The user selects "Save as PDF" in the browser's print dialog.
  */
-export async function printVectorFlyerFromDOM(root: HTMLElement, geometry: CreativeExportGeometry): Promise<void> {
-  if (root.dataset.pricingState !== 'ready') throw new Error('Official DNS price data is not ready');
+export async function printVectorFlyerFromDOM(roots: HTMLElement | readonly HTMLElement[], geometry: CreativeExportGeometry): Promise<void> {
+  const pages = Array.isArray(roots) ? roots : [roots as HTMLElement];
+  if (!pages.length) throw new Error('No flyer pages available for print');
+  for (const root of pages) {
+    if (root.dataset.pricingState && root.dataset.pricingState !== 'ready') throw new Error('Official DNS price data is not ready');
+  }
   await document.fonts.ready;
-  const pictures = [...root.querySelectorAll('img')];
+  const pictures = pages.flatMap(root => [...root.querySelectorAll('img')]);
   await Promise.all(pictures.map(async image => {
     if (!image.complete || image.naturalWidth <= 0) {
       throw new Error('Missing flyer image: ' + (image.currentSrc || image.src));
@@ -32,30 +36,31 @@ export async function printVectorFlyerFromDOM(root: HTMLElement, geometry: Creat
 
   const styles = [...document.querySelectorAll('link[rel="stylesheet"], style')]
     .map(node => node.outerHTML).join('\n');
-  // The printed stage is cloned at scale 1; never inherit the editor zoom.
-  const clone = root.cloneNode(true) as HTMLElement;
-  clone.style.transform = 'none';
-  clone.style.margin = '0';
-  clone.style.boxShadow = 'none';
-  clone.style.width = w + 'mm';
-  clone.style.height = h + 'mm';
-  clone.style.overflow = 'hidden';
-
-  // Absolute URLs are required because about:blank has no Vite asset base.
-  for (const img of [...clone.querySelectorAll('img')]) {
-    img.src = new URL(img.getAttribute('src') || '', document.baseURI).href;
-  }
+  const clones = pages.map(root => {
+    const clone=root.cloneNode(true) as HTMLElement;
+    clone.style.transform='none';
+    clone.style.margin='0';
+    clone.style.boxShadow='none';
+    clone.style.width=w+'mm';
+    clone.style.height=h+'mm';
+    clone.style.overflow='hidden';
+    clone.classList.add('dns-print-page');
+    for (const img of [...clone.querySelectorAll('img')]) {
+      img.src=new URL(img.getAttribute('src') || '', document.baseURI).href;
+    }
+    return clone;
+  });
   doc.open();
   doc.write(`<!doctype html><html><head><meta charset="utf-8"><base href="${document.baseURI}">
     ${styles}
     <style>
       @page { size: ${w}mm ${h}mm; margin:0; }
-      html, body {margin:0!important;padding:0!important;width:${w}mm;height:${h}mm;overflow:hidden!important;}
+      html, body {margin:0!important;padding:0!important;width:${w}mm!important;min-height:${h}mm!important;}\n      .dns-print-page {break-after:page;page-break-after:always;break-inside:avoid;page-break-inside:avoid;}\n      .dns-print-page:last-child {break-after:auto;page-break-after:auto;}
       *, *::before, *::after { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
       [data-dns-fit] {transform:none!important;}
     </style></head><body></body></html>`);
   doc.close();
-  doc.body.appendChild(doc.importNode(clone, true));
+  for (const clone of clones) doc.body.appendChild(doc.importNode(clone, true));
   try {
     await Promise.all([
       doc.fonts.ready,

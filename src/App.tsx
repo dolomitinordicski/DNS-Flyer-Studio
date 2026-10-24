@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import { captureCreativeFlyer, exportCreativePDF, exportCreativePNG } from './features/creative-export/creativeExport';
 import { Navbar } from './components/Navbar';
 import { initWorkspaceShell } from './lib/workspaceShell';
@@ -426,7 +427,7 @@ export default function App() {
   // Export from a separate, native-size render: never rasterize the zoomed editor preview.
   // Language changes do not mutate the working draft or trigger autosave.
   const renderCanvasForLang = async (lang: LanguageCode) => {
-    setExportContent({ ...getContentForLanguage(content, lang), activeLanguage: lang });
+    flushSync(() => setExportContent({ ...getContentForLanguage(content, lang), activeLanguage: lang }));
     await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     const flyerElement = exportFlyerRef.current;
     if (!flyerElement) throw new Error('Export canvas not mounted');

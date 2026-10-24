@@ -11,6 +11,7 @@ interface ExportModalProps {
   onExportPdfBundle: () => Promise<void>;
   onExportPdfSeparate: () => Promise<void>;
   onExportPdfSingle: (lang: LanguageCode) => Promise<void>;
+  onDNSVectorProof?: () => Promise<void>;
   onExportPngSeparate: () => Promise<void>;
   onExportPngSingle: (lang: LanguageCode) => Promise<void>;
   isExporting: boolean;
@@ -28,6 +29,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   onExportPdfBundle,
   onExportPdfSeparate,
   onExportPdfSingle,
+  onDNSVectorProof,
   onExportPngSeparate,
   onExportPngSingle,
   isExporting,
@@ -89,6 +91,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </div>
           )}
 
+          {isPriceTable && onDNSVectorProof && <button type="button" disabled={isExporting} onClick={onDNSVectorProof} className="w-full rounded-xl border-2 border-dashed border-[#0D4D5E] bg-[#E8F4F6] p-3 text-left text-xs font-bold text-[#0D4D5E] disabled:opacity-50">{ui('Vektor-PDF Test (noch nicht druckfertig)', 'Test PDF vettoriale (non ancora pronto per la stampa)')}</button>}
           <div className="space-y-3 pt-1">
             <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">{ui('PDF-Exportoptionen:', 'Opzioni Esportazione PDF:')}</span>
 

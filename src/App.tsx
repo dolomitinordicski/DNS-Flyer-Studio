@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import html2canvas from 'html2canvas-pro';
-import { jsPDF } from 'jspdf';
+import { captureCreativeFlyer, exportCreativePDF, exportCreativePNG } from './features/creative-export/creativeExport';
 import { Navbar } from './components/Navbar';
 import { initWorkspaceShell } from './lib/workspaceShell';
 import { DNSDesignControl } from './components/DNSDesignControl';
@@ -431,188 +430,49 @@ export default function App() {
     await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     const flyerElement = exportFlyerRef.current;
     if (!flyerElement) throw new Error('Export canvas not mounted');
-    await document.fonts.ready;
-    await Promise.all(Array.from(flyerElement.querySelectorAll('img')).map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise<void>(resolve => {
-        img.addEventListener('load', () => resolve(), { once: true });
-        img.addEventListener('error', () => resolve(), { once: true });
-        setTimeout(resolve, 4000);
-      });
-    }));
-    // Official price lists may fetch data asynchronously.
+    // Export remains distinct from live editor: language and scale stay stable.
     for (let i = 0; i < 40 && flyerElement.dataset.pricingState === 'loading'; i++) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     if (flyerElement.dataset.pricingState !== 'ready') throw new Error('Official prices unavailable during export');
-    return html2canvas(flyerElement, {
-      scale: 3,
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: '#ffffff',
-      logging: false,
-      width: flyerElement.clientWidth,
-      height: flyerElement.clientHeight,
-      onclone: clonedDocument => {
-        const stage = clonedDocument.querySelector<HTMLElement>('[data-dns-export-stage]');
-        if (stage) { stage.style.left = '0px'; stage.style.top = '0px'; }
-      },
-    });
+    return captureCreativeFlyer(flyerElement);
   };
 
-  // 1. Export PDF Bundle (3 Pages: DE, IT, EN)
-  const handleExportPdfBundle = async () => {
-    if (!flyerRef.current) return;
+  // All creative outputs use the Foundation capability registry and one Flyer-owned renderer.
+  const exportPages = async (kind: 'pdf' | 'png', languages: LanguageCode[], bundled: boolean) => {
+    if (isExporting || !flyerRef.current) return;
     if (flyerRef.current.dataset.pricingState !== 'ready') {
-      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili. Attendi il caricamento o verifica l’accesso a DNS Core prima di esportare.');
+      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili.');
       return;
     }
     setIsExporting(true);
-
     try {
-      const doc = new jsPDF({
-        orientation: content.orientation,
-        unit: 'mm',
-        format: content.format.toLowerCase() as any
-      });
-
-      const languages: LanguageCode[] = ['de', 'it', 'en'];
-      for (let i = 0; i < languages.length; i++) {
-        const lang = languages[i];
-        const canvas = await renderCanvasForLang(lang);
-        if (!canvas) continue;
-
-        const imgData = canvas.toDataURL('image/png');
-        if (i > 0) {
-          doc.addPage();
+      const geometry = {format: content.format, orientation: content.orientation};
+      if (bundled && kind === 'pdf') {
+        const canvases: HTMLCanvasElement[] = [];
+        for (const language of languages) canvases.push(await renderCanvasForLang(language));
+        await exportCreativePDF({canvases,geometry,filename:`Dolomiti_NordicSki_3Pagine_DE_IT_EN_${content.format}_${Date.now()}.pdf`});
+      } else {
+        for (const language of languages) {
+          const canvas = await renderCanvasForLang(language);
+          const filename = `Dolomiti_NordicSki_${language.toUpperCase()}_${content.format}_${Date.now()}.${kind}`;
+          if(kind==='pdf') await exportCreativePDF({canvases:[canvas],geometry,filename});
+          else await exportCreativePNG({canvases:[canvas],geometry,filename});
         }
-        doc.addImage(imgData, 'PNG', 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight());
       }
-
-      doc.save(`Dolomiti_NordicSki_3Pagine_DE_IT_EN_${content.format}_${Date.now()}.pdf`);
-    } catch (err) {
-      console.error('Error exporting PDF bundle:', err);
-      window.print();
+    } catch (error) {
+      console.error('Creative export failed:',error);
+      window.alert(uiLanguage === 'de' ? 'Export fehlgeschlagen. Bitte Layout und Bilder prüfen.' : 'Esportazione non riuscita. Controlla impaginazione e immagini.');
     } finally {
       setExportContent(null);
       setIsExporting(false);
     }
   };
-
-  // 2. Export 3 Separate PDF Files
-  const handleExportPdfSeparate = async () => {
-    if (!flyerRef.current) return;
-    if (flyerRef.current.dataset.pricingState !== 'ready') {
-      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili. Attendi il caricamento o verifica l’accesso a DNS Core prima di esportare.');
-      return;
-    }
-    setIsExporting(true);
-
-    try {
-      const languages: LanguageCode[] = ['de', 'it', 'en'];
-      for (const lang of languages) {
-        const canvas = await renderCanvasForLang(lang);
-        if (!canvas) continue;
-
-        const imgData = canvas.toDataURL('image/png');
-        const doc = new jsPDF({
-          orientation: content.orientation,
-          unit: 'mm',
-          format: content.format.toLowerCase() as any
-        });
-        doc.addImage(imgData, 'PNG', 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight());
-        doc.save(`Dolomiti_NordicSki_${lang.toUpperCase()}_${content.format}_${Date.now()}.pdf`);
-      }
-    } catch (err) {
-      console.error('Error exporting separate PDFs:', err);
-    } finally {
-      setExportContent(null);
-      setIsExporting(false);
-    }
-  };
-
-  // 3. Export Single Language PDF
-  const handleExportPdfSingle = async (lang: LanguageCode) => {
-    if (!flyerRef.current) return;
-    if (flyerRef.current.dataset.pricingState !== 'ready') {
-      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili. Attendi il caricamento o verifica l’accesso a DNS Core prima di esportare.');
-      return;
-    }
-    setIsExporting(true);
-
-    try {
-      const canvas = await renderCanvasForLang(lang);
-      if (!canvas) return;
-
-      const imgData = canvas.toDataURL('image/png');
-      const doc = new jsPDF({
-        orientation: content.orientation,
-        unit: 'mm',
-        format: content.format.toLowerCase() as any
-      });
-      doc.addImage(imgData, 'PNG', 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight());
-      doc.save(`Dolomiti_NordicSki_${lang.toUpperCase()}_${content.format}_${Date.now()}.pdf`);
-    } catch (err) {
-      console.error('Error exporting single PDF:', err);
-    } finally {
-      setExportContent(null);
-      setIsExporting(false);
-    }
-  };
-
-  // 4. Export 3 Separate PNG Files
-  const handleExportPngSeparate = async () => {
-    if (!flyerRef.current) return;
-    if (flyerRef.current.dataset.pricingState !== 'ready') {
-      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili. Attendi il caricamento o verifica l’accesso a DNS Core prima di esportare.');
-      return;
-    }
-    setIsExporting(true);
-
-    try {
-      const languages: LanguageCode[] = ['de', 'it', 'en'];
-      for (const lang of languages) {
-        const canvas = await renderCanvasForLang(lang);
-        if (!canvas) continue;
-
-        const link = document.createElement('a');
-        link.download = `Dolomiti_NordicSki_${lang.toUpperCase()}_${content.format}_${Date.now()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        await new Promise(r => setTimeout(r, 200));
-      }
-    } catch (err) {
-      console.error('Error exporting separate PNGs:', err);
-    } finally {
-      setExportContent(null);
-      setIsExporting(false);
-    }
-  };
-
-  // 5. Export Single Language PNG
-  const handleExportPngSingle = async (lang: LanguageCode) => {
-    if (!flyerRef.current) return;
-    if (flyerRef.current.dataset.pricingState !== 'ready') {
-      window.alert('Le tariffe ufficiali DNS non sono ancora disponibili. Attendi il caricamento o verifica l’accesso a DNS Core prima di esportare.');
-      return;
-    }
-    setIsExporting(true);
-
-    try {
-      const canvas = await renderCanvasForLang(lang);
-      if (!canvas) return;
-
-      const link = document.createElement('a');
-      link.download = `Dolomiti_NordicSki_${lang.toUpperCase()}_${content.format}_${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    } catch (err) {
-      console.error('Error exporting single PNG:', err);
-    } finally {
-      setExportContent(null);
-      setIsExporting(false);
-    }
-  };
+  const handleExportPdfBundle = () => exportPages('pdf',['de','it','en'],true);
+  const handleExportPdfSeparate = () => exportPages('pdf',['de','it','en'],false);
+  const handleExportPdfSingle = (language:LanguageCode) => exportPages('pdf',[language],false);
+  const handleExportPngSeparate = () => exportPages('png',['de','it','en'],false);
+  const handleExportPngSingle = (language:LanguageCode) => exportPages('png',[language],false);
 
   const handleExportPng = () => handleExportPngSingle(content.activeLanguage || 'it');
 

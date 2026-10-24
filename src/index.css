@@ -101,3 +101,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
+
+/* Workspace owns the global header; Flyer Studio keeps its own command/navigation bar. */
+html[data-dns-workspace-embedded="true"] [data-dns-tool-header] { display: none !important; }
+html[data-dns-workspace-embedded="true"] .no-print { /* operational tool controls remain visible */ }

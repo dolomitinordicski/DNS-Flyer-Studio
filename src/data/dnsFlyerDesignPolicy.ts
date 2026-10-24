@@ -7,7 +7,7 @@ export type DesignProperty = 'corners' | 'pills' | 'heroFade';
 export interface DesignValues { corners: 'square' | 'soft' | 'round'; pills: 'square' | 'soft' | 'pill'; heroFade: FadeSide }
 export type DesignOverride = Partial<DesignValues>;
 export interface DNSFlyerDesignPolicy { schemaVersion: 1; global: DesignValues; perFlyer: Record<string, DesignOverride>; updatedAt?: string; updatedBy?: string }
-export const DEFAULT_DESIGN: DesignValues = { corners: 'round', pills: 'pill', heroFade: 'bottom' };
+export const DEFAULT_DESIGN: DesignValues = { corners: 'round', pills: 'pill', heroFade: 'none' };
 export const DEFAULT_POLICY: DNSFlyerDesignPolicy = { schemaVersion: 1, global: DEFAULT_DESIGN, perFlyer: {} };
 const target = doc(dnsCoreDb, 'flyerDesignPolicies', 'dns-global');
 const accepted: Record<DesignProperty, string[]> = {
@@ -32,7 +32,7 @@ export function parseDesignPolicy(raw: unknown): DNSFlyerDesignPolicy {
       if (/^[a-z][a-z0-9_]{0,80}$/.test(name)) perFlyer[name] = validated(setting);
     }
   }
-  return { schemaVersion: 1, global, perFlyer };
+  return { schemaVersion: 1, global, perFlyer, updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : undefined, updatedBy: typeof data.updatedBy === 'string' ? data.updatedBy : undefined };
 }
 export function resolveFlyerDesign(policy: DNSFlyerDesignPolicy, flyer: string): DesignValues {
   return { ...policy.global, ...policy.perFlyer[flyer] };

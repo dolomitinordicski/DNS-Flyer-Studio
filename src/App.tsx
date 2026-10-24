@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
 import { Navbar } from './components/Navbar';
+import { initWorkspaceShell } from './lib/workspaceShell';
 import { DNSDesignControl } from './components/DNSDesignControl';
 import { DEFAULT_POLICY, subscribeDesignPolicy, type DNSFlyerDesignPolicy } from './data/dnsFlyerDesignPolicy';
 import { FlyerCanvas } from './components/FlyerCanvas';
@@ -27,6 +28,7 @@ import { useFlyerAutosave } from './hooks/useFlyerAutosave';
 import { downloadFlyerCodeHtml } from './utils/codeExport';
 
 export default function App() {
+  useEffect(() => initWorkspaceShell('flyer-studio'), []);
   // View mode: 'editor' | 'dashboard'
   const [activeView, setActiveView] = useState<'editor' | 'dashboard'>('editor');
   const [perfectToast, setPerfectToast] = useState<string | null>(null);

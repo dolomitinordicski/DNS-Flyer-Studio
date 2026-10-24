@@ -31,11 +31,25 @@ async function imageData(img: HTMLImageElement): Promise<{ dataUrl: string; form
   if (!img.complete || !img.naturalWidth) throw new Error('Photo/logo failed to load: '+img.currentSrc);
   await img.decode();
   const canvas=document.createElement('canvas');
-  canvas.width=img.naturalWidth;
-  canvas.height=img.naturalHeight;
+  const displayed=img.getBoundingClientRect();
+  const targetWidth=Math.max(1,Math.round(displayed.width));
+  const targetHeight=Math.max(1,Math.round(displayed.height));
+  canvas.width=targetWidth;
+  canvas.height=targetHeight;
   const context=canvas.getContext('2d');
   if (!context) throw new Error('Image canvas unavailable');
-  context.drawImage(img,0,0);
+  const fit=getComputedStyle(img).objectFit;
+  if(fit === 'cover') {
+    const scale=Math.max(targetWidth/img.naturalWidth,targetHeight/img.naturalHeight);
+    const drawWidth=img.naturalWidth*scale;
+    const drawHeight=img.naturalHeight*scale;
+    const position=getComputedStyle(img).objectPosition.split(/\\s+/);
+    const xPercent=(position[0]||'50%').endsWith('%') ? parseFloat(position[0])/100 : 0.5;
+    const yPercent=(position[1]||'50%').endsWith('%') ? parseFloat(position[1])/100 : 0.5;
+    context.drawImage(img,(targetWidth-drawWidth)*xPercent,(targetHeight-drawHeight)*yPercent,drawWidth,drawHeight);
+  } else {
+    context.drawImage(img,0,0,targetWidth,targetHeight);
+  }
   try { return {dataUrl:canvas.toDataURL('image/png'),format:'PNG'}; }
   catch { throw new Error('Image is not CORS-safe for vector PDF: '+img.currentSrc); }
 }
@@ -48,6 +62,7 @@ export async function buildDnsPriceListVectorProof(root: HTMLElement, geometry: 
   const warnings: string[]=[];
   const mmX=pageWidth/bounds.width,mmY=pageHeight/bounds.height;
   let textNodes=0,imageNodes=0;
+  await document.fonts.ready;
   const elements=[root,...Array.from(root.querySelectorAll('*'))];
   for (const element of elements) {
     if (!isVisible(element)) continue;
@@ -94,6 +109,8 @@ export async function buildDnsPriceListVectorProof(root: HTMLElement, geometry: 
     }
   }
   if (!imageNodes) warnings.push('No image elements recorded: photography could be missing');
+  // Do not treat a proof with unsupported SVG assets as print-ready.
+  if(warnings.some(message => message.startsWith('SVG requires'))) warnings.push('Vector proof incomplete: SVG assets must be embedded before PDF activation');
   if (!textNodes) throw new Error('No text nodes recorded for vector PDF');
   return {page:{geometry,commands},warnings:[...new Set(warnings)],textNodes,imageNodes};
 }

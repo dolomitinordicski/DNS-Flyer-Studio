@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom';
 import { captureCreativeFlyer, exportCreativePDF, exportCreativePNG } from './features/creative-export/creativeExport';
 import { buildDnsPriceListVectorProof } from './features/creative-export/dnsPriceListVectorProof';
 import { renderVectorPdf } from './features/creative-export/vectorPdf';
+import { printVectorFlyerFromDOM } from './features/creative-export/nativeVectorPrint';
 import { Navbar } from './components/Navbar';
 import { initWorkspaceShell } from './lib/workspaceShell';
 import { DNSDesignControl } from './components/DNSDesignControl';
@@ -477,6 +478,24 @@ export default function App() {
   const handleExportPngSeparate = () => exportPages('png',['de','it','en'],false);
   const handleExportPngSingle = (language:LanguageCode) => exportPages('png',[language],false);
 
+  const handleDNSNativePrint = async () => {
+    if (isExporting || content.layoutTemplateId !== 'official_price_list') return;
+    setIsExporting(true);
+    try {
+      flushSync(() => setExportContent({ ...getContentForLanguage(content, content.activeLanguage || 'de') }));
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const element = exportFlyerRef.current;
+      if (!element) throw new Error('Print stage unavailable');
+      for (let i=0; i<50 && element.dataset.pricingState==='loading'; i++) await new Promise(resolve => setTimeout(resolve,100));
+      await printVectorFlyerFromDOM(element,{format:content.format,orientation:content.orientation});
+    } catch(error) {
+      console.error(error);
+      window.alert('PDF vettoriale: '+String(error));
+    } finally {
+      setExportContent(null);
+      setIsExporting(false);
+    }
+  };
   const handleDNSVectorProof = async () => {
     if (isExporting || content.layoutTemplateId !== 'official_price_list') return;
     setIsExporting(true);
@@ -728,6 +747,7 @@ export default function App() {
         onExportPdfSeparate={handleExportPdfSeparate}
         onExportPdfSingle={handleExportPdfSingle}
         onDNSVectorProof={content.layoutTemplateId === 'official_price_list' ? handleDNSVectorProof : undefined}
+        onDNSNativeVectorPrint={content.layoutTemplateId === 'official_price_list' ? handleDNSNativePrint : undefined}
         onExportPngSeparate={handleExportPngSeparate}
         onExportPngSingle={handleExportPngSingle}
         isExporting={isExporting}

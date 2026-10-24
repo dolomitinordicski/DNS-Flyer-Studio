@@ -483,7 +483,7 @@ export default function App() {
     setIsExporting(true);
     try {
       flushSync(() => setExportContent({ ...getContentForLanguage(content, content.activeLanguage || 'de') }));
-      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
       const element = exportFlyerRef.current;
       if (!element) throw new Error('Print stage unavailable');
       for (let i=0; i<50 && element.dataset.pricingState==='loading'; i++) await new Promise(resolve => setTimeout(resolve,100));

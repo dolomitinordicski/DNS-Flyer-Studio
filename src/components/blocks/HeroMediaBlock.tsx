@@ -35,7 +35,7 @@ export const HeroMediaBlock: React.FC<BlockProps> = ({
       <img
         src={imageUrl}
         alt={content.title || 'Dolomiti NordicSki'}
-        className="w-full h-full object-cover"
+        className="absolute inset-0 block w-full h-full object-cover"
         style={{ objectPosition: `${content.heroImageFocusX ?? 50}% ${content.heroImageFocusY ?? 50}%` }}
         referrerPolicy="no-referrer"
       />

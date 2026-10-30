@@ -22,7 +22,7 @@ import { runMakeItPerfect } from './features/make-it-perfect/runMakeItPerfect';
 import { probeDNSCoreHeader, type DNSCoreHeaderStatus } from './lib/dnsCoreHeader';
 import { getDNSFoundationRuntime } from './lib/foundationRuntime';
 import { createFlyerDocumentV1, normalizeFlyerContent } from './model/flyerDocument';
-import { signInDNSCore, signOutDNSCore, subscribeDNSCoreUser } from './lib/dnsCore';
+import { signInDNSCore, signInDNSCoreWithEmail, signOutDNSCore, subscribeDNSCoreUser } from './lib/dnsCore';
 import { loadCurrentFlyerAccess } from './data/currentFlyerAccess';
 import { getFlyerProductByTemplate, lockContentToProduct } from './model/flyerProductModel';
 import { useFlyerAutosave } from './hooks/useFlyerAutosave';
@@ -39,6 +39,9 @@ export default function App() {
   const [coreUserEmail, setCoreUserEmail] = useState<string | null>(null);
   const [coreUserId, setCoreUserId] = useState<string | null>(null);
   const [coreAuthError, setCoreAuthError] = useState<string | null>(null);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [canReadFlyer, setCanReadFlyer] = useState(false);
   const [currentReportingAreaId, setCurrentReportingAreaId] = useState<string | null>(null);
   const [isDNSAdmin, setIsDNSAdmin] = useState(false);
   const [designPolicy, setDesignPolicy] = useState<DNSFlyerDesignPolicy>(DEFAULT_POLICY);
@@ -119,6 +122,8 @@ export default function App() {
   useEffect(() => {
     void probeDNSCoreHeader().then(setCoreStatus);
     return subscribeDNSCoreUser(user => {
+      setCanReadFlyer(false);
+      setCanWriteFlyer(false);
       setCoreUserEmail(user?.email ?? null);
       setCoreUserId(user?.uid ?? null);
       if (!user) {
@@ -134,6 +139,7 @@ export default function App() {
           setIsDNSAdmin(access.isAdmin);
           setHasDNSNetworkAccess(access.hasNetworkAccess);
           setCanWriteFlyer(access.canWrite);
+          setCanReadFlyer(access.canRead);
         })
         .catch(error => {
           console.error('Failed to resolve DNS Core Flyer access:', error);
@@ -141,6 +147,7 @@ export default function App() {
           setIsDNSAdmin(false);
           setHasDNSNetworkAccess(false);
           setCanWriteFlyer(false);
+          setCanReadFlyer(false);
         });
     });
   }, []);
@@ -161,9 +168,22 @@ export default function App() {
     }
   };
 
+  const handleEmailSignIn = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setCoreAuthError(null);
+    try {
+      await signInDNSCoreWithEmail(loginEmail.trim(), loginPassword);
+      setLoginPassword('');
+    } catch (error: unknown) {
+      setCoreAuthError((error as { code?: string })?.code || 'Accesso non riuscito');
+    }
+  };
+
   const handleCoreSignOut = async () => {
     try {
       await signOutDNSCore();
+      setLoginPassword('');
+      setContent({ ...FLYER_TEMPLATES[0].defaultContent } as FlyerContent);
     } catch (error) {
       console.error('DNS Core sign-out failed:', error);
     }
@@ -565,6 +585,8 @@ export default function App() {
         </div>
       )}
 
+      {coreUserId && canReadFlyer ? (
+      <>
       {/* Make It Perfect Floating Toast Notification */}
       {perfectToast && (
         <div className="fixed top-20 right-6 z-50 bg-[#0D4D5E] text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#AAD0D1] flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -733,7 +755,21 @@ export default function App() {
         onExportCode={handleExportCode}
         isPriceTable={content.graphicStyle === 'official_price_table' || content.graphicStyle === 'official_price_table_v1'}
       />
-
+      </>
+      ) : (
+        <section className="flex-1 flex items-center justify-center p-8 no-print">
+          <div className="w-full max-w-md rounded-xl border bg-white p-6 shadow-sm">
+            <h1 className="text-xl font-bold text-[#0D4D5E]">DNS Flyer Studio</h1>
+            <p className="my-3 text-sm text-slate-700">{coreUserId ? 'Account non autorizzato a Flyer Studio oppure accesso in verifica.' : 'Accedi con il tuo account DNS Identity.'}</p>
+            {!coreUserId && <form onSubmit={handleEmailSignIn} className="flex flex-col gap-3">
+              <input aria-label="Email" type="email" required autoComplete="username" value={loginEmail} onChange={event => setLoginEmail(event.target.value)} className="rounded border p-2" placeholder="Email" />
+              <input aria-label="Password" type="password" required autoComplete="current-password" value={loginPassword} onChange={event => setLoginPassword(event.target.value)} className="rounded border p-2" placeholder="Password" />
+              <button type="submit" className="rounded bg-[#0D4D5E] p-2 font-bold text-white">Accedi</button>
+              <button type="button" onClick={handleCoreSignIn} className="rounded border p-2">Accedi con Google</button>
+            </form>}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

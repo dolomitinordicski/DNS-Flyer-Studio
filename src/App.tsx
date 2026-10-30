@@ -237,6 +237,9 @@ export default function App() {
   const autosave = useFlyerAutosave(content, coreUserId, autosaveAllowed);
 
   const handleSaveDraftNow = async (snapshot: FlyerContent = content, title?: string) => {
+    if (!canWriteFlyer) throw new Error('FLYER_WRITE_PERMISSION_REQUIRED');
+    if (!isDNSAdmin && (!currentReportingAreaId ||
+      snapshot.regionId !== currentReportingAreaId)) throw new Error('FLYER_AREA_SCOPE_DENIED');
     await autosave.saveNow(snapshot, title);
     if (title && title !== content.title) setContent(snapshot);
   };
@@ -290,7 +293,16 @@ export default function App() {
 
   // Update Flyer Content partial
   const handleUpdateContent = (updated: Partial<FlyerContent>) => {
-    setContent(prev => ({ ...prev, ...updated }));
+    if (!canWriteFlyer) return;
+    setContent(prev => {
+      const next = { ...prev, ...updated };
+      if (!isDNSAdmin && currentReportingAreaId) {
+        next.regionId = currentReportingAreaId;
+        next.customRegionalLogoUrl = undefined;
+        next.customRegionName = '';
+      }
+      return next;
+    });
   };
 
   // Apply Pre-built Template

@@ -4,6 +4,7 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithEmailAndPassword,
   signOut,
   type User,
 } from 'firebase/auth';
@@ -37,6 +38,12 @@ export function subscribeDNSCoreUser(listener: (user: User | null) => void): () 
 
 export async function signInDNSCore(): Promise<User> {
   const result = await signInWithPopup(dnsCoreAuth, dnsCoreAuthProvider);
+  return result.user;
+}
+
+/** Uses the same dns-core Firebase Auth tenant; no parallel account store. */
+export async function signInDNSCoreWithEmail(email: string, password: string): Promise<User> {
+  const result = await signInWithEmailAndPassword(dnsCoreAuth, email, password);
   return result.user;
 }
 

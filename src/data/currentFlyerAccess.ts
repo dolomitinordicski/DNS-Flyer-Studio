@@ -1,44 +1,72 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { dnsCoreDb, getDNSCoreUser } from '../lib/dnsCore';
 
+/** UI projection only. Authoritative authorization stays in dns-core Firestore Rules. */
 export interface CurrentFlyerAccess {
   isAdmin: boolean;
   hasNetworkAccess: boolean;
+  canRead: boolean;
+  canWrite: boolean;
   reportingAreaId?: string;
   organizationId?: string;
+  allowedReportingAreaIds: string[];
 }
+
+const denied = (): CurrentFlyerAccess => ({
+  isAdmin: false, hasNetworkAccess: false, canRead: false, canWrite: false, allowedReportingAreaIds: [],
+});
 
 export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
   const user = getDNSCoreUser();
-  if (!user) return { isAdmin: false, hasNetworkAccess: false };
+  if (!user) return denied();
 
-  const [userSnap, grantsSnap] = await Promise.all([
+  const [userSnap, membershipSnap, grantsSnap] = await Promise.all([
     getDoc(doc(dnsCoreDb, 'users', user.uid)),
+    getDocs(query(collection(dnsCoreDb, 'memberships'), where('userId', '==', user.uid))),
     getDocs(query(collection(dnsCoreDb, 'accessGrants'), where('userId', '==', user.uid))),
   ]);
+  if (!userSnap.exists()) return denied();
+  const profile = userSnap.data();
+  if (profile.active !== true) return denied();
 
-  const userData = userSnap.exists() ? userSnap.data() : undefined;
-  const isAdmin = Array.isArray(userData?.globalRoles) && userData.globalRoles.includes('dns-admin');
+  const memberships = membershipSnap.docs.map(item => item.data())
+    .filter(item => item.active === true || item.status === 'active');
+  const grants = grantsSnap.docs.map(item => item.data())
+    .filter(item => item.active === true && (!item.expiresAt || typeof item.expiresAt !== 'string' || Date.parse(item.expiresAt) > Date.now()));
+  const isAdmin = Array.isArray(profile.globalRoles) && profile.globalRoles.includes('dns-admin');
+  const permitted = (permission: string) => grants.filter(item =>
+    Array.isArray(item.permissions) && item.permissions.includes(permission));
+  const readGrants = permitted('flyer.read');
+  const writeGrants = permitted('flyer.write');
+  const network = grants.find(item => item.scopeType === 'network' && item.scopeId === 'dolomiti-nordicski'
+    && (readGrants.includes(item) || writeGrants.includes(item)));
+  const areaIds = [...new Set([...readGrants, ...writeGrants]
+    .filter(item => item.scopeType === 'reportingArea' && typeof item.scopeId === 'string')
+    .map(item => item.scopeId as string))];
+  // A territorial account with multiple areas must not silently acquire one by array order.
+  const regionGrant = areaIds.length === 1 ? areaIds[0] : undefined;
+  const orgGrant = [...readGrants, ...writeGrants].find(item => item.scopeType === 'organization'
+    && memberships.some(m => m.organizationId === item.scopeId));
 
-  const grants = grantsSnap.docs
-    .map(item => item.data())
-    .filter(item => item.active === true);
-
-  const networkGrant = grants.find(item => item.scopeType === 'network' && item.scopeId === 'dolomiti-nordicski');
-  const reportingArea = grants.find(item => item.scopeType === 'reportingArea');
-  const organization = grants.find(item => item.scopeType === 'organization');
+  const organizationAreas = new Set<string>();
+  if (orgGrant && typeof orgGrant.scopeId === 'string') {
+    const organization = await getDoc(doc(dnsCoreDb, 'organizations', orgGrant.scopeId));
+    const ids = organization.exists() ? organization.data().reportingAreaIds : undefined;
+    if (Array.isArray(ids)) {
+      for (const area of ids) if (typeof area === 'string') organizationAreas.add(area);
+    }
+  }
+  const mappedAreas = new Set([...areaIds, ...organizationAreas]);
+  const territorialArea = mappedAreas.size === 1 ? [...mappedAreas][0] : undefined;
+  const territorialAllowed = !!territorialArea;
 
   return {
     isAdmin,
-    hasNetworkAccess: isAdmin || !!networkGrant,
-    reportingAreaId: reportingArea?.scopeId,
-    organizationId: organization?.scopeId,
+    hasNetworkAccess: isAdmin || !!network,
+    canRead: isAdmin || (territorialAllowed && readGrants.length > 0),
+    canWrite: isAdmin || (territorialAllowed && writeGrants.length > 0),
+    reportingAreaId: territorialArea,
+    allowedReportingAreaIds: areaIds,
+    organizationId: orgGrant?.scopeId,
   };
 }

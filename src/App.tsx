@@ -22,7 +22,7 @@ import { runMakeItPerfect } from './features/make-it-perfect/runMakeItPerfect';
 import { probeDNSCoreHeader, type DNSCoreHeaderStatus } from './lib/dnsCoreHeader';
 import { getDNSFoundationRuntime } from './lib/foundationRuntime';
 import { createFlyerDocumentV1, normalizeFlyerContent } from './model/flyerDocument';
-import { signInDNSCore, signOutDNSCore, subscribeDNSCoreUser } from './lib/dnsCore';
+import { signInDNSCore, signInDNSCoreWithEmail, signOutDNSCore, subscribeDNSCoreUser } from './lib/dnsCore';
 import { loadCurrentFlyerAccess } from './data/currentFlyerAccess';
 import { getFlyerProductByTemplate, lockContentToProduct } from './model/flyerProductModel';
 import { useFlyerAutosave } from './hooks/useFlyerAutosave';
@@ -39,6 +39,9 @@ export default function App() {
   const [coreUserEmail, setCoreUserEmail] = useState<string | null>(null);
   const [coreUserId, setCoreUserId] = useState<string | null>(null);
   const [coreAuthError, setCoreAuthError] = useState<string | null>(null);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [canReadFlyer, setCanReadFlyer] = useState(false);
   const [currentReportingAreaId, setCurrentReportingAreaId] = useState<string | null>(null);
   const [isDNSAdmin, setIsDNSAdmin] = useState(false);
   const [designPolicy, setDesignPolicy] = useState<DNSFlyerDesignPolicy>(DEFAULT_POLICY);
@@ -51,12 +54,14 @@ export default function App() {
     return subscribeDesignPolicy(setDesignPolicy, error => console.warn('DNS Design Control configuration not available:', error));
   }, [coreUserId]);
   const [hasDNSNetworkAccess, setHasDNSNetworkAccess] = useState(false);
+  const [canWriteFlyer, setCanWriteFlyer] = useState(false);
   const [isLegacyMode, setIsLegacyMode] = useState(() => new URLSearchParams(window.location.search).get('legacy') === '1');
 
   // Initial Flyer Content from Template 1 or LocalStorage
   const [content, setContent] = useState<FlyerContent>(() => {
     // Try to load from localStorage first
-    const saved = localStorage.getItem('dns_active_flyer');
+    // Legacy shared draft keys are never read: they can belong to another account.
+    const saved = null;
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -117,25 +122,45 @@ export default function App() {
   useEffect(() => {
     void probeDNSCoreHeader().then(setCoreStatus);
     return subscribeDNSCoreUser(user => {
+      setCanReadFlyer(false);
+      setCanWriteFlyer(false);
+      // Never retain a previous user's visible editor state when authentication changes.
+      setContent({ ...FLYER_TEMPLATES[0].defaultContent } as FlyerContent);
+      setActiveView('editor');
+      setIsSavedDesignsModalOpen(false);
+      setIsShareModalOpen(false);
+      setIsLegacyMode(false);
       setCoreUserEmail(user?.email ?? null);
       setCoreUserId(user?.uid ?? null);
       if (!user) {
         setCurrentReportingAreaId(null);
         setIsDNSAdmin(false);
         setHasDNSNetworkAccess(false);
+        setCanWriteFlyer(false);
         return;
       }
       void loadCurrentFlyerAccess()
         .then(access => {
           setCurrentReportingAreaId(access.reportingAreaId ?? null);
+          if (!access.isAdmin && access.reportingAreaId && access.canRead) {
+            setContent(previous => ({
+              ...previous,
+              regionId: access.reportingAreaId!,
+              customRegionName: '',
+            }));
+          }
           setIsDNSAdmin(access.isAdmin);
           setHasDNSNetworkAccess(access.hasNetworkAccess);
+          setCanWriteFlyer(access.canWrite);
+          setCanReadFlyer(access.canRead);
         })
         .catch(error => {
           console.error('Failed to resolve DNS Core Flyer access:', error);
           setCurrentReportingAreaId(null);
           setIsDNSAdmin(false);
           setHasDNSNetworkAccess(false);
+          setCanWriteFlyer(false);
+          setCanReadFlyer(false);
         });
     });
   }, []);
@@ -156,9 +181,22 @@ export default function App() {
     }
   };
 
+  const handleEmailSignIn = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setCoreAuthError(null);
+    try {
+      await signInDNSCoreWithEmail(loginEmail.trim(), loginPassword);
+      setLoginPassword('');
+    } catch (error: unknown) {
+      setCoreAuthError((error as { code?: string })?.code || 'Accesso non riuscito');
+    }
+  };
+
   const handleCoreSignOut = async () => {
     try {
       await signOutDNSCore();
+      setLoginPassword('');
+      setContent({ ...FLYER_TEMPLATES[0].defaultContent } as FlyerContent);
     } catch (error) {
       console.error('DNS Core sign-out failed:', error);
     }
@@ -174,8 +212,9 @@ export default function App() {
 
   // Save to localStorage whenever content changes
   React.useEffect(() => {
-    localStorage.setItem('dns_active_flyer', JSON.stringify(createFlyerDocumentV1(content, { source: 'editor' })));
-  }, [content]);
+    if (!coreUserId) return;
+    localStorage.setItem(`dns_active_flyer_${coreUserId}`, JSON.stringify(createFlyerDocumentV1(content, { source: 'editor' })));
+  }, [content, coreUserId]);
 
   const [activeTemplateId, setActiveTemplateId] = useState<LayoutTemplateId>(() => {
     const savedId = localStorage.getItem('dns_active_template_id');
@@ -192,12 +231,15 @@ export default function App() {
   const [isSavedDesignsModalOpen, setIsSavedDesignsModalOpen] = useState(false);
   // DNS Core saves the active draft after edits settle; local recovery remains immediate.
   // Temporary export-language snapshots are deliberately excluded.
-  const autosaveAllowed = !isExporting
+  const autosaveAllowed = canWriteFlyer && !!coreUserId && !isExporting
     && !isLegacyMode
     && (content.layoutTemplateId !== 'official_price_list' || isDNSAdmin || hasDNSNetworkAccess);
   const autosave = useFlyerAutosave(content, coreUserId, autosaveAllowed);
 
   const handleSaveDraftNow = async (snapshot: FlyerContent = content, title?: string) => {
+    if (!canWriteFlyer) throw new Error('FLYER_WRITE_PERMISSION_REQUIRED');
+    if (!isDNSAdmin && (!currentReportingAreaId ||
+      snapshot.regionId !== currentReportingAreaId)) throw new Error('FLYER_AREA_SCOPE_DENIED');
     await autosave.saveNow(snapshot, title);
     if (title && title !== content.title) setContent(snapshot);
   };
@@ -251,7 +293,16 @@ export default function App() {
 
   // Update Flyer Content partial
   const handleUpdateContent = (updated: Partial<FlyerContent>) => {
-    setContent(prev => ({ ...prev, ...updated }));
+    if (!canWriteFlyer) return;
+    setContent(prev => {
+      const next = { ...prev, ...updated };
+      if (!isDNSAdmin && currentReportingAreaId) {
+        next.regionId = currentReportingAreaId;
+        next.customRegionalLogoUrl = undefined;
+        next.customRegionName = '';
+      }
+      return next;
+    });
   };
 
   // Apply Pre-built Template
@@ -559,6 +610,8 @@ export default function App() {
         </div>
       )}
 
+      {coreUserId && canReadFlyer ? (
+      <>
       {/* Make It Perfect Floating Toast Notification */}
       {perfectToast && (
         <div className="fixed top-20 right-6 z-50 bg-[#0D4D5E] text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#AAD0D1] flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -727,7 +780,21 @@ export default function App() {
         onExportCode={handleExportCode}
         isPriceTable={content.graphicStyle === 'official_price_table' || content.graphicStyle === 'official_price_table_v1'}
       />
-
+      </>
+      ) : (
+        <section className="flex-1 flex items-center justify-center p-8 no-print">
+          <div className="w-full max-w-md rounded-xl border bg-white p-6 shadow-sm">
+            <h1 className="text-xl font-bold text-[#0D4D5E]">DNS Flyer Studio</h1>
+            <p className="my-3 text-sm text-slate-700">{coreUserId ? 'Account non autorizzato a Flyer Studio oppure accesso in verifica.' : 'Accedi con il tuo account DNS Identity.'}</p>
+            {!coreUserId && <form onSubmit={handleEmailSignIn} className="flex flex-col gap-3">
+              <input aria-label="Email" type="email" required autoComplete="username" value={loginEmail} onChange={event => setLoginEmail(event.target.value)} className="rounded border p-2" placeholder="Email" />
+              <input aria-label="Password" type="password" required autoComplete="current-password" value={loginPassword} onChange={event => setLoginPassword(event.target.value)} className="rounded border p-2" placeholder="Password" />
+              <button type="submit" className="rounded bg-[#0D4D5E] p-2 font-bold text-white">Accedi</button>
+              <button type="button" onClick={handleCoreSignIn} className="rounded border p-2">Accedi con Google</button>
+            </form>}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

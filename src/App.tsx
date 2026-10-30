@@ -51,12 +51,14 @@ export default function App() {
     return subscribeDesignPolicy(setDesignPolicy, error => console.warn('DNS Design Control configuration not available:', error));
   }, [coreUserId]);
   const [hasDNSNetworkAccess, setHasDNSNetworkAccess] = useState(false);
+  const [canWriteFlyer, setCanWriteFlyer] = useState(false);
   const [isLegacyMode, setIsLegacyMode] = useState(() => new URLSearchParams(window.location.search).get('legacy') === '1');
 
   // Initial Flyer Content from Template 1 or LocalStorage
   const [content, setContent] = useState<FlyerContent>(() => {
     // Try to load from localStorage first
-    const saved = localStorage.getItem('dns_active_flyer');
+    // Legacy shared draft keys are never read: they can belong to another account.
+    const saved = null;
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -123,6 +125,7 @@ export default function App() {
         setCurrentReportingAreaId(null);
         setIsDNSAdmin(false);
         setHasDNSNetworkAccess(false);
+        setCanWriteFlyer(false);
         return;
       }
       void loadCurrentFlyerAccess()
@@ -130,12 +133,14 @@ export default function App() {
           setCurrentReportingAreaId(access.reportingAreaId ?? null);
           setIsDNSAdmin(access.isAdmin);
           setHasDNSNetworkAccess(access.hasNetworkAccess);
+          setCanWriteFlyer(access.canWrite);
         })
         .catch(error => {
           console.error('Failed to resolve DNS Core Flyer access:', error);
           setCurrentReportingAreaId(null);
           setIsDNSAdmin(false);
           setHasDNSNetworkAccess(false);
+          setCanWriteFlyer(false);
         });
     });
   }, []);
@@ -174,8 +179,9 @@ export default function App() {
 
   // Save to localStorage whenever content changes
   React.useEffect(() => {
-    localStorage.setItem('dns_active_flyer', JSON.stringify(createFlyerDocumentV1(content, { source: 'editor' })));
-  }, [content]);
+    if (!coreUserId) return;
+    localStorage.setItem(`dns_active_flyer_${coreUserId}`, JSON.stringify(createFlyerDocumentV1(content, { source: 'editor' })));
+  }, [content, coreUserId]);
 
   const [activeTemplateId, setActiveTemplateId] = useState<LayoutTemplateId>(() => {
     const savedId = localStorage.getItem('dns_active_template_id');
@@ -192,7 +198,7 @@ export default function App() {
   const [isSavedDesignsModalOpen, setIsSavedDesignsModalOpen] = useState(false);
   // DNS Core saves the active draft after edits settle; local recovery remains immediate.
   // Temporary export-language snapshots are deliberately excluded.
-  const autosaveAllowed = !isExporting
+  const autosaveAllowed = canWriteFlyer && !!coreUserId && !isExporting
     && !isLegacyMode
     && (content.layoutTemplateId !== 'official_price_list' || isDNSAdmin || hasDNSNetworkAccess);
   const autosave = useFlyerAutosave(content, coreUserId, autosaveAllowed);

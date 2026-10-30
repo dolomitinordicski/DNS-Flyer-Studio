@@ -48,12 +48,24 @@ export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
   const orgGrant = [...readGrants, ...writeGrants].find(item => item.scopeType === 'organization'
     && memberships.some(m => m.organizationId === item.scopeId));
 
+  const organizationAreas = new Set<string>();
+  if (orgGrant && typeof orgGrant.scopeId === 'string') {
+    const organization = await getDoc(doc(dnsCoreDb, 'organizations', orgGrant.scopeId));
+    const ids = organization.exists() ? organization.data().reportingAreaIds : undefined;
+    if (Array.isArray(ids)) {
+      for (const area of ids) if (typeof area === 'string') organizationAreas.add(area);
+    }
+  }
+  const mappedAreas = new Set([...areaIds, ...organizationAreas]);
+  const territorialArea = mappedAreas.size === 1 ? [...mappedAreas][0] : undefined;
+  const territorialAllowed = !!territorialArea;
+
   return {
     isAdmin,
     hasNetworkAccess: isAdmin || !!network,
-    canRead: isAdmin || readGrants.length > 0,
-    canWrite: isAdmin || writeGrants.length > 0,
-    reportingAreaId: regionGrant,
+    canRead: isAdmin || (territorialAllowed && readGrants.length > 0),
+    canWrite: isAdmin || (territorialAllowed && writeGrants.length > 0),
+    reportingAreaId: territorialArea,
     allowedReportingAreaIds: areaIds,
     organizationId: orgGrant?.scopeId,
   };

@@ -26,7 +26,7 @@ export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
   ]);
   if (!userSnap.exists()) return denied();
   const profile = userSnap.data();
-  if (profile.active !== true && profile.status !== 'active') return denied();
+  if (profile.active !== true) return denied();
 
   const memberships = membershipSnap.docs.map(item => item.data())
     .filter(item => item.active === true || item.status === 'active');

@@ -9,10 +9,11 @@ export interface CurrentFlyerAccess {
   canWrite: boolean;
   reportingAreaId?: string;
   organizationId?: string;
+  allowedReportingAreaIds: string[];
 }
 
 const denied = (): CurrentFlyerAccess => ({
-  isAdmin: false, hasNetworkAccess: false, canRead: false, canWrite: false,
+  isAdmin: false, hasNetworkAccess: false, canRead: false, canWrite: false, allowedReportingAreaIds: [],
 });
 
 export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
@@ -39,7 +40,11 @@ export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
   const writeGrants = permitted('flyer.write');
   const network = grants.find(item => item.scopeType === 'network' && item.scopeId === 'dolomiti-nordicski'
     && (readGrants.includes(item) || writeGrants.includes(item)));
-  const regionGrant = [...readGrants, ...writeGrants].find(item => item.scopeType === 'reportingArea');
+  const areaIds = [...new Set([...readGrants, ...writeGrants]
+    .filter(item => item.scopeType === 'reportingArea' && typeof item.scopeId === 'string')
+    .map(item => item.scopeId as string))];
+  // A territorial account with multiple areas must not silently acquire one by array order.
+  const regionGrant = areaIds.length === 1 ? areaIds[0] : undefined;
   const orgGrant = [...readGrants, ...writeGrants].find(item => item.scopeType === 'organization'
     && memberships.some(m => m.organizationId === item.scopeId));
 
@@ -48,7 +53,8 @@ export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
     hasNetworkAccess: isAdmin || !!network,
     canRead: isAdmin || readGrants.length > 0,
     canWrite: isAdmin || writeGrants.length > 0,
-    reportingAreaId: regionGrant?.scopeId,
+    reportingAreaId: regionGrant,
+    allowedReportingAreaIds: areaIds,
     organizationId: orgGrant?.scopeId,
   };
 }

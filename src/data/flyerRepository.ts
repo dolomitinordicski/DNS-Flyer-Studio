@@ -2,6 +2,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   query,
   serverTimestamp,
@@ -18,6 +19,7 @@ import {
 } from '../model/flyerDocument';
 import { dnsCoreDb, getDNSCoreUser } from '../lib/dnsCore';
 import { coreReportingAreaId } from './regionalLogos';
+import { loadCurrentFlyerAccess } from './currentFlyerAccess';
 
 export type FlyerScopeType = 'network' | 'reportingArea' | 'organization';
 
@@ -91,6 +93,15 @@ export function scopeFromContent(content: FlyerContent): { scopeType: FlyerScope
   return { scopeType: 'reportingArea', scopeId: coreReportingAreaId(content.regionId) };
 }
 
+/** Client-side safety boundary in addition to authoritative Firestore Rules. */
+async function assertFlyerScope(scopeType: FlyerScopeType, scopeId: string, write: boolean) {
+  const access = await loadCurrentFlyerAccess();
+  if (access.isAdmin) return;
+  if (write ? !access.canWrite : !access.canRead) throw new Error('FLYER_PERMISSION_DENIED');
+  if (scopeType !== 'reportingArea' || !access.reportingAreaId
+      || access.reportingAreaId !== scopeId) throw new Error('FLYER_AREA_SCOPE_DENIED');
+}
+
 export function seasonIdFromContent(content: FlyerContent): string {
   const raw = content.validityPeriod?.trim();
   if (raw && /^\d{4}[/-]\d{2}$/.test(raw)) {
@@ -110,6 +121,7 @@ export async function saveFlyerDocument(
   const user = requireDNSCoreUser();
   const id = options.id ?? `flyer_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const scope = scopeFromContent(content);
+  await assertFlyerScope(scope.scopeType, scope.scopeId, true);
   const seasonId = seasonIdFromContent(content);
   // Historic imports embedded full Base64 files in drafts. Never send these
   // oversized binary strings to Firestore (which has a 1 MiB document limit).
@@ -154,25 +166,32 @@ export async function saveFlyerDocument(
 
 export async function loadOwnedFlyerDocuments(): Promise<FlyerDocumentRecord[]> {
   const user = requireDNSCoreUser();
+  const access = await loadCurrentFlyerAccess();
+  if (!access.canRead) throw new Error('FLYER_PERMISSION_DENIED');
   const snapshot = await getDocs(
     query(collection(dnsCoreDb, DOCUMENTS), where('ownerUserId', '==', user.uid)),
   );
 
   return snapshot.docs
     .map(snap => hydrateDocumentRecord(snap.id, snap.data()))
-    .filter((item): item is FlyerDocumentRecord => !!item)
+    .filter((item): item is FlyerDocumentRecord => !!item && (access.isAdmin || (item.scopeType === 'reportingArea' && item.scopeId === access.reportingAreaId)))
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 
 export async function deleteFlyerDocument(id: string): Promise<void> {
   requireDNSCoreUser();
-  await deleteDoc(doc(dnsCoreDb, DOCUMENTS, id));
+  const target = doc(dnsCoreDb, DOCUMENTS, id);
+  const existing = await getDoc(target);
+  if (!existing.exists()) throw new Error('FLYER_DOCUMENT_NOT_FOUND');
+  await assertFlyerScope(existing.data().scopeType, existing.data().scopeId, true);
+  await deleteDoc(target);
 }
 
 export async function publishFlyerDocument(
   documentRecord: FlyerDocumentRecord,
 ): Promise<FlyerPublicationRecord> {
   const user = requireDNSCoreUser();
+  await assertFlyerScope(documentRecord.scopeType, documentRecord.scopeId, true);
   const publicationId = `${documentRecord.id}__${Date.now()}`;
   const record: FlyerPublicationRecord = {
     id: publicationId,
@@ -197,12 +216,14 @@ export async function publishFlyerDocument(
 
 export async function loadOwnedPublications(): Promise<FlyerPublicationRecord[]> {
   const user = requireDNSCoreUser();
+  const access = await loadCurrentFlyerAccess();
+  if (!access.canRead) throw new Error('FLYER_PERMISSION_DENIED');
   const snapshot = await getDocs(
     query(collection(dnsCoreDb, PUBLICATIONS), where('publishedBy', '==', user.uid)),
   );
   return snapshot.docs
     .map(snap => hydratePublicationRecord(snap.id, snap.data()))
-    .filter((item): item is FlyerPublicationRecord => !!item);
+    .filter((item): item is FlyerPublicationRecord => !!item && (access.isAdmin || (item.scopeType === 'reportingArea' && item.scopeId === access.reportingAreaId)));
 }
 
 export function savedDesignProjection(record: FlyerDocumentRecord) {

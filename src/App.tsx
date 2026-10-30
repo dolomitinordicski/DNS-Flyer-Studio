@@ -124,6 +124,12 @@ export default function App() {
     return subscribeDNSCoreUser(user => {
       setCanReadFlyer(false);
       setCanWriteFlyer(false);
+      // Never retain a previous user's visible editor state when authentication changes.
+      setContent({ ...FLYER_TEMPLATES[0].defaultContent } as FlyerContent);
+      setActiveView('editor');
+      setIsSavedDesignsModalOpen(false);
+      setIsShareModalOpen(false);
+      setIsLegacyMode(false);
       setCoreUserEmail(user?.email ?? null);
       setCoreUserId(user?.uid ?? null);
       if (!user) {
@@ -136,6 +142,13 @@ export default function App() {
       void loadCurrentFlyerAccess()
         .then(access => {
           setCurrentReportingAreaId(access.reportingAreaId ?? null);
+          if (!access.isAdmin && access.reportingAreaId && access.canRead) {
+            setContent(previous => ({
+              ...previous,
+              regionId: access.reportingAreaId!,
+              customRegionName: '',
+            }));
+          }
           setIsDNSAdmin(access.isAdmin);
           setHasDNSNetworkAccess(access.hasNetworkAccess);
           setCanWriteFlyer(access.canWrite);

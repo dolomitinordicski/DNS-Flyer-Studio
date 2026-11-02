@@ -58,13 +58,20 @@ export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
   }
   const mappedAreas = new Set([...areaIds, ...organizationAreas]);
   const territorialArea = mappedAreas.size === 1 ? [...mappedAreas][0] : undefined;
-  const territorialAllowed = !!territorialArea;
+  // The editor persists reportingArea-scoped documents. Organization grants
+  // identify the UI area but do not authorize that scope in Firestore Rules.
+  // Require an explicit matching reportingArea grant until server-side
+  // organization-to-area authorization is implemented and emulator-tested.
+  const readAllowed = !!territorialArea && readGrants.some(grant =>
+    grant.scopeType === 'reportingArea' && grant.scopeId === territorialArea);
+  const writeAllowed = !!territorialArea && writeGrants.some(grant =>
+    grant.scopeType === 'reportingArea' && grant.scopeId === territorialArea);
 
   return {
     isAdmin,
     hasNetworkAccess: isAdmin || !!network,
-    canRead: isAdmin || (territorialAllowed && readGrants.length > 0),
-    canWrite: isAdmin || (territorialAllowed && writeGrants.length > 0),
+    canRead: isAdmin || readAllowed,
+    canWrite: isAdmin || writeAllowed,
     reportingAreaId: territorialArea,
     allowedReportingAreaIds: areaIds,
     organizationId: orgGrant?.scopeId,

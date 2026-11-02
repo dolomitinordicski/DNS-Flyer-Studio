@@ -155,7 +155,8 @@ export const REGIONAL_AREA_ALIASES: Record<string, string> = {
 };
 export function findReportingAreaLogo(areaId: string) {
   const id = REGIONAL_AREA_ALIASES[areaId] || areaId;
-  return REGIONAL_LOGOS.find(area => area.id === id) || REGIONAL_LOGOS[0];
+  return REGIONAL_LOGOS.find(area => area.id === id)
+    || { ...REGIONAL_LOGOS[0], id, name: areaId, regionName: areaId };
 }
 
 /** Exact Firestore reportingAreas document ID for Flyer persistence and pricing. */

@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   query,
+  runTransaction,
   serverTimestamp,
   setDoc,
   where,
@@ -68,6 +69,8 @@ export interface FlyerTemplateRecord {
 
 const DOCUMENTS = 'flyerDocuments';
 const PUBLICATIONS = 'flyerPublications';
+const observedRevisions = new Map<string, number>();
+const revisionKey = (uid: string, id: string) => `${uid}:${id}`;
 
 /**
  * FlyerDocumentV1 has optional nested fields. Firestore rejects `undefined`
@@ -151,15 +154,39 @@ export async function saveFlyerDocument(
     updatedBy: user.uid,
   };
 
-  await setDoc(
-    doc(dnsCoreDb, DOCUMENTS, id),
-    {
+  const key = revisionKey(user.uid, id);
+  const expected = observedRevisions.get(key);
+  const newRevision = await runTransaction(dnsCoreDb, async transaction => {
+    const reference = doc(dnsCoreDb, DOCUMENTS, id);
+    const current = await transaction.get(reference);
+    if (current.exists()) {
+      const data = current.data();
+      const currentRevision = typeof data.editRevision === 'number' ? data.editRevision : 0;
+      if (expected === undefined || expected !== currentRevision) {
+        throw new Error('FLYER_CONCURRENT_EDIT_CONFLICT');
+      }
+      if (data.scopeType !== scope.scopeType || data.scopeId !== scope.scopeId ||
+          data.seasonId !== seasonId) throw new Error('FLYER_AREA_SCOPE_DENIED');
+      transaction.update(reference, {
+        title: record.title,
+        status: record.status,
+        document: flyerDocument,
+        updatedBy: user.uid,
+        updatedAt: serverTimestamp(),
+        editRevision: currentRevision + 1,
+      });
+      return currentRevision + 1;
+    }
+    if (options.id && expected !== undefined) throw new Error('FLYER_DOCUMENT_DELETED');
+    transaction.set(reference, {
       ...record,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-    },
-    { merge: true },
-  );
+      editRevision: 1,
+    });
+    return 1;
+  });
+  observedRevisions.set(key, newRevision);
 
   return record;
 }
@@ -172,6 +199,10 @@ export async function loadOwnedFlyerDocuments(): Promise<FlyerDocumentRecord[]> 
     query(collection(dnsCoreDb, DOCUMENTS), where('ownerUserId', '==', user.uid)),
   );
 
+  for (const snap of snapshot.docs) {
+    const data = snap.data();
+    observedRevisions.set(revisionKey(user.uid, snap.id), typeof data.editRevision === 'number' ? data.editRevision : 0);
+  }
   return snapshot.docs
     .map(snap => hydrateDocumentRecord(snap.id, snap.data()))
     .filter((item): item is FlyerDocumentRecord => !!item && (access.isAdmin || (item.scopeType === 'reportingArea' && item.scopeId === access.reportingAreaId)))

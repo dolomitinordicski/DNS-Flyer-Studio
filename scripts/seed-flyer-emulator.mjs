@@ -1,10 +1,11 @@
 /**
  * Local-only Auth/Firestore emulator fixture for Flyer Studio.
- * Run with both emulators on 9099/8080, project demo-dns-core.
+ * Run with both emulators on 9099/8080, project dns-core.
+ * Despite the project ID 'dns-core', all requests target localhost only.
  * Does not use production credentials or Firebase Admin service accounts.
  */
 const auth = 'http://127.0.0.1:9099';
-const db = 'http://127.0.0.1:8080/v1/projects/demo-dns-core/databases/(default)/documents';
+const db = 'http://127.0.0.1:8080/v1/projects/dns-core/databases/(default)/documents';
 const password = 'TestOnly-Flyer-2026!'; // local disposable credential
 const specs = [
   ['dns-test-admin@invalid.example', 'dns-admin', 'dns-test-admin'],
@@ -28,7 +29,7 @@ async function write(path, data) {
 }
 for (const [email,role,uid] of specs) {
   // Emulator-only Admin API: stable uid, no real Firebase project touched.
-  await request(`${auth}/identitytoolkit.googleapis.com/v1/projects/demo-dns-core/accounts`,{
+  await request(`${auth}/identitytoolkit.googleapis.com/v1/projects/dns-core/accounts`,{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({localId:uid,email,password,emailVerified:true})
   });

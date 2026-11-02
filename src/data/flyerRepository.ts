@@ -177,7 +177,8 @@ export async function saveFlyerDocument(
       });
       return currentRevision + 1;
     }
-    if (options.id && expected !== undefined) throw new Error('FLYER_DOCUMENT_DELETED');
+    // Never recreate a deleted or inaccessible saved draft using an old ID.
+    if (options.id) throw new Error('FLYER_DOCUMENT_MISSING_OR_INACCESSIBLE');
     transaction.set(reference, {
       ...record,
       createdAt: serverTimestamp(),

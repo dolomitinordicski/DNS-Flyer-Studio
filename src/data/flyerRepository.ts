@@ -182,9 +182,14 @@ export async function loadOwnedFlyerDocuments(): Promise<FlyerDocumentRecord[]> 
   const user = requireDNSCoreUser();
   const access = await loadCurrentFlyerAccess();
   if (!access.canRead) throw new Error('FLYER_PERMISSION_DENIED');
-  const snapshot = await getDocs(
-    query(collection(dnsCoreDb, DOCUMENTS), where('ownerUserId', '==', user.uid)),
-  );
+  const constraints = [where('ownerUserId', '==', user.uid)];
+  // Firestore rules are not query filters: territorial queries must prove scope.
+  if (!access.isAdmin) {
+    if (!access.reportingAreaId) throw new Error('FLYER_AREA_SCOPE_DENIED');
+    constraints.push(where('scopeType', '==', 'reportingArea'));
+    constraints.push(where('scopeId', '==', access.reportingAreaId));
+  }
+  const snapshot = await getDocs(query(collection(dnsCoreDb, DOCUMENTS), ...constraints));
 
   return snapshot.docs
     .map(snap => hydrateDocumentRecord(snap.id, snap.data()))

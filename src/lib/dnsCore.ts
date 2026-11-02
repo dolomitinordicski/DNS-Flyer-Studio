@@ -1,6 +1,7 @@
 import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import {
   getAuth,
+  connectAuthEmulator,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
@@ -8,7 +9,7 @@ import {
   signOut,
   type User,
 } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { connectFirestoreEmulator, getFirestore, type Firestore } from 'firebase/firestore';
 
 const DNS_CORE_APP_NAME = 'dns-core-flyer-studio';
 
@@ -28,6 +29,14 @@ export const dnsCoreApp: FirebaseApp =
 
 export const dnsCoreDb: Firestore = getFirestore(dnsCoreApp);
 export const dnsCoreAuth = getAuth(dnsCoreApp);
+
+// Explicit local-only opt-in for browser acceptance tests. Never connect a
+// deployed build to local emulators, even if its environment is misconfigured.
+if (import.meta.env.DEV && import.meta.env.VITE_DNS_USE_EMULATORS === 'true') {
+  connectAuthEmulator(dnsCoreAuth, 'http://127.0.0.1:9099', { disableWarnings: true });
+  connectFirestoreEmulator(dnsCoreDb, '127.0.0.1', 8080);
+}
+
 
 export const dnsCoreAuthProvider = new GoogleAuthProvider();
 dnsCoreAuthProvider.setCustomParameters({ prompt: 'select_account' });

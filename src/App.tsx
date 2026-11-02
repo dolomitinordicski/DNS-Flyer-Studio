@@ -24,6 +24,7 @@ import { getDNSFoundationRuntime } from './lib/foundationRuntime';
 import { createFlyerDocumentV1, normalizeFlyerContent } from './model/flyerDocument';
 import { signInDNSCore, signInDNSCoreWithEmail, signOutDNSCore, subscribeDNSCoreUser } from './lib/dnsCore';
 import { loadCurrentFlyerAccess } from './data/currentFlyerAccess';
+import { coreReportingAreaId, findReportingAreaLogo } from './data/regionalLogos';
 import { getFlyerProductByTemplate, lockContentToProduct } from './model/flyerProductModel';
 import { useFlyerAutosave } from './hooks/useFlyerAutosave';
 import { downloadFlyerCodeHtml } from './utils/codeExport';
@@ -145,7 +146,7 @@ export default function App() {
           if (!access.isAdmin && access.reportingAreaId && access.canRead) {
             setContent(previous => ({
               ...previous,
-              regionId: access.reportingAreaId!,
+              regionId: findReportingAreaLogo(access.reportingAreaId!).id,
               customRegionName: '',
             }));
           }
@@ -239,7 +240,7 @@ export default function App() {
   const handleSaveDraftNow = async (snapshot: FlyerContent = content, title?: string) => {
     if (!canWriteFlyer) throw new Error('FLYER_WRITE_PERMISSION_REQUIRED');
     if (!isDNSAdmin && (!currentReportingAreaId ||
-      snapshot.regionId !== currentReportingAreaId)) throw new Error('FLYER_AREA_SCOPE_DENIED');
+      coreReportingAreaId(snapshot.regionId) !== currentReportingAreaId)) throw new Error('FLYER_AREA_SCOPE_DENIED');
     await autosave.saveNow(snapshot, title);
     if (title && title !== content.title) setContent(snapshot);
   };
@@ -297,7 +298,7 @@ export default function App() {
     setContent(prev => {
       const next = { ...prev, ...updated };
       if (!isDNSAdmin && currentReportingAreaId) {
-        next.regionId = currentReportingAreaId;
+        next.regionId = findReportingAreaLogo(currentReportingAreaId).id;
         next.customRegionalLogoUrl = undefined;
         next.customRegionName = '';
       }
@@ -381,6 +382,7 @@ export default function App() {
       orientation: template.defaultContent.orientation || prev.orientation || 'portrait',
       activeLanguage: template.defaultContent.activeLanguage || prev.activeLanguage || 'it',
       importedImages: prev.importedImages || [],
+      ...(!isDNSAdmin && currentReportingAreaId ? { regionId: findReportingAreaLogo(currentReportingAreaId).id } : {}),
     } as FlyerContent));
   };
 
@@ -388,7 +390,7 @@ export default function App() {
   const handleLoadSavedDesign = (savedContent: FlyerContent) => {
     const product = getFlyerProductByTemplate(savedContent.layoutTemplateId);
     const scopedContent = currentReportingAreaId
-      ? { ...savedContent, regionId: currentReportingAreaId }
+      ? { ...savedContent, regionId: findReportingAreaLogo(currentReportingAreaId).id }
       : savedContent;
     setContent(product ? lockContentToProduct(scopedContent, product) : scopedContent);
   };

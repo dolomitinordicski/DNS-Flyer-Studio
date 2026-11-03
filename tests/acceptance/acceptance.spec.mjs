@@ -93,7 +93,9 @@ test('writer: actual image library upload, reload and foreign-area denial',async
   await login(page,'writer');await expect(editor(page)).toBeVisible();
   const result=await page.evaluate(async()=>{
     const library=await import('/src/data/flyerImageLibrary.ts');
-    const png=Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aYuQAAAAASUVORK5CYII='),c=>c.charCodeAt(0));
+    const canvas=document.createElement('canvas');canvas.width=2;canvas.height=2;
+    const context=canvas.getContext('2d');context.fillStyle='#0D4D5E';context.fillRect(0,0,2,2);
+    const png=await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('Fixture image failed')),'image/png'));
     const file=new File([png],'virtual-area-image.png',{type:'image/png'});
     const uploaded=await library.uploadFlyerImage(file,'dns-test-area');
     const listed=await library.listFlyerImages('dns-test-area');

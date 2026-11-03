@@ -74,9 +74,8 @@ const editor=page=>page.getByRole('complementary');
 test('Workspace SSO: persisted dns-core session opens Flyer and host logout propagates',async({page,context})=>{
   await page.goto('/');
   await page.evaluate(async({email,password})=>{
-    const {signInWithEmailAndPassword}=await import('firebase/auth');
-    const {dnsCoreAuth}=await import('/src/lib/dnsCore.ts');
-    await signInWithEmailAndPassword(dnsCoreAuth,email,password);
+    const {signInDNSCoreWithEmail}=await import('/src/lib/dnsCore.ts');
+    await signInDNSCoreWithEmail(email,password);
   },{email:'flyer-writer@example.test',password});
   const embedded=await context.newPage();
   await embedded.goto('/');
@@ -85,9 +84,8 @@ test('Workspace SSO: persisted dns-core session opens Flyer and host logout prop
   await embedded.reload();
   await expect(editor(embedded)).toBeVisible();
   await page.evaluate(async()=>{
-    const {signOut}=await import('firebase/auth');
-    const {dnsCoreAuth}=await import('/src/lib/dnsCore.ts');
-    await signOut(dnsCoreAuth);
+    const {signOutDNSCore}=await import('/src/lib/dnsCore.ts');
+    await signOutDNSCore();
   });
   await expect(embedded.getByLabel('Email',{exact:true})).toBeVisible();
   await embedded.close();

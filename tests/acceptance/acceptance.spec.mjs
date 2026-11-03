@@ -12,6 +12,9 @@ test.beforeAll(async()=>{
     process.env.FIREBASE_AUTH_EMULATOR_HOST!=='127.0.0.1:9199')throw Error('Dedicated loopback demo emulators required');
   env=await initializeTestEnvironment({projectId:project,firestore:{host:'127.0.0.1',port:8188,
     rules:readFileSync('tests/acceptance/upstream/firestore.rules','utf8')}});
+  const cleared=await fetch('http://127.0.0.1:9199/emulator/v1/projects/'+project+'/accounts',{
+    method:'DELETE',headers:{Authorization:'Bearer owner'}});
+  if(!cleared.ok)throw Error('Could not reset dedicated demo Auth');
   for(const role of roles){
     const response=await fetch('http://127.0.0.1:9199/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-flyer-key',{
       method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer owner'},

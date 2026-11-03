@@ -53,7 +53,7 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
   const isPackageOffer = content.layoutTemplateId === 'hotel_skipass_package';
   const isVoucherDocument = content.layoutTemplateId === 'gift_voucher' || content.layoutTemplateId === 'service_voucher';
   const isTicket = ['ticket_online_weekly_dns', 'ticket_online_weekly_area', 'ticket_online_daily'].includes(content.layoutTemplateId || '');
-  const seasonId = /^\\d{4}[/-]\\d{2}$/.test(content.validityPeriod || '')
+  const seasonId = /^\d{4}[/-]\d{2}$/.test(content.validityPeriod || '')
     ? content.validityPeriod.replace('/', '-') : '2026-27';
   const [officialPrices, setOfficialPrices] = useState<Partial<PriceListTexts>>({});
   const [priceLoadState, setPriceLoadState] = useState<'loading' | 'ready' | 'error'>('loading');

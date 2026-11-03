@@ -1,6 +1,6 @@
 # Flyer integrated acceptance
 
-This suite runs the actual Flyer UI, repository services and image library against Firebase Auth, Firestore and Storage emulators and the exact rules of Shared Data #232, commit 8d413e3ff0c472f1f565e26b3911189b05450a25. verify-upstream.mjs compares both checked-in rules files with that immutable upstream source.
+This suite runs the actual Flyer UI, repository services and image library against Firebase Auth, Firestore and Storage emulators and the exact rules of Shared Data #232, commit 88bc6c101e611ed20fac23fbda8997584844b088. verify-upstream.mjs compares both checked-in rules files with that immutable upstream source.
 
 Use the dedicated Vite config only for tests: all dnsCore imports resolve to a loopback-only demo-dns-identity connection. Production imports and configuration are unchanged. The CI checks that the demo connection is absent from the normal production bundle. Browser requests to remote assets/APIs are blocked. No production credentials are used.
 

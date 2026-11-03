@@ -31,8 +31,13 @@ export async function loadCurrentFlyerAccess(): Promise<CurrentFlyerAccess> {
 
   const memberships = membershipSnap.docs.map(item => item.data())
     .filter(item => item.active === true || item.status === 'active');
+  const now = Date.now();
+  const validDate = (value: unknown, starts: boolean) => value === undefined
+    || (typeof value === 'string' && Number.isFinite(Date.parse(value))
+      && (starts ? Date.parse(value) <= now : Date.parse(value) >= now));
   const grants = grantsSnap.docs.map(item => item.data())
-    .filter(item => item.active === true && (!item.expiresAt || typeof item.expiresAt !== 'string' || Date.parse(item.expiresAt) > Date.now()));
+    .filter(item => item.active === true && validDate(item.validFrom, true)
+      && validDate(item.validTo, false) && validDate(item.expiresAt, false));
   const isAdmin = Array.isArray(profile.globalRoles) && profile.globalRoles.includes('dns-admin');
   const permitted = (permission: string) => grants.filter(item =>
     Array.isArray(item.permissions) && item.permissions.includes(permission));

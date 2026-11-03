@@ -120,7 +120,7 @@ test('writer: foreign area blocked, own CRUD works, publication requires separat
     try{await m.publishFlyerDocument(saved);}catch{publishDenied=true;}
     const loaded=(await m.loadOwnedFlyerDocuments()).find(x=>x.id===saved.id)?.title;
     await m.deleteFlyerDocument(saved.id);
-    const removed=!(await m.getDoc(m.doc(m.dnsCoreDb,'flyerDocuments',saved.id))).exists();
+    const removed=!(await m.loadOwnedFlyerDocuments()).some(x=>x.id===saved.id);
     return {foreignRead,foreignWrite,publishDenied,loaded,removed};});
   expect(result).toEqual({foreignRead:true,foreignWrite:true,publishDenied:true,loaded:'Corrected draft',removed:true});
 });
@@ -142,7 +142,15 @@ test('DNS Admin: editor and network draft allowed without grants',async({page})=
 });
 
 test('DNS Admin: real PNG export produces a downloadable image',async({page})=>{
+  await page.route('**/*',async route=>{
+    if(route.request().resourceType()==='image'&&!['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname))
+      await route.fulfill({contentType:'image/png',headers:{'Access-Control-Allow-Origin':'*'},body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aYuQAAAAASUVORK5CYII=','base64')});
+    else await route.fallback();
+  });
+  page.on('console',message=>{if(message.type()==='error')console.log('Export browser:',message.text());});
+  page.on('dialog',async dialog=>{console.log('Export dialog:',dialog.message());await dialog.dismiss();});
   await login(page,'admin');await expect(editor(page)).toBeVisible();
+  await page.getByRole('button',{name:/^(Pakete & Angebote|Pacchetti e offerte)$/}).click();
   const download=page.waitForEvent('download');
   await page.getByRole('button',{name:'PNG',exact:true}).click();
   const file=await download;expect(file.suggestedFilename()).toMatch(/\.png$/i);

@@ -237,9 +237,13 @@ export async function loadOwnedPublications(): Promise<FlyerPublicationRecord[]>
   const user = requireDNSCoreUser();
   const access = await loadCurrentFlyerAccess();
   if (!access.canRead) throw new Error('FLYER_PERMISSION_DENIED');
-  const snapshot = await getDocs(
-    query(collection(dnsCoreDb, PUBLICATIONS), where('publishedBy', '==', user.uid)),
-  );
+  const constraints = [where('publishedBy', '==', user.uid)];
+  if (!access.isAdmin) {
+    if (!access.reportingAreaId) throw new Error('FLYER_AREA_SCOPE_DENIED');
+    constraints.push(where('scopeType', '==', 'reportingArea'));
+    constraints.push(where('scopeId', '==', access.reportingAreaId));
+  }
+  const snapshot = await getDocs(query(collection(dnsCoreDb, PUBLICATIONS), ...constraints));
   return snapshot.docs
     .map(snap => hydratePublicationRecord(snap.id, snap.data()))
     .filter((item): item is FlyerPublicationRecord => !!item && (access.isAdmin || (item.scopeType === 'reportingArea' && item.scopeId === access.reportingAreaId)));

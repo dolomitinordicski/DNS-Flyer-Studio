@@ -89,7 +89,7 @@ test('writer: UI edit, autosave, explicit save, logout/login and reload',async({
   await expect(page.getByLabel(/^(Titel|Titolo)$/)).toHaveValue('Virtual DNS package saved');
 });
 
-test('writer: actual image library upload, reload and foreign-area denial',async({page})=>{
+test('area library: writer upload, reader shared reload and foreign-area denial',async({page})=>{
   await login(page,'writer');await expect(editor(page)).toBeVisible();
   const result=await page.evaluate(async()=>{
     const library=await import('/src/data/flyerImageLibrary.ts');
@@ -103,8 +103,19 @@ test('writer: actual image library upload, reload and foreign-area denial',async
     try{await library.uploadFlyerImage(file,'dns-test-area-b');}catch{foreignDenied=true;}
     return {path:uploaded.path,listed:listed.some(item=>item.path===uploaded.path),foreignDenied};
   });
-  expect(result.path).toMatch(/^flyerAssets\/flyer-writer\/dns-test-area\/.+\.jpg$/);
+  expect(result.path).toMatch(/^flyerAssets\/dns-test-area\/.+\.jpg$/);
   expect(result).toMatchObject({listed:true,foreignDenied:true});
+  await logout(page);await login(page,'reader');
+  const reader=await page.evaluate(async uploadedPath=>{
+    const library=await import('/src/data/flyerImageLibrary.ts');
+    const listed=await library.listFlyerImages('dns-test-area');
+    const canvas=document.createElement('canvas');canvas.width=2;canvas.height=2;
+    const png=await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('Fixture image failed')),'image/png'));
+    let uploadDenied=false;
+    try{await library.uploadFlyerImage(new File([png],'reader-denied.png',{type:'image/png'}),'dns-test-area');}catch{uploadDenied=true;}
+    return {shared:listed.some(item=>item.path===uploadedPath),uploadDenied};
+  },result.path);
+  expect(reader).toEqual({shared:true,uploadDenied:true});
 });
 
 for(const role of ['none','inactive','expired','future','malformed','writeonly']){

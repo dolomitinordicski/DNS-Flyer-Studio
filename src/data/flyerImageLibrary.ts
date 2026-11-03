@@ -10,15 +10,16 @@ const MAX_DIMENSION = 2400;
 
 export interface FlyerImageAsset { url: string; name: string; path: string }
 
-async function ownedFolder(areaId: string): Promise<string> {
+async function areaFolder(areaId: string): Promise<string> {
   // Firebase restores the account asynchronously after a page refresh.
   await dnsCoreAuth.authStateReady();
   const user = getDNSCoreUser();
   if (!user) throw new Error('DNS_CORE_AUTH_REQUIRED');
-  // Only a signed-in user's own library; the document's reportingArea
-  // determines the folder, not a public/unrestricted Storage collection.
+  // The reporting area is the DNS counterpart. Storage rules decide whether
+  // the signed-in account may read or write the shared area library.
   const area = areaId.replace(/[^a-zA-Z0-9_-]/g, '_');
-  return `flyerAssets/${user.uid}/${area}`;
+  if (!area) throw new Error('INVALID_AREA_SCOPE');
+  return `flyerAssets/${area}`;
 }
 
 async function optimizeImage(file: File): Promise<Blob> {
@@ -43,7 +44,7 @@ async function optimizeImage(file: File): Promise<Blob> {
 }
 
 export async function uploadFlyerImage(file: File, regionId: string): Promise<FlyerImageAsset> {
-  const folder = await ownedFolder(regionId);
+  const folder = await areaFolder(regionId);
   const optimized = await optimizeImage(file);
   const name = file.name.replace(/[^a-zA-Z0-9_.-]/g, '_').slice(0, 90) || 'image';
   const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 9)}_${name}.jpg`;
@@ -53,7 +54,7 @@ export async function uploadFlyerImage(file: File, regionId: string): Promise<Fl
 }
 
 export async function listFlyerImages(regionId: string): Promise<FlyerImageAsset[]> {
-  const folder = await ownedFolder(regionId);
+  const folder = await areaFolder(regionId);
   const result = await listAll(ref(storage, folder));
   const items = await Promise.all(result.items.map(async item => ({
     path: item.fullPath,

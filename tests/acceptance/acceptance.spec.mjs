@@ -9,9 +9,11 @@ const roles=['admin','writer','reader','writeonly','none','inactive','expired','
 let env;
 test.beforeAll(async()=>{
   if(process.env.GCLOUD_PROJECT!==project||process.env.FIRESTORE_EMULATOR_HOST!=='127.0.0.1:8188'||
+    process.env.FIREBASE_STORAGE_EMULATOR_HOST!=='127.0.0.1:9299'||
     process.env.FIREBASE_AUTH_EMULATOR_HOST!=='127.0.0.1:9199')throw Error('Dedicated loopback demo emulators required');
   env=await initializeTestEnvironment({projectId:project,firestore:{host:'127.0.0.1',port:8188,
-    rules:readFileSync('tests/acceptance/upstream/firestore.rules','utf8')}});
+    rules:readFileSync('tests/acceptance/upstream/firestore.rules','utf8')},storage:{host:'127.0.0.1',port:9299,
+    rules:readFileSync('tests/acceptance/upstream/storage.rules','utf8')}});
   const cleared=await fetch('http://127.0.0.1:9199/emulator/v1/projects/'+project+'/accounts',{
     method:'DELETE',headers:{Authorization:'Bearer owner'}});
   if(!cleared.ok)throw Error('Could not reset dedicated demo Auth');
@@ -28,6 +30,7 @@ test.beforeEach(async({context})=>{
     else await route.abort();
   });
   await env.clearFirestore();
+  await env.clearStorage();
   await env.withSecurityRulesDisabled(async c=>{
     const db=c.firestore();const put=(path,data)=>setDoc(doc(db,path),data);
     await put('seasons/2026-27',{status:'active'});
@@ -84,6 +87,22 @@ test('writer: UI edit, autosave, explicit save, logout/login and reload',async({
   await editor(page).getByRole('button',{name:'Virtual DNS package saved',exact:true}).click();
   await page.getByRole('button',{name:/^(Inhalte|Contenuti)$/}).click();
   await expect(page.getByLabel(/^(Titel|Titolo)$/)).toHaveValue('Virtual DNS package saved');
+});
+
+test('writer: actual image library upload, reload and foreign-area denial',async({page})=>{
+  await login(page,'writer');await expect(editor(page)).toBeVisible();
+  const result=await page.evaluate(async()=>{
+    const library=await import('/src/data/flyerImageLibrary.ts');
+    const png=Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aYuQAAAAASUVORK5CYII='),c=>c.charCodeAt(0));
+    const file=new File([png],'virtual-area-image.png',{type:'image/png'});
+    const uploaded=await library.uploadFlyerImage(file,'dns-test-area');
+    const listed=await library.listFlyerImages('dns-test-area');
+    let foreignDenied=false;
+    try{await library.uploadFlyerImage(file,'dns-test-area-b');}catch{foreignDenied=true;}
+    return {path:uploaded.path,listed:listed.some(item=>item.path===uploaded.path),foreignDenied};
+  });
+  expect(result.path).toMatch(/^flyerAssets\/flyer-writer\/dns-test-area\/.+\.jpg$/);
+  expect(result).toMatchObject({listed:true,foreignDenied:true});
 });
 
 for(const role of ['none','inactive','expired','future','malformed','writeonly']){

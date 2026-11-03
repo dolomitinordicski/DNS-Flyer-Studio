@@ -24,12 +24,13 @@ jobs:
       - name: Production bundle has no test connection
         run: '! grep -R -E "demo-dns-identity|LOOPBACK_DEMO_REQUIRED|demo-flyer-key" dist/assets'
       - run: npx playwright install --with-deps chromium
-      - name: Demo Auth and Firestore browser acceptance
-        run: npx firebase emulators:exec --config tests/acceptance/firebase.json --only auth,firestore --project demo-dns-identity "npx playwright test --config tests/acceptance/playwright.config.mjs"
+      - name: Demo Auth, Firestore and Storage browser acceptance
+        run: npx firebase emulators:exec --config tests/acceptance/firebase.json --only auth,firestore,storage --project demo-dns-identity "npx playwright test --config tests/acceptance/playwright.config.mjs"
         env:
           GCLOUD_PROJECT: demo-dns-identity
           FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9199
           FIRESTORE_EMULATOR_HOST: 127.0.0.1:8188
+          FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9299
       - uses: actions/upload-artifact@v4
         if: always()
         with:

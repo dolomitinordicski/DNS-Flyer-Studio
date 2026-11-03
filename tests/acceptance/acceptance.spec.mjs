@@ -153,6 +153,7 @@ test('DNS Admin: real PNG export produces a downloadable image',async({page})=>{
   await page.getByRole('button',{name:/^(Pakete & Angebote|Pacchetti e offerte)$/}).click();
   const download=page.waitForEvent('download');
   await page.getByRole('button',{name:'PNG',exact:true}).click();
+  await page.getByRole('button',{name:/Preisliste als PNG herunterladen|Scarica Immagine PNG Listino/}).click();
   const file=await download;expect(file.suggestedFilename()).toMatch(/\.png$/i);
   const path=await file.path();const {stat}=await import('node:fs/promises');
   expect((await stat(path)).size).toBeGreaterThan(500);

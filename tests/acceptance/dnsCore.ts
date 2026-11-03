@@ -4,7 +4,7 @@ import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 if (!import.meta.env.DEV || !['127.0.0.1','localhost'].includes(location.hostname)) throw Error('LOOPBACK_DEMO_REQUIRED');
 export const DNS_CORE_FIREBASE_CONFIG = { apiKey:'demo-flyer-key', projectId:'demo-dns-identity', authDomain:'localhost', storageBucket:'demo-dns-identity.firebasestorage.app', appId:'demo-flyer' };
-export const dnsCoreApp=initializeApp(DNS_CORE_FIREBASE_CONFIG,'dns-core-flyer-studio');
+export const dnsCoreApp=initializeApp(DNS_CORE_FIREBASE_CONFIG,'dns-digital-pass');
 export const dnsCoreAuth=getAuth(dnsCoreApp);
 export const dnsCoreDb=getFirestore(dnsCoreApp);
 export const dnsCoreStorage=getStorage(dnsCoreApp);

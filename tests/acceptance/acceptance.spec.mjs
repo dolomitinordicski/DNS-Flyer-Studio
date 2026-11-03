@@ -71,6 +71,28 @@ async function logout(page){
 }
 const editor=page=>page.getByRole('complementary');
 
+test('Workspace SSO: persisted dns-core session opens Flyer and host logout propagates',async({page,context})=>{
+  await page.goto('/');
+  await page.evaluate(async({email,password})=>{
+    const {signInWithEmailAndPassword}=await import('firebase/auth');
+    const {dnsCoreAuth}=await import('/src/lib/dnsCore.ts');
+    await signInWithEmailAndPassword(dnsCoreAuth,email,password);
+  },{email:'flyer-writer@example.test',password});
+  const embedded=await context.newPage();
+  await embedded.goto('/');
+  await expect(editor(embedded)).toBeVisible();
+  await expect(embedded.getByLabel('Email',{exact:true})).toHaveCount(0);
+  await embedded.reload();
+  await expect(editor(embedded)).toBeVisible();
+  await page.evaluate(async()=>{
+    const {signOut}=await import('firebase/auth');
+    const {dnsCoreAuth}=await import('/src/lib/dnsCore.ts');
+    await signOut(dnsCoreAuth);
+  });
+  await expect(embedded.getByLabel('Email',{exact:true})).toBeVisible();
+  await embedded.close();
+});
+
 test('writer: UI edit, autosave, explicit save, logout/login and reload',async({page})=>{
   await login(page,'writer');await expect(editor(page)).toBeVisible();
   await page.getByRole('button',{name:/^(Pakete & Angebote|Pacchetti e offerte)$/}).click();

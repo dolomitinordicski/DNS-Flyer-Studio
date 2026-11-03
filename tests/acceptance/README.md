@@ -1,0 +1,11 @@
+# Flyer integrated acceptance
+
+This suite runs the actual Flyer UI and repository services against Firebase Auth/Firestore emulators and the exact rules of Shared Data #232, commit d7125abd67f42fec187c8be3ae5a8b41472e5b71. verify-upstream.mjs compares the checked-in rules with that immutable upstream source.
+
+Use the dedicated Vite config only for tests: all dnsCore imports resolve to a loopback-only demo-dns-identity connection. Production imports and configuration are unchanged. The CI checks that the demo connection is absent from the normal production bundle. Browser requests to remote assets/APIs are blocked. No production credentials are used.
+
+Coverage: real email/password login, writer UI editing/autosave/manual save/logout/login/reload, read-only and write-only behavior, inactive/no grant/expired/future/malformed authorization, owner without grant, foreign-area denial, CRUD, explicit publish permissions and scoped reload, DNS Admin, PNG export and two isolated sessions. The synthetic organization/area records are only in the demo emulator.
+
+Run on Node 22/Java 21 with @playwright/test 1.56.1, @firebase/rules-unit-testing 5.0.0 and firebase-tools 15.34.2, as specified in .github/workflows/acceptance.yml. The tests refuse other project IDs or emulator hosts.
+
+This is a pre-merge candidate check, not a production smoke test or permission to deploy. Adding the tests does not change the status of existing Firestore rules or publish the Flyer app.

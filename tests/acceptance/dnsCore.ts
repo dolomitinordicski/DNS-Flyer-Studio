@@ -1,0 +1,16 @@
+import { initializeApp } from 'firebase/app';
+import { getAuth, connectAuthEmulator, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+if (!import.meta.env.DEV || !['127.0.0.1','localhost'].includes(location.hostname)) throw Error('LOOPBACK_DEMO_REQUIRED');
+export const DNS_CORE_FIREBASE_CONFIG = { apiKey:'demo-flyer-key', projectId:'demo-dns-identity', authDomain:'localhost', appId:'demo-flyer' };
+export const dnsCoreApp=initializeApp(DNS_CORE_FIREBASE_CONFIG,'dns-core-flyer-studio');
+export const dnsCoreAuth=getAuth(dnsCoreApp);
+export const dnsCoreDb=getFirestore(dnsCoreApp);
+connectAuthEmulator(dnsCoreAuth,'http://127.0.0.1:9199',{disableWarnings:true});
+connectFirestoreEmulator(dnsCoreDb,'127.0.0.1',8188);
+export const dnsCoreAuthProvider=new GoogleAuthProvider();
+export const getDNSCoreUser=()=>dnsCoreAuth.currentUser;
+export const subscribeDNSCoreUser=(listener:Parameters<typeof onAuthStateChanged>[1])=>onAuthStateChanged(dnsCoreAuth,listener);
+export const signInDNSCoreWithEmail=(email:string,password:string)=>signInWithEmailAndPassword(dnsCoreAuth,email,password);
+export const signInDNSCore=()=>signInWithPopup(dnsCoreAuth,dnsCoreAuthProvider);
+export const signOutDNSCore=()=>signOut(dnsCoreAuth);

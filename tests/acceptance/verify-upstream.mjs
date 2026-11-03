@@ -1,0 +1,10 @@
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import assert from 'node:assert/strict';
+const sha='d7125abd67f42fec187c8be3ae5a8b41472e5b71';
+const remote=await fetch(`https://raw.githubusercontent.com/dolomitinordicski/dns-shared-data/${sha}/firestore.rules`);
+assert.equal(remote.ok,true);
+const normalize=s=>s.replace(/\r\n/g,'\n').trimEnd();
+const local=normalize(readFileSync(new URL('./upstream/firestore.rules',import.meta.url),'utf8'));
+assert.equal(local,normalize(await remote.text()));
+console.log(`Exact Shared Data #232 ${sha}: ${createHash('sha256').update(local).digest('hex')}`);

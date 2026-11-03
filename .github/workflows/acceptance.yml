@@ -1,0 +1,39 @@
+name: Flyer integrated acceptance
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci --no-audit --no-fund
+      - run: npm install --no-save --package-lock=false @playwright/test@1.56.1 @firebase/rules-unit-testing@5.0.0 firebase-tools@15.34.2
+      - run: node tests/acceptance/verify-upstream.mjs
+      - run: npm run lint && npm run build
+      - name: Production bundle has no test connection
+        run: '! grep -R -E "demo-dns-identity|LOOPBACK_DEMO_REQUIRED|demo-flyer-key" dist/assets'
+      - run: npx playwright install --with-deps chromium
+      - name: Demo Auth and Firestore browser acceptance
+        run: npx firebase emulators:exec --config tests/acceptance/firebase.json --only auth,firestore --project demo-dns-identity "npx playwright test --config tests/acceptance/playwright.config.mjs"
+        env:
+          GCLOUD_PROJECT: demo-dns-identity
+          FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9199
+          FIRESTORE_EMULATOR_HOST: 127.0.0.1:8188
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flyer-integrated-acceptance
+          path: |
+            playwright-report/
+            test-results/

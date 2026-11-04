@@ -2,6 +2,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { dnsCoreDb } from '../lib/dnsCore';
 import type { PriceListTexts } from '../types';
 import { coreReportingAreaId } from './regionalLogos';
+import { selectPrice } from './pricingSelection';
 
 interface PricingRow {
   seasonId: string;
@@ -28,40 +29,31 @@ export async function loadOfficialPriceTexts(
     where('seasonId', '==', seasonId),
   ));
   const rows = snapshot.docs.map(doc => doc.data() as PricingRow);
-  const price = (scopeType: string, scopeId: string, productCode: string, channel = 'official', period = 'regular') =>
-    format(rows.find(row =>
-      row.scopeType === scopeType && row.scopeId === scopeId &&
-      row.productCode === productCode && row.salesChannel === channel &&
-      row.salesPeriod === period
-    )?.unitPrice);
-
+  const reportingAreaId = coreReportingAreaId(regionId);
   const network = 'dolomiti-nordicski';
-  const officialWeekly = rows.find(row => row.scopeType === 'network' && row.scopeId === network &&
-    row.productCode === 'wk-dns' && row.salesChannel === 'official' && row.salesPeriod === 'regular')?.unitPrice;
-  const trackWeekly = rows.find(row => row.scopeType === 'network' && row.scopeId === network &&
-    row.productCode === 'wk-dns' && row.salesChannel === 'track' && row.salesPeriod === 'regular')?.unitPrice;
-  const trackSupplement = typeof officialWeekly === 'number' && typeof trackWeekly === 'number'
-    ? format(trackWeekly - officialWeekly) : '—';
-  const difference = (scopeType: string, scopeId: string, productCode: string): string => {
-    const regular = rows.find(row => row.scopeType === scopeType && row.scopeId === scopeId && row.productCode === productCode && row.salesChannel === 'official' && row.salesPeriod === 'regular')?.unitPrice;
-    const onTrack = rows.find(row => row.scopeType === scopeType && row.scopeId === scopeId && row.productCode === productCode && row.salesChannel === 'track' && row.salesPeriod === 'regular')?.unitPrice;
-    return typeof regular === 'number' && typeof onTrack === 'number' ? format(onTrack - regular) : '—';
+  const price = (productCode: string, channel = 'official', period = 'regular') =>
+    selectPrice(rows, productCode, reportingAreaId, channel, period);
+  const difference = (productCode: string): string => {
+    const official = price(productCode);
+    const track = price(productCode, 'track');
+    return typeof official === 'number' && typeof track === 'number'
+      ? format(track - official) : '—';
   };
   const result: Partial<PriceListTexts> = {
-    carouselWeekPrice: price('network', network, 'wk-dns'),
-    carouselWeekTrackSupplement: trackSupplement,
-    carouselSeasonPrice: price('network', network, 'sk-dns'),
+    // DNS products can only resolve from the central network scope.
+    carouselWeekPrice: format(price('wk-dns')),
+    carouselWeekTrackSupplement: difference('wk-dns'),
+    carouselSeasonPrice: format(price('sk-dns')),
   };
 
-  // The network flyer deliberately leaves regional "ab / da / from" editorial
-  // prices untouched; only its official DNS network table is hydrated.
+  // Preserve the network flyer editorial "ab / da / from" regional prices.
+  // The area flyer resolves area overrides before network defaults.
   if (!isNetworkList) {
-    const reportingAreaId = coreReportingAreaId(regionId);
-    result.regionalDayPrice = price('reportingArea', reportingAreaId, 'day');
-    result.regionalDayTrackSupplement = difference('reportingArea', reportingAreaId, 'day');
-    result.regionalWeekPrice = price('reportingArea', reportingAreaId, 'wk-area');
-    result.regionalWeekTrackSupplement = difference('reportingArea', reportingAreaId, 'wk-area');
-    result.regionalSeasonPrice = price('network', network, 'sk-area');
+    result.regionalDayPrice = format(price('day'));
+    result.regionalDayTrackSupplement = difference('day');
+    result.regionalWeekPrice = format(price('wk-area'));
+    result.regionalWeekTrackSupplement = difference('wk-area');
+    result.regionalSeasonPrice = format(price('sk-area'));
   }
   return result;
 }

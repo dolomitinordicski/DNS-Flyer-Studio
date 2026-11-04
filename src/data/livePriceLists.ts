@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { dnsCoreDb } from '../lib/dnsCore';
 import type { PriceListTexts } from '../types';
 import { coreReportingAreaId } from './regionalLogos';
@@ -19,18 +19,28 @@ const format = (value: number | null | undefined): string =>
     ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(value)
     : '—';
 
-export async function loadOfficialPriceTexts(
+export function subscribeOfficialPriceTexts(
   seasonId: string,
   regionId: string,
   isNetworkList: boolean,
-): Promise<Partial<PriceListTexts>> {
-  const snapshot = await getDocs(query(
+  onPrices: (prices: Partial<PriceListTexts>) => void,
+  onError: (error: Error) => void,
+): () => void {
+  return onSnapshot(query(
     collection(dnsCoreDb, 'ticketPricingConfigs'),
     where('seasonId', '==', seasonId),
-  ));
-  const rows = snapshot.docs.map(doc => doc.data() as PricingRow);
+  ), snapshot => {
+    const rows = snapshot.docs.map(doc => doc.data() as PricingRow);
+    onPrices(resolveOfficialPriceTexts(rows, regionId, isNetworkList));
+  }, onError);
+}
+
+export function resolveOfficialPriceTexts(
+  rows: PricingRow[],
+  regionId: string,
+  isNetworkList: boolean,
+): Partial<PriceListTexts> {
   const reportingAreaId = coreReportingAreaId(regionId);
-  const network = 'dolomiti-nordicski';
   const price = (productCode: string, channel = 'official', period = 'regular') =>
     selectPrice(rows, productCode, reportingAreaId, channel, period);
   const difference = (productCode: string): string => {

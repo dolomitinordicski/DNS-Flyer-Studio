@@ -4,7 +4,7 @@ import { FlyerContent } from '../types';
 import { DEFAULT_POLICY, resolveFlyerDesign, type DNSFlyerDesignPolicy } from '../data/dnsFlyerDesignPolicy';
 import { getAllSportsIcons } from '../data/sportsIcons';
 import { DEFAULT_PRICE_LIST_TEXTS } from '../data/templates';
-import { loadOfficialPriceTexts } from '../data/livePriceLists';
+import { subscribeOfficialPriceTexts } from '../data/livePriceLists';
 import type { PriceListTexts } from '../types';
 import { getContentForLanguage } from '../utils/multilingual';
 import { getTemporaryFlyerImage, subscribeTemporaryFlyerImage } from '../data/temporaryFlyerImage';
@@ -59,13 +59,15 @@ export const FlyerCanvas = forwardRef<HTMLDivElement, FlyerCanvasProps>(({ conte
   const [priceLoadState, setPriceLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
   useEffect(() => {
     if (!isPriceList) return;
-    let cancelled = false;
     setOfficialPrices({});
     setPriceLoadState('loading');
-    void loadOfficialPriceTexts(seasonId, content.regionId, isNetworkPriceList)
-      .then(prices => { if (!cancelled) { setOfficialPrices(prices); setPriceLoadState('ready'); } })
-      .catch(error => { if (!cancelled) { console.error('DNS tariff lookup failed:', error); setPriceLoadState('error'); } });
-    return () => { cancelled = true; };
+    return subscribeOfficialPriceTexts(
+      seasonId,
+      content.regionId,
+      isNetworkPriceList,
+      prices => { setOfficialPrices(prices); setPriceLoadState('ready'); },
+      error => { console.error('DNS tariff lookup failed:', error); setPriceLoadState('error'); },
+    );
   }, [isPriceList, isNetworkPriceList, seasonId, content.regionId]);
 
   const missingOfficialPrices: Partial<PriceListTexts> = isPriceList ? {

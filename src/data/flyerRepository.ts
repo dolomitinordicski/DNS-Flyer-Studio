@@ -2,6 +2,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  documentId,
   getDoc,
   getDocs,
   query,
@@ -127,20 +128,24 @@ export async function loadCurrentFlyerDocument(content: FlyerContent): Promise<F
   const scope = scopeFromContent(content);
   await assertFlyerScope(scope.scopeType, scope.scopeId, false);
   const id = canonicalFlyerDocumentId(content);
-  let snapshot;
-  try {
-    snapshot = await getDoc(doc(dnsCoreDb, DOCUMENTS, id));
-  } catch (error: any) {
-    // Firestore read rules use resource.data; a missing document can surface as
-    // permission-denied instead of a normal non-existent snapshot. Scope access
-    // has already been verified above, so treat this as "no current state yet".
-    if (error?.code === 'permission-denied') return null;
-    throw error;
-  }
-  if (!snapshot.exists()) return null;
+  // Query the exact canonical ID and scope. Unlike getDoc() on a missing
+  // document (which can throw permission-denied when rules inspect resource.data),
+  // this scoped query can return an empty result only if its authorization
+  // constraints are satisfied. Permission and index errors must propagate.
+  const matches = await getDocs(query(
+    collection(dnsCoreDb, DOCUMENTS),
+    where('scopeType', '==', scope.scopeType),
+    where('scopeId', '==', scope.scopeId),
+    where(documentId(), '==', id),
+  ));
+  if (matches.empty) return null;
+  const snapshot = matches.docs[0];
   const record = hydrateDocumentRecord(snapshot.id, snapshot.data());
-  if (!record || record.scopeType !== scope.scopeType || record.scopeId !== scope.scopeId
-      || record.seasonId !== seasonIdFromContent(content)) return null;
+  if (!record || record.id !== id || record.scopeType !== scope.scopeType
+      || record.scopeId !== scope.scopeId
+      || record.seasonId !== seasonIdFromContent(content)) {
+    throw new Error('FLYER_CURRENT_DOCUMENT_SCOPE_MISMATCH');
+  }
   return record;
 }
 

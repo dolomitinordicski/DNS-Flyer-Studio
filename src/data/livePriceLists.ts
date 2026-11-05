@@ -6,6 +6,7 @@ import { selectPrice } from './pricingSelection';
 
 interface PricingRow {
   seasonId: string;
+  active?: boolean;
   scopeType: string;
   scopeId: string;
   productCode: string;
@@ -30,7 +31,7 @@ export function subscribeOfficialPriceTexts(
     collection(dnsCoreDb, 'ticketPricingConfigs'),
     where('seasonId', '==', seasonId),
   ), snapshot => {
-    const rows = snapshot.docs.map(doc => doc.data() as PricingRow);
+    const rows = snapshot.docs.map(doc => doc.data() as PricingRow).filter(row => row.active !== false);
     onPrices(resolveOfficialPriceTexts(rows, regionId, isNetworkList));
   }, onError);
 }

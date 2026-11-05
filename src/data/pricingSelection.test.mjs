@@ -46,3 +46,19 @@ test('unset override does not mask valid network price', () => {
     row('network', network, 'sk-area', 140)];
   assert.equal(selectPrice(rows, 'sk-area', area), 140);
 });
+
+test('retired organization override cannot affect selection', () => {
+  const rows = [
+    { ...row('reportingArea', area, 'day', 16), active: true },
+    { ...row('organization', 'other-organization', 'day', 1), active: false },
+  ];
+  assert.equal(selectPrice(rows, 'day', area), 16);
+});
+
+test('retired tariff cannot override active scope and is not used as fallback', () => {
+  const rows = [
+    { ...row('reportingArea', area, 'sk-area', 99), active: false },
+    { ...row('network', network, 'sk-area', 140), active: true },
+  ];
+  assert.equal(selectPrice(rows, 'sk-area', area), null);
+});

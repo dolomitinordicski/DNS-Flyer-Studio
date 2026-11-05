@@ -1,5 +1,6 @@
 /** Pricing precedence for area products only. DNS weekly and season tickets are network-only. */
 export interface PriceSelectionRow {
+  active?: boolean;
   scopeType: string;
   scopeId: string;
   productCode: string;
@@ -27,7 +28,7 @@ export function selectPrice(
          { scopeType: 'network', scopeId: network }];
   for (const scope of eligibleScopes) {
     const matching = rows.find(row =>
-      row.scopeType === scope.scopeType && row.scopeId === scope.scopeId &&
+      row.active !== false && row.scopeType === scope.scopeType && row.scopeId === scope.scopeId &&
       row.productCode === productCode && row.salesChannel === channel &&
       row.salesPeriod === period && typeof row.unitPrice === 'number' &&
       Number.isFinite(row.unitPrice));

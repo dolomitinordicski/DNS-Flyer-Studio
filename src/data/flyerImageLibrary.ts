@@ -1,5 +1,6 @@
 import { getDownloadURL, getStorage, listAll, ref, uploadBytes } from 'firebase/storage';
 import { dnsCoreApp, dnsCoreAuth, getDNSCoreUser } from '../lib/dnsCore';
+import { coreReportingAreaId } from './regionalLogos';
 
 const storage = getStorage(dnsCoreApp);
 // Surface a missing bucket or unavailable service instead of retrying for minutes.
@@ -17,7 +18,10 @@ async function areaFolder(areaId: string): Promise<string> {
   if (!user) throw new Error('DNS_CORE_AUTH_REQUIRED');
   // The reporting area is the DNS counterpart. Storage rules decide whether
   // the signed-in account may read or write the shared area library.
-  const area = areaId.replace(/[^a-zA-Z0-9_-]/g, '_');
+  // The editor uses legacy presentation IDs (e.g. 3_zinnen), while
+  // dns-core Storage grants are issued for canonical reporting-area IDs
+  // (e.g. drei-zinnen). Never use the presentation alias as a Storage path.
+  const area = coreReportingAreaId(areaId).replace(/[^a-zA-Z0-9_-]/g, '_');
   if (!area) throw new Error('INVALID_AREA_SCOPE');
   return `flyerAssets/${area}`;
 }

@@ -56,15 +56,29 @@ export default function App() {
   const [designPolicy, setDesignPolicy] = useState<DNSFlyerDesignPolicy>(DEFAULT_POLICY);
   const [designPanelOpen, setDesignPanelOpen] = useState(false);
   const [availabilityPolicy, setAvailabilityPolicy] = useState<DNSFlyerAvailabilityPolicy>(DEFAULT_FLYER_AVAILABILITY);
+  const [availabilityStatus, setAvailabilityStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [availabilityPanelOpen, setAvailabilityPanelOpen] = useState(false);
   useEffect(() => {
     if (!coreUserId) {
       setDesignPolicy(DEFAULT_POLICY);
       setAvailabilityPolicy(DEFAULT_FLYER_AVAILABILITY);
+      setAvailabilityStatus('loading');
+      setAvailabilityError(null);
       return;
     }
+    setAvailabilityStatus('loading');
+    setAvailabilityError(null);
     const stopDesign = subscribeDesignPolicy(setDesignPolicy, error => console.warn('DNS Design Control configuration not available:', error));
-    const stopAvailability = subscribeFlyerAvailabilityPolicy(setAvailabilityPolicy, error => console.warn('DNS Flyer availability configuration not available:', error));
+    const stopAvailability = subscribeFlyerAvailabilityPolicy(policy => {
+      setAvailabilityPolicy(policy);
+      setAvailabilityStatus('ready');
+      setAvailabilityError(null);
+    }, error => {
+      console.error('DNS Flyer availability configuration not available:', error);
+      setAvailabilityStatus('error');
+      setAvailabilityError(error);
+    });
     return () => { stopDesign(); stopAvailability(); };
   }, [coreUserId]);
   const [hasDNSNetworkAccess, setHasDNSNetworkAccess] = useState(false);
@@ -318,7 +332,7 @@ export default function App() {
     if (!template?.defaultContent) return;
     const selectedProduct = getFlyerProductByTemplate(templateId);
     if (selectedProduct?.dataPolicy.access === 'dns-only' && !(isDNSAdmin || hasDNSNetworkAccess)) return;
-    if (selectedProduct && !isDNSAdmin && !isFlyerProductEnabled(availabilityPolicy, selectedProduct.type)) return;
+    if (selectedProduct && !isDNSAdmin && (availabilityStatus !== 'ready' || !isFlyerProductEnabled(availabilityPolicy, selectedProduct.type))) return;
 
     const defaultVis = template.defaultContent.sectionVisibility || {
       header: true, bigTitle: true, heroImage: true, earlyBird: false,
@@ -610,6 +624,13 @@ export default function App() {
         </div>
       )}
 
+      {coreUserId && canReadFlyer && availabilityStatus !== 'ready' && (
+        <div role="alert" className="bg-amber-50 border-b border-amber-300 text-amber-950 px-5 py-3 text-sm no-print">
+          {availabilityStatus === 'error'
+            ? `Disponibilità flyer non verificabile (Firestore: ${availabilityError ?? 'errore sconosciuto'}). Non è possibile scegliere un nuovo tipo finché non viene ripristinata la lettura.`
+            : 'Caricamento disponibilità flyer in corso…'}
+        </div>
+      )}
       {coreUserId && canReadFlyer ? (
       <>
       {/* Make It Perfect Floating Toast Notification */}
@@ -663,7 +684,7 @@ export default function App() {
                 onChangeFormat={handleChangeFormat}
                 onToggleOrientation={handleToggleOrientation}
                 isDNSAdmin={isDNSAdmin || hasDNSNetworkAccess}
-                availabilityPolicy={availabilityPolicy}
+                availabilityPolicy={availabilityStatus === 'ready' ? availabilityPolicy : { ...DEFAULT_FLYER_AVAILABILITY, enabled: Object.fromEntries(Object.keys(DEFAULT_FLYER_AVAILABILITY.enabled).map(key => [key, false])) as DNSFlyerAvailabilityPolicy['enabled'] }}
                 canBypassAvailability={isDNSAdmin}
                 onOpenLegacy={() => setLegacyReviewMode(true)}
               />

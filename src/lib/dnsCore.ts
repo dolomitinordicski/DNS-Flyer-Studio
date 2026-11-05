@@ -14,7 +14,7 @@ import { connectFirestoreEmulator, getFirestore, type Firestore } from 'firebase
 // Firebase Auth persistence is keyed by API key and app name. Using the same
 // canonical name as DNS Workspace lets same-origin embedded documents observe
 // one dns-core session without transferring credentials or tokens.
-export const DNS_CORE_APP_NAME = 'dns-digital-pass';
+export const DNS_CORE_APP_NAME = 'dns-core-staff';
 
 export const DNS_CORE_FIREBASE_CONFIG = {
   apiKey: 'AIzaSyAgxv6Z45-AfrusbFnCSyvYChRUBu6-vXc',

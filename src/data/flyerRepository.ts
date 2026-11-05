@@ -127,7 +127,16 @@ export async function loadCurrentFlyerDocument(content: FlyerContent): Promise<F
   const scope = scopeFromContent(content);
   await assertFlyerScope(scope.scopeType, scope.scopeId, false);
   const id = canonicalFlyerDocumentId(content);
-  const snapshot = await getDoc(doc(dnsCoreDb, DOCUMENTS, id));
+  let snapshot;
+  try {
+    snapshot = await getDoc(doc(dnsCoreDb, DOCUMENTS, id));
+  } catch (error: any) {
+    // Firestore read rules use resource.data; a missing document can surface as
+    // permission-denied instead of a normal non-existent snapshot. Scope access
+    // has already been verified above, so treat this as "no current state yet".
+    if (error?.code === 'permission-denied') return null;
+    throw error;
+  }
   if (!snapshot.exists()) return null;
   const record = hydrateDocumentRecord(snapshot.id, snapshot.data());
   if (!record || record.scopeType !== scope.scopeType || record.scopeId !== scope.scopeId
@@ -177,11 +186,9 @@ export async function saveFlyerDocument(
   };
 
   const reference = doc(dnsCoreDb, DOCUMENTS, id);
-  const existing = await getDoc(reference);
-  if (existing.exists()) {
-    const data = existing.data();
-    if (data.scopeType !== scope.scopeType || data.scopeId !== scope.scopeId ||
-        data.seasonId !== seasonId) throw new Error('FLYER_AREA_SCOPE_DENIED');
+  try {
+    // Update first: this preserves immutable owner/scope fields when DNS Admin
+    // and the area account collaborate on the same current Flyer.
     await updateDoc(reference, {
       title: record.title,
       status: record.status,
@@ -189,7 +196,11 @@ export async function saveFlyerDocument(
       updatedBy: user.uid,
       updatedAt: serverTimestamp(),
     });
-  } else {
+  } catch (error: any) {
+    // A missing canonical document can surface as not-found or permission-denied
+    // under rules that inspect resource.data. Creation is safe: if a document
+    // actually exists but is not writable, Firestore will reject this set too.
+    if (!['not-found', 'permission-denied'].includes(error?.code)) throw error;
     await setDoc(reference, {
       ...record,
       createdAt: serverTimestamp(),

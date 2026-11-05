@@ -1,0 +1,22 @@
+name: Flyer canonical pricing regression
+on:
+  pull_request:
+    paths:
+      - 'src/data/pricingSelection.ts'
+      - 'src/data/livePriceLists.ts'
+      - 'src/data/regionalLogos.ts'
+      - 'tests/pricing-selection.test.ts'
+      - '.github/workflows/pricing-regression.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pricing:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npx tsx --test tests/pricing-selection.test.ts

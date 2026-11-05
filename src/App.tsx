@@ -138,6 +138,7 @@ export default function App() {
     return subscribeDNSCoreUser(user => {
       setCanReadFlyer(false);
       setCanWriteFlyer(false);
+      setCurrentStateReady(false);
       // Never retain a previous user's visible editor state when authentication changes.
       setContent({ ...FLYER_TEMPLATES[0].defaultContent } as FlyerContent);
       setActiveView('editor');
@@ -367,6 +368,13 @@ export default function App() {
       setCurrentStateReady(true);
     }
   };
+
+  useEffect(() => {
+    if (!coreUserId || !canReadFlyer || !canWriteFlyer || currentStateReady) return;
+    if (!isDNSAdmin && !currentReportingAreaId) return;
+    void handleApplyTemplate(activeTemplateId);
+  }, [coreUserId, canReadFlyer, canWriteFlyer, currentReportingAreaId, isDNSAdmin, activeTemplateId, currentStateReady]);
+
 
   const handleApplyLegacyTemplate = (templateId: LayoutTemplateId) => {
     const template = LEGACY_FLYER_TEMPLATES.find(t => t.id === templateId);

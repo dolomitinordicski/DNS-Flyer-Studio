@@ -54,7 +54,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     ],
     pagePolicy: { formats: ['A3', 'A4'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: {
-      access: 'dns-only',
+      access: 'area',
       languageMode: 'trilingual',
       pricing: {
         dnsPrices: 'data-entry',

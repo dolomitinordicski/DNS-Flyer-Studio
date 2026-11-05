@@ -32,6 +32,7 @@ interface EditorPanelProps {
   onToggleOrientation?: () => void;
   isDNSAdmin?: boolean;
   availabilityPolicy: DNSFlyerAvailabilityPolicy;
+  canBypassAvailability?: boolean;
   onOpenLegacy?: () => void;
 }
 
@@ -48,6 +49,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onOpenSavedDesignsModal,
   isDNSAdmin = false,
   availabilityPolicy,
+  canBypassAvailability = false,
   onMakeItPerfect,
   onChangeFormat,
   onToggleOrientation,
@@ -134,6 +136,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             onOpenSavedDesignsModal={onOpenSavedDesignsModal}
             isDNSAdmin={isDNSAdmin}
             availabilityPolicy={availabilityPolicy}
+            canBypassAvailability={canBypassAvailability}
             activeDraftId={activeDraftId}
             onLoadSaved={saved => {
               const savedProduct = getFlyerProductByTemplate(saved.content.layoutTemplateId);

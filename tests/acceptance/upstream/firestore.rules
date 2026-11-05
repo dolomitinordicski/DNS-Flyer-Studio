@@ -520,7 +520,7 @@ service cloud.firestore {
         && data.salesPeriod in ['regular','presale']
         && data.unitPrice is number && data.unitPrice >= 0
         && data.settlementUnitPrice is number && data.settlementUnitPrice >= 0
-        && data.currency == 'EUR' && data.active == true
+        && data.currency == 'EUR' && data.active is bool
         && data.revision is int && data.revision >= 1
         && data.provenance.sourceSystem == 'manual-data-entry'
         && data.provenance.methodVersion == 1 && data.provenance.dataStatus == 'draft'
@@ -595,7 +595,7 @@ service cloud.firestore {
     match /ticketPricingConfigs/{document} {
       allow read: if readPricing(resource.data);
       allow get: if !exists(/databases/$(database)/documents/ticketPricingConfigs/$(document)) && activeUser();
-      allow create: if !historicalLocked(request.resource.data) && validPricing(request.resource.data) && managePricing(request.resource.data)
+      allow create: if !historicalLocked(request.resource.data) && request.resource.data.active == true && validPricing(request.resource.data) && managePricing(request.resource.data)
         && request.resource.data.id == document && request.resource.data.revision == 1;
       allow update: if !historicalLocked(request.resource.data) && validPricing(request.resource.data) && managePricing(resource.data)
         && request.resource.data.id == resource.data.id
@@ -604,6 +604,13 @@ service cloud.firestore {
         && request.resource.data.productCode == resource.data.productCode
         && request.resource.data.salesChannel == resource.data.salesChannel && request.resource.data.salesPeriod == resource.data.salesPeriod
         && resource.data.provenance.dataStatus == 'draft'
+        && (resource.data.active == true
+            || (resource.data.scopeType == 'organization' && request.resource.data.active == true))
+        && (request.resource.data.active == true
+            || (request.resource.data.active == false
+                && resource.data.scopeType == 'organization'
+                && request.resource.data.diff(resource.data).affectedKeys()
+                     .hasOnly(['active','revision','updatedBy','updatedAt'])))
         && request.resource.data.revision == resource.data.revision + 1 && archived('ticketPricingConfigs',document);
       allow delete: if false;
       match /revisions/{revision} {
@@ -1142,10 +1149,18 @@ service cloud.firestore {
     match /flyerTemplates/{document} {
       allow read: if hasFlyerPermission('flyer.read', resource.data);
 
-      allow create, update: if activeUser()
+      allow create: if activeUser()
         && validFlyerTemplate(request.resource.data)
         && request.resource.data.id == document
         && hasFlyerPermission('flyer.templates.manage', request.resource.data);
+
+      allow update: if activeUser()
+        && validFlyerTemplate(request.resource.data)
+        && request.resource.data.id == document
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.scopeType == resource.data.scopeType
+        && request.resource.data.scopeId == resource.data.scopeId
+        && hasFlyerPermission('flyer.templates.manage', resource.data);
 
       allow delete: if isAdmin();
     }
@@ -1154,10 +1169,18 @@ service cloud.firestore {
     match /flyerAssets/{document} {
       allow read: if hasFlyerPermission('flyer.read', resource.data);
 
-      allow create, update: if activeUser()
+      allow create: if activeUser()
         && validFlyerAsset(request.resource.data)
         && request.resource.data.id == document
         && hasFlyerPermission('flyer.assets.manage', request.resource.data);
+
+      allow update: if activeUser()
+        && validFlyerAsset(request.resource.data)
+        && request.resource.data.id == document
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.scopeType == resource.data.scopeType
+        && request.resource.data.scopeId == resource.data.scopeId
+        && hasFlyerPermission('flyer.assets.manage', resource.data);
 
       allow delete: if isAdmin();
     }
@@ -1334,12 +1357,47 @@ service cloud.firestore {
         && data.updatedAt.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3}Z$');
     }
 
+    function validFlyerAvailabilityPolicy(data) {
+      return data.keys().hasAll(['schemaVersion', 'enabled', 'updatedAt', 'updatedBy'])
+        && data.keys().hasOnly(['schemaVersion', 'enabled', 'updatedAt', 'updatedBy'])
+        && data.schemaVersion is int && data.schemaVersion == 1
+        && data.enabled is map
+        && data.enabled.keys().hasAll([
+          'dns_price_list','regional_price_list','ticket_weekly_dns','ticket_weekly_area',
+          'ticket_daily_area','hotel_package','voucher','gutschein','promotion'
+        ])
+        && data.enabled.keys().hasOnly([
+          'dns_price_list','regional_price_list','ticket_weekly_dns','ticket_weekly_area',
+          'ticket_daily_area','hotel_package','voucher','gutschein','promotion'
+        ])
+        && data.enabled['dns_price_list'] is bool
+        && data.enabled['regional_price_list'] is bool
+        && data.enabled['ticket_weekly_dns'] is bool
+        && data.enabled['ticket_weekly_area'] is bool
+        && data.enabled['ticket_daily_area'] is bool
+        && data.enabled['hotel_package'] is bool
+        && data.enabled['voucher'] is bool
+        && data.enabled['gutschein'] is bool
+        && data.enabled['promotion'] is bool
+        && data.updatedBy == request.auth.uid
+        && data.updatedAt is string && data.updatedAt.size() == 24
+        && data.updatedAt.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3}Z$');
+    }
+
     match /flyerDesignPolicies/{policyId} {
       allow get: if policyId == 'dns-global' && canReadFlyerDesignPolicy();
       allow list: if false;
       allow create, update: if policyId == 'dns-global'
         && isAdmin() && validFlyerDesignPolicy(request.resource.data);
       allow delete: if policyId == 'dns-global' && isAdmin();
+    }
+
+    match /flyerAvailabilityPolicies/{policyId} {
+      allow get: if policyId == 'dns-global' && canReadFlyerDesignPolicy();
+      allow list: if false;
+      allow create, update: if policyId == 'dns-global'
+        && isAdmin() && validFlyerAvailabilityPolicy(request.resource.data);
+      allow delete: if false;
     }
 
     match /flyerPolicyReaders/{userId} {
@@ -1359,6 +1417,51 @@ service cloud.firestore {
           )
         );
       allow create, update, delete: if false;
+    }
+
+    // Partner Ecosystem v1: deny-by-default staging boundary.
+    // All mutations are trusted-backend only pending verified service layer.
+    // Establishment records may include private management metadata: NOT public.
+    function canReadPartnerEstablishment(data) {
+      return activeUser() && (
+        isAdmin()
+        || hasGrant('network', 'dolomiti-nordicski', 'partner.read')
+        || (data.keys().hasAll(['organizationId'])
+          && data.organizationId is string
+          && hasGrant('organization', data.organizationId, 'partner.read'))
+        || (data.keys().hasAll(['reportingAreaId'])
+          && data.reportingAreaId is string
+          && hasGrant('reportingArea', data.reportingAreaId, 'partner.read'))
+      );
+    }
+
+    match /partnerEstablishments/{establishmentId} {
+      allow get, list: if canReadPartnerEstablishment(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    // Sensitive evidence, assessment and capacity details have NO client
+    // access until per-document authorization and collection-query tests pass.
+    match /partnerCapacityRevisions/{document} {
+      allow read, write: if false;
+    }
+    match /partnerAssessments/{document} {
+      allow read, write: if false;
+    }
+    match /partnerAccreditations/{document} {
+      allow read, write: if false;
+    }
+    match /partnerEvidence/{document} {
+      allow read, write: if false;
+    }
+    match /partnerEvents/{document} {
+      allow read, write: if false;
+    }
+    match /partnerVouchers/{document} {
+      allow read, write: if false;
+    }
+    match /partnerCommunications/{document} {
+      allow read, write: if false;
     }
 
     // Everything else remains closed until its domain rules are implemented.

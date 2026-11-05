@@ -51,6 +51,19 @@ test.beforeEach(async({context})=>{
         ...(role==='malformed'?{validTo:'not-a-date'}:{}),
       });
     }
+    await put('flyerAvailabilityPolicies/dns-global',{
+      schemaVersion:1,
+      enabled:{dns_price_list:true,regional_price_list:true,ticket_weekly_dns:false,
+        ticket_weekly_area:false,ticket_daily_area:false,hotel_package:false,
+        voucher:false,gutschein:false,promotion:false},
+      updatedAt:'2026-11-05T15:00:00.000Z',updatedBy:'flyer-admin',
+    });
+    for(const role of ['writer','reader','publisher','other']){
+      const uid=`flyer-${role}`;
+      await put(`flyerPolicyReaders/${uid}`,{
+        scopeType:'reportingArea',scopeId:role==='other'?otherArea:area,
+      });
+    }
     for(const [id,owner,a]of [['owned-without-grant','flyer-none',area],['foreign-draft','flyer-other',otherArea],['readable-draft','flyer-writer',area]])
       await put(`flyerDocuments/${id}`,{id,schema:'dns.flyer-document',version:1,title:id,scopeType:'reportingArea',scopeId:a,
         seasonId:'2026-27',status:'draft',ownerUserId:owner,document:{schema:'dns.flyer-document',version:1},updatedBy:owner});
@@ -104,6 +117,35 @@ test('writer: UI edit autosaves one current flyer and restores it after login',a
   await logout(page);await login(page,'writer');
   await page.getByRole('button',{name:/^(Inhalte|Contenuti)$/}).click();
   await expect(page.getByLabel(/^(Titel|Titolo)$/)).toHaveValue('Virtual DNS package saved');
+});
+
+test('area availability: admin changes appear and disappear live without F5',async({page})=>{
+  await login(page,'writer');
+  await expect(editor(page)).toBeVisible();
+  const regional=page.getByRole('button',{name:/^(Regionale Preisliste|Listino regionale)$/});
+  const packageFlyer=page.getByRole('button',{name:/^(Pakete & Angebote|Pacchetti e offerte)$/});
+  await expect(regional).toBeVisible();
+  await expect(packageFlyer).toHaveCount(0);
+  await env.withSecurityRulesDisabled(async c=>{
+    await setDoc(doc(c.firestore(),'flyerAvailabilityPolicies','dns-global'),{
+      schemaVersion:1,
+      enabled:{dns_price_list:true,regional_price_list:true,ticket_weekly_dns:false,
+        ticket_weekly_area:false,ticket_daily_area:false,hotel_package:true,
+        voucher:false,gutschein:false,promotion:false},
+      updatedAt:'2026-11-05T15:01:00.000Z',updatedBy:'flyer-admin',
+    });
+  });
+  await expect(packageFlyer).toBeVisible();
+  await env.withSecurityRulesDisabled(async c=>{
+    await setDoc(doc(c.firestore(),'flyerAvailabilityPolicies','dns-global'),{
+      schemaVersion:1,
+      enabled:{dns_price_list:true,regional_price_list:true,ticket_weekly_dns:false,
+        ticket_weekly_area:false,ticket_daily_area:false,hotel_package:false,
+        voucher:false,gutschein:false,promotion:false},
+      updatedAt:'2026-11-05T15:02:00.000Z',updatedBy:'flyer-admin',
+    });
+  });
+  await expect(packageFlyer).toHaveCount(0);
 });
 
 test('area library: writer upload, reader shared reload and foreign-area denial',async({page})=>{

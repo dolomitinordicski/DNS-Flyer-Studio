@@ -91,20 +91,17 @@ test('Workspace SSO: persisted dns-core session opens Flyer and host logout prop
   await embedded.close();
 });
 
-test('writer: UI edit, autosave, explicit save, logout/login and reload',async({page})=>{
+test('writer: UI edit autosaves one current flyer and restores it after login',async({page})=>{
   await login(page,'writer');await expect(editor(page)).toBeVisible();
   await page.getByRole('button',{name:/^(Regionale Preisliste|Listino regionale)$/}).click();
   await page.getByRole('button',{name:/^(Inhalte|Contenuti)$/}).click();
   await page.getByLabel(/^(Titel|Titolo)$/).fill('Virtual DNS package saved');
   await expect(editor(page).getByRole('status').first()).toContainText(/In DNS Core gespeichert|Salvato automaticamente/);
-  await page.getByRole('button',{name:'Flyer',exact:true}).click();
-  await page.getByRole('button',{name:/^(Entwurf speichern|Salva bozza)$/}).click();
-  await expect(page.getByText(/Bozza salvata in DNS Core|Entwurf in DNS Core gespeichert/)).toBeVisible();
   const record=await page.evaluate(async()=>{const m=await import('/tests/acceptance/operations.ts');const items=await m.loadOwnedFlyerDocuments();
     return items.filter(i=>i.title==='Virtual DNS package saved').map(i=>({id:i.id,area:i.scopeId,owner:i.ownerUserId}));});
   expect(record).toHaveLength(1);expect(record[0].area).toBe(area);
+  expect(record[0].id).toContain('current__reportingArea__dns-test-area__2026-27__regional_price_list');
   await logout(page);await login(page,'writer');
-  await editor(page).getByRole('button',{name:'Virtual DNS package saved',exact:true}).click();
   await page.getByRole('button',{name:/^(Inhalte|Contenuti)$/}).click();
   await expect(page.getByLabel(/^(Titel|Titolo)$/)).toHaveValue('Virtual DNS package saved');
 });

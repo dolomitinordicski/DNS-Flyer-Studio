@@ -1,4 +1,6 @@
 import React from 'react';
+import { resolveDNSRegionAccent } from '@dolomitinordicski/dns-shared-data';
+import { coreReportingAreaId } from '../../data/regionalLogos';
 import { BlockProps } from './BlockTypes';
 import { OFFICIAL_ASSET_PATHS } from '../CorporateVectors';
 import { getPriceTablePresentation } from './priceTablePresentation';
@@ -29,6 +31,11 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
   const primaryColor = theme.primaryHex || '#004B87';
   const secondaryColor = theme.secondaryHex || '#003366';
   const accentColor = theme.accentHex || '#3399FF';
+  // Resolve the selected flyer area's canonical color, not the editor's login area.
+  // DNS-wide price lists remain purely corporate.
+  const regionAccent = isRegionalProduct
+    ? resolveDNSRegionAccent(coreReportingAreaId(content.regionId))
+    : null;
 
   return (
     <div className="space-y-1 shrink-0 min-w-0 w-full" data-price-list-variant={presentation.kind}>
@@ -36,7 +43,7 @@ export const PriceTableBlock: React.FC<BlockProps> = ({
         {/* Regional rates: main section for area flyers, comparative section on network flyers. */}
         <div 
           className={`border bg-white/95 overflow-hidden flex flex-col ${isRegionalProduct ? "order-2" : "order-1"} ${isDNSList ? "rounded-sm" : isRegionalList ? "rounded-md border-2 shadow-xs" : "rounded-xl shadow-xs"}`} 
-          style={{ borderColor: isRegionalList ? primaryColor : `${accentColor}80` }}
+          style={{ borderColor: isRegionalList ? primaryColor : `${accentColor}80`, ...(regionAccent ? { borderTopColor: regionAccent, borderTopWidth: '3px' } : {}) }}
         >
           <div 
             className={`text-white ${isA5 ? 'p-1.5' : isA3 ? 'p-3' : 'p-2'} flex items-center justify-between uppercase shrink-0`} 

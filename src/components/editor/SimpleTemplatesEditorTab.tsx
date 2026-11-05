@@ -18,6 +18,7 @@ interface SimpleTemplatesEditorTabProps {
   activeDraftId: string | null;
   isDNSAdmin: boolean;
   availabilityPolicy: DNSFlyerAvailabilityPolicy;
+  canBypassAvailability: boolean;
 }
 
 export function SimpleTemplatesEditorTab({
@@ -31,11 +32,12 @@ export function SimpleTemplatesEditorTab({
   onLoadSaved,
   isDNSAdmin,
   availabilityPolicy,
+  canBypassAvailability,
   activeDraftId,
 }: SimpleTemplatesEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const templates = FLYER_PRODUCTS
-    .filter(product => isDNSAdmin || isFlyerProductEnabled(availabilityPolicy, product.type))
+    .filter(product => canBypassAvailability || isFlyerProductEnabled(availabilityPolicy, product.type))
     .map(product => ({
       product,
       template: FLYER_TEMPLATES.find(item => item.id === product.templateId),

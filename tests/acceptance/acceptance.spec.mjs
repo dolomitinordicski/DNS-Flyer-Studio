@@ -51,6 +51,19 @@ test.beforeEach(async({context})=>{
         ...(role==='malformed'?{validTo:'not-a-date'}:{}),
       });
     }
+    await put('flyerAvailabilityPolicies/dns-global',{
+      schemaVersion:1,
+      enabled:{dns_price_list:true,regional_price_list:true,ticket_weekly_dns:false,
+        ticket_weekly_area:false,ticket_daily_area:false,hotel_package:false,
+        voucher:false,gutschein:false,promotion:false},
+      updatedAt:'2026-11-05T15:00:00.000Z',updatedBy:'flyer-admin',
+    });
+    for(const role of ['writer','reader','publisher','other']){
+      const uid=`flyer-${role}`;
+      await put(`flyerPolicyReaders/${uid}`,{
+        scopeType:'reportingArea',scopeId:role==='other'?otherArea:area,
+      });
+    }
     for(const [id,owner,a]of [['owned-without-grant','flyer-none',area],['foreign-draft','flyer-other',otherArea],['readable-draft','flyer-writer',area]])
       await put(`flyerDocuments/${id}`,{id,schema:'dns.flyer-document',version:1,title:id,scopeType:'reportingArea',scopeId:a,
         seasonId:'2026-27',status:'draft',ownerUserId:owner,document:{schema:'dns.flyer-document',version:1},updatedBy:owner});

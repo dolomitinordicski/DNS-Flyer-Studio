@@ -266,6 +266,7 @@ export default function App() {
   const autosave = useFlyerAutosave(content, coreUserId, autosaveAllowed);
 
   const handleSaveDraftNow = async (snapshot: FlyerContent = content, title?: string) => {
+    if (!currentStateReady || currentStateError) throw new Error('FLYER_CURRENT_STATE_UNVERIFIED');
     if (!canWriteFlyer) throw new Error('FLYER_WRITE_PERMISSION_REQUIRED');
     if (!isDNSAdmin && (!currentReportingAreaId ||
       coreReportingAreaId(snapshot.regionId) !== currentReportingAreaId)) throw new Error('FLYER_AREA_SCOPE_DENIED');

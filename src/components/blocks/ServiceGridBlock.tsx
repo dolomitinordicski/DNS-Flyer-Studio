@@ -34,6 +34,13 @@ export const ServiceGridBlock: React.FC<BlockProps> = ({
     ski_bus: 'Ski bus',
     parking: 'Parkplatz · Parcheggio · Parking',
   };
+  const trailRules = [
+    { icon: 'TicketCheck', text: 'Loipenbenutzung nur mit gültigem Ticket · Utilizzo delle piste solo con biglietto valido · Use of the tracks only with a valid ticket' },
+    { icon: 'Smile', text: 'Kinder bis 13,9 Jahre kostenlos · Gratis per bambini fino a 13,9 anni · Children up to 13.9 years free of charge' },
+    { icon: 'Ban', text: 'Hunde und Wanderer nicht erlaubt · Cani ed escursionisti non ammessi · Dogs and hikers are not allowed' },
+    { icon: 'Route', text: 'Loipenbericht: OFFEN/GESCHLOSSEN · Stato piste: APERTO/CHIUSO · Track status: OPEN/CLOSED' },
+    { icon: 'Clock3', text: 'Loipenöffnungszeiten 08:30–17:00 · Orario piste 08:30–17:00 · Opening times 8:30am–5:00pm' },
+  ] as const;
   return (
     <div className="space-y-2 min-w-0 flex flex-col justify-between w-full">
       {(localText || localServices.length > 0) && (
@@ -49,6 +56,24 @@ export const ServiceGridBlock: React.FC<BlockProps> = ({
           )}
         </section>
       )}
+      {isRegional && content.trailRulesEnabled && (
+        <section data-trail-rules className="border border-slate-200 rounded-sm p-2 space-y-1.5">
+          <h4 className="text-[9px] font-black uppercase tracking-wide" style={{ color: theme.primaryHex }}>
+            LOIPENREGELN · REGOLE PISTE · TRACK RULES
+          </h4>
+          <div className={`grid ${isLandscape ? 'grid-cols-2' : 'grid-cols-1'} gap-1.5`}>
+            {trailRules.map(rule => (
+              <div key={rule.icon} className="flex items-start gap-1.5 text-[7.5px] leading-snug text-slate-700">
+                <span className="shrink-0 rounded-full p-1" style={{ backgroundColor: `${theme.primaryHex}12`, color: theme.primaryHex }}>
+                  {renderIcon(rule.icon, 'w-3 h-3')}
+                </span>
+                <span>{rule.text}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Inclusions / Features */}
       {content.features && content.features.length > 0 && (
         <div className="space-y-1.5 min-w-0">

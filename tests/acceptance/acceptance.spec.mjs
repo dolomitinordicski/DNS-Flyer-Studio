@@ -93,7 +93,7 @@ test('Workspace SSO: persisted dns-core session opens Flyer and host logout prop
 
 test('writer: UI edit, autosave, explicit save, logout/login and reload',async({page})=>{
   await login(page,'writer');await expect(editor(page)).toBeVisible();
-  await page.getByRole('button',{name:/^(Pakete & Angebote|Pacchetti e offerte)$/}).click();
+  await page.getByRole('button',{name:/^(Regionale Preisliste|Listino regionale)$/}).click();
   await page.getByRole('button',{name:/^(Inhalte|Contenuti)$/}).click();
   await page.getByLabel(/^(Titel|Titolo)$/).fill('Virtual DNS package saved');
   await expect(editor(page).getByRole('status').first()).toContainText(/In DNS Core gespeichert|Salvato automaticamente/);

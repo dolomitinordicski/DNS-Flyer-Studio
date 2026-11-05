@@ -127,20 +127,23 @@ export async function loadCurrentFlyerDocument(content: FlyerContent): Promise<F
   const scope = scopeFromContent(content);
   await assertFlyerScope(scope.scopeType, scope.scopeId, false);
   const id = canonicalFlyerDocumentId(content);
-  let snapshot;
-  try {
-    snapshot = await getDoc(doc(dnsCoreDb, DOCUMENTS, id));
-  } catch (error: any) {
-    // Firestore read rules use resource.data; a missing document can surface as
-    // permission-denied instead of a normal non-existent snapshot. Scope access
-    // has already been verified above, so treat this as "no current state yet".
-    if (error?.code === 'permission-denied') return null;
-    throw error;
-  }
-  if (!snapshot.exists()) return null;
+  // Query only the permitted scope and select the canonical ID locally.
+  // Missing getDoc() can be denied, and documentId() filters fail on absent
+  // documents under current rules. Area-scoped list is emulator-verified.
+  // Propagate permission and index errors to prevent unsafe autosaving.
+  const matches = await getDocs(query(
+    collection(dnsCoreDb, DOCUMENTS),
+    where('scopeType', '==', scope.scopeType),
+    where('scopeId', '==', scope.scopeId),
+  ));
+  const snapshot = matches.docs.find(item => item.id === id);
+  if (!snapshot) return null;
   const record = hydrateDocumentRecord(snapshot.id, snapshot.data());
-  if (!record || record.scopeType !== scope.scopeType || record.scopeId !== scope.scopeId
-      || record.seasonId !== seasonIdFromContent(content)) return null;
+  if (!record || record.id !== id || record.scopeType !== scope.scopeType
+      || record.scopeId !== scope.scopeId
+      || record.seasonId !== seasonIdFromContent(content)) {
+    throw new Error('FLYER_CURRENT_DOCUMENT_SCOPE_MISMATCH');
+  }
   return record;
 }
 

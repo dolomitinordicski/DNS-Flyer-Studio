@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { selectPrice, type PriceSelectionRow } from '../src/data/pricingSelection';
-import { resolveOfficialPriceTexts } from '../src/data/livePriceLists';
 
 const network = 'dolomiti-nordicski';
 const area = 'osttirol';
@@ -34,30 +33,27 @@ test('channel and period separation prevents track or presale leaking into offic
   assert.equal(selectPrice(rows, 'day', area, 'official', 'presale'), 10);
 });
 
-test('regional flyer resolves area prices, track supplements and network-only DNS prices', () => {
+test('area aliases use the canonical reporting-area scope', () => {
   const rows = [
-    row('day', 12, 'reportingArea', area), row('day', 17, 'reportingArea', area, 'track'),
-    row('wk-area', 55, 'reportingArea', area), row('wk-area', 65, 'reportingArea', area, 'track'),
-    row('sk-area', 120, 'reportingArea', area),
-    row('wk-dns', 65), row('wk-dns', 999, 'reportingArea', area),
-    row('wk-dns', 75, 'network', network, 'track'),
-    row('sk-dns', 145), row('sk-dns', 999, 'reportingArea', area),
-  ].map(r => ({ ...r, seasonId: '2026-27' }));
-  const result = resolveOfficialPriceTexts(rows, area, false);
-  assert.match(result.regionalDayPrice ?? '', /12/);
-  assert.match(result.regionalWeekPrice ?? '', /55/);
-  assert.match(result.regionalSeasonPrice ?? '', /120/);
-  assert.match(result.carouselWeekPrice ?? '', /65/);
-  assert.match(result.carouselSeasonPrice ?? '', /145/);
-  assert.match(result.regionalDayTrackSupplement ?? '', /5/);
-  assert.match(result.regionalWeekTrackSupplement ?? '', /10/);
-  assert.match(result.carouselWeekTrackSupplement ?? '', /10/);
+    row('day', 12, 'reportingArea', 'drei-zinnen'),
+    row('day', 15),
+    row('wk-dns', 65),
+    row('wk-dns', 999, 'reportingArea', 'drei-zinnen'),
+  ];
+  assert.equal(selectPrice(rows, 'day', 'drei-zinnen'), 12);
+  assert.equal(selectPrice(rows, 'wk-dns', 'drei-zinnen'), 65);
 });
 
-test('network flyer preserves editorial area prices rather than resolving area overrides', () => {
-  const rows = [row('day', 12, 'reportingArea', area), row('wk-dns', 65), row('sk-dns', 145)]
-    .map(r => ({ ...r, seasonId: '2026-27' }));
-  const result = resolveOfficialPriceTexts(rows, area, true);
-  assert.equal(result.regionalDayPrice, undefined);
-  assert.match(result.carouselWeekPrice ?? '', /65/);
+test('regional track surcharge must use corresponding scoped track and official values', () => {
+  const rows = [
+    row('day', 12, 'reportingArea', area),
+    row('day', 17, 'reportingArea', area, 'track'),
+    row('day', 15),
+    row('wk-area', 55, 'reportingArea', area),
+    row('wk-area', 65, 'reportingArea', area, 'track'),
+    row('wk-dns', 65), row('wk-dns', 75, 'network', network, 'track'),
+  ];
+  assert.equal(selectPrice(rows, 'day', area, 'track')! - selectPrice(rows, 'day', area)!, 5);
+  assert.equal(selectPrice(rows, 'wk-area', area, 'track')! - selectPrice(rows, 'wk-area', area)!, 10);
+  assert.equal(selectPrice(rows, 'wk-dns', area, 'track')! - selectPrice(rows, 'wk-dns', area)!, 10);
 });

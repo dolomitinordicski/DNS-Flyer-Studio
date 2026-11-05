@@ -245,8 +245,7 @@ export default function App() {
   // DNS Core saves the active draft after edits settle; local recovery remains immediate.
   // Temporary export-language snapshots are deliberately excluded.
   const autosaveAllowed = canWriteFlyer && !!coreUserId && !isExporting
-    && !isLegacyMode
-    && (content.layoutTemplateId !== 'official_price_list' || isDNSAdmin || hasDNSNetworkAccess);
+    && !isLegacyMode;
   const autosave = useFlyerAutosave(content, coreUserId, autosaveAllowed);
 
   const handleSaveDraftNow = async (snapshot: FlyerContent = content, title?: string) => {

@@ -17,12 +17,11 @@ import { FlyerCanvas } from './components/FlyerCanvas';
 import { EditorPanel } from './components/EditorPanel';
 import { LegacyEditorPanel } from './components/LegacyEditorPanel';
 import { SocialShareModal } from './components/SocialShareModal';
-import { SavedDesignsModal } from './components/SavedDesignsModal';
 import { FlyerDashboard } from './components/FlyerDashboard';
 import { FlyerContent, PaperFormat, PaperOrientation, LayoutTemplateId, LanguageCode } from './types';
 import { FLYER_TEMPLATES } from './data/templates';
 import { LEGACY_FLYER_TEMPLATES } from './data/legacyTemplates';
-import { Printer, Download, Eye, RotateCw, Cloud, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Printer, Download, Eye, RotateCw, Sparkles, CheckCircle2 } from 'lucide-react';
 import { ExportModal } from './components/ExportModal';
 import { getContentForLanguage } from './utils/multilingual';
 import { runMakeItPerfect } from './features/make-it-perfect/runMakeItPerfect';
@@ -35,6 +34,8 @@ import { coreReportingAreaId, findReportingAreaLogo } from './data/regionalLogos
 import { getFlyerProductByTemplate, lockContentToProduct } from './model/flyerProductModel';
 import { useFlyerAutosave } from './hooks/useFlyerAutosave';
 import { downloadFlyerCodeHtml } from './utils/codeExport';
+import { loadCurrentDesignFromFirebase } from './lib/firebase';
+import { canonicalFlyerDocumentId } from './data/flyerRepository';
 
 export default function App() {
   useEffect(() => initWorkspaceShell('flyer-studio'), []);
@@ -140,7 +141,6 @@ export default function App() {
       // Never retain a previous user's visible editor state when authentication changes.
       setContent({ ...FLYER_TEMPLATES[0].defaultContent } as FlyerContent);
       setActiveView('editor');
-      setIsSavedDesignsModalOpen(false);
       setIsShareModalOpen(false);
       setIsLegacyMode(false);
       setCoreUserEmail(user?.email ?? null);
@@ -241,10 +241,10 @@ export default function App() {
   // UI & Export State
   const [isExporting, setIsExporting] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isSavedDesignsModalOpen, setIsSavedDesignsModalOpen] = useState(false);
+  const [currentStateReady, setCurrentStateReady] = useState(false);
   // DNS Core saves the active draft after edits settle; local recovery remains immediate.
   // Temporary export-language snapshots are deliberately excluded.
-  const autosaveAllowed = canWriteFlyer && !!coreUserId && !isExporting
+  const autosaveAllowed = canWriteFlyer && !!coreUserId && currentStateReady && !isExporting
     && !isLegacyMode;
   const autosave = useFlyerAutosave(content, coreUserId, autosaveAllowed);
 
@@ -255,12 +255,6 @@ export default function App() {
     await autosave.saveNow(snapshot, title);
     if (title && title !== content.title) setContent(snapshot);
   };
-
-  const handleOpenSavedDraft = (savedContent: FlyerContent, id: string) => {
-    autosave.selectDraft(id, savedContent);
-    handleLoadSavedDesign(savedContent);
-  };
-
 
   
   // Canvas DOM Reference for PDF & PNG capture
@@ -317,69 +311,60 @@ export default function App() {
     });
   };
 
-  // Apply Pre-built Template
-  const handleApplyTemplate = (templateId: LayoutTemplateId) => {
+  // Apply a canonical Flyer type. The current Firestore state wins over template defaults.
+  const handleApplyTemplate = async (templateId: LayoutTemplateId) => {
     const template = FLYER_TEMPLATES.find(t => t.id === templateId);
-    if (template && template.defaultContent) {
-      const selectedProduct = getFlyerProductByTemplate(templateId);
-      if (selectedProduct?.dataPolicy.access === 'dns-only' && !(isDNSAdmin || hasDNSNetworkAccess)) {
-        return;
+    if (!template?.defaultContent) return;
+    const selectedProduct = getFlyerProductByTemplate(templateId);
+    if (selectedProduct?.dataPolicy.access === 'dns-only' && !(isDNSAdmin || hasDNSNetworkAccess)) return;
+    if (selectedProduct && !isDNSAdmin && !isFlyerProductEnabled(availabilityPolicy, selectedProduct.type)) return;
+
+    const defaultVis = template.defaultContent.sectionVisibility || {
+      header: true, bigTitle: true, heroImage: true, earlyBird: false,
+      promotionBox: true, priceTables: true, servicesBox: true,
+      sportsIcons: true, ecoBanner: true, qrCode: true, disclaimer: true, footer: true,
+    };
+    const candidate: FlyerContent = {
+      ...content,
+      ...template.defaultContent,
+      layoutTemplateId: templateId,
+      regionId: selectedProduct?.dataPolicy.access === 'dns-only'
+        ? 'dns_central'
+        : (currentReportingAreaId || template.defaultContent.regionId || content.regionId || 'dns_central'),
+      translations: selectedProduct?.dataPolicy.languageMode === 'monolingual'
+        ? template.defaultContent.translations
+        : undefined,
+      sectionVisibility: defaultVis,
+      visibility: defaultVis,
+      format: content.format || 'A4',
+      orientation: content.orientation || 'portrait',
+      activeLanguage: content.activeLanguage || 'it',
+      logoVariant: content.logoVariant || 'default',
+      logoCornerStyle: content.logoCornerStyle || 'rounded',
+      showCropMarks: content.showCropMarks,
+      importedImages: content.importedImages || [],
+    };
+    const scoped = selectedProduct ? lockContentToProduct(candidate, selectedProduct) : candidate;
+
+    setActiveTemplateId(templateId);
+    setCurrentStateReady(false);
+    try {
+      const current = await loadCurrentDesignFromFirebase(scoped);
+      if (current) {
+        autosave.selectDraft(current.id, current.content);
+        setContent(selectedProduct ? lockContentToProduct(current.content, selectedProduct) : current.content);
+      } else {
+        const currentId = canonicalFlyerDocumentId(scoped);
+        autosave.selectDraft(currentId);
+        setContent(scoped);
       }
-      if (selectedProduct && !isDNSAdmin && !isFlyerProductEnabled(availabilityPolicy, selectedProduct.type)) {
-        return;
-      }
-      setActiveTemplateId(templateId);
-      autosave.selectDraft(null);
-      setContent(prev => {
-        const defaultVis = template.defaultContent.sectionVisibility || {
-          header: true,
-          bigTitle: true,
-          heroImage: true,
-          earlyBird: false,
-          promotionBox: true,
-          priceTables: true,
-          servicesBox: true,
-          sportsIcons: true,
-          ecoBanner: true,
-          qrCode: true,
-          disclaimer: true,
-          footer: true,
-        };
-
-        const product = getFlyerProductByTemplate(templateId);
-        const newContent: FlyerContent = {
-          ...prev,
-          ...template.defaultContent,
-
-          layoutTemplateId: templateId,
-          regionId: product?.dataPolicy.access === 'dns-only'
-            ? 'dns_central'
-            : (currentReportingAreaId
-              || template.defaultContent.regionId
-              || prev.regionId
-              || 'dns_central'),
-
-          // Canonical monolingual ticket templates carry their approved DE/IT/EN
-          // text sets; other products continue to initialize translations lazily.
-          translations: product?.dataPolicy.languageMode === 'monolingual'
-            ? template.defaultContent.translations
-            : undefined,
-
-          sectionVisibility: defaultVis,
-          visibility: defaultVis,
-
-          // Carry over persistent app preferences
-          format: prev.format || 'A4',
-          orientation: prev.orientation || 'portrait',
-          activeLanguage: prev.activeLanguage || 'it',
-          logoVariant: prev.logoVariant || 'default',
-          logoCornerStyle: prev.logoCornerStyle || 'rounded',
-          showCropMarks: prev.showCropMarks,
-          importedImages: prev.importedImages || [],
-        };
-
-        return product ? lockContentToProduct(newContent, product) : newContent;
-      });
+    } catch (error) {
+      console.error('Failed to load current Flyer state:', error);
+      const currentId = canonicalFlyerDocumentId(scoped);
+      autosave.selectDraft(currentId);
+      setContent(scoped);
+    } finally {
+      setCurrentStateReady(true);
     }
   };
 
@@ -398,15 +383,6 @@ export default function App() {
       importedImages: prev.importedImages || [],
       ...(!isDNSAdmin && currentReportingAreaId ? { regionId: findReportingAreaLogo(currentReportingAreaId).id } : {}),
     } as FlyerContent));
-  };
-
-  // Load Saved Design from Firebase
-  const handleLoadSavedDesign = (savedContent: FlyerContent) => {
-    const product = getFlyerProductByTemplate(savedContent.layoutTemplateId);
-    const scopedContent = currentReportingAreaId
-      ? { ...savedContent, regionId: findReportingAreaLogo(currentReportingAreaId).id }
-      : savedContent;
-    setContent(product ? lockContentToProduct(scopedContent, product) : scopedContent);
   };
 
   // Helper to compute optimal graphic sizes for format & orientation
@@ -664,22 +640,17 @@ export default function App() {
                 content={content}
                 onChangeContent={handleUpdateContent}
                 onApplyTemplate={handleApplyLegacyTemplate}
-                onOpenSavedDesignsModal={() => setIsSavedDesignsModalOpen(true)}
                 onMakeItPerfect={handleMakeItPerfect}
                 onExitLegacy={() => setLegacyReviewMode(false)}
               />
             ) : (
               <EditorPanel
-                onSaveDraft={handleSaveDraftNow}
-                onOpenSavedDraft={handleOpenSavedDraft}
                 autosaveStatus={autosave.status}
                 autosaveErrorCode={autosave.errorCode}
-                activeDraftId={autosave.draftId}
                 uiLanguage={uiLanguage}
                 content={content}
                 onChangeContent={handleUpdateContent}
                 onApplyTemplate={handleApplyTemplate}
-                onOpenSavedDesignsModal={() => setIsSavedDesignsModalOpen(true)}
                 onMakeItPerfect={handleMakeItPerfect}
                 onChangeFormat={handleChangeFormat}
                 onToggleOrientation={handleToggleOrientation}
@@ -707,13 +678,6 @@ export default function App() {
               </div>
               
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsSavedDesignsModalOpen(true)}
-                  className="hover:text-slate-900 flex items-center gap-1 transition-all text-[#0D4D5E] font-bold"
-                >
-                  <Cloud className="w-3.5 h-3.5 text-[#417483]" />
-                  <span>{uiCopy.saveOpen}</span>
-                </button>
                 <button
                   onClick={handleToggleOrientation}
                   className="hover:text-slate-900 flex items-center gap-1 transition-all text-slate-600 font-medium"
@@ -765,16 +729,6 @@ export default function App() {
         onClose={() => setIsShareModalOpen(false)}
         content={content}
         onDownloadPng={handleExportPng}
-      />
-
-      {/* Firebase Cloud Saved Designs Modal */}
-      <SavedDesignsModal
-        uiLanguage={uiLanguage}
-        isOpen={isSavedDesignsModalOpen}
-        onClose={() => setIsSavedDesignsModalOpen(false)}
-        currentContent={content}
-        onLoadDesign={handleOpenSavedDraft}
-        onSaveCurrentDesign={handleSaveDraftNow}
       />
 
       {/* Native-sized print rasterization. Outside the editor preview and without CSS scale. */}

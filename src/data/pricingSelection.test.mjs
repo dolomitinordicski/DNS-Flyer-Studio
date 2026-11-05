@@ -14,11 +14,11 @@ test('area day and week prices override any network default', () => {
   assert.equal(selectPrice(rows, 'wk-area', area), 55);
 });
 
-test('area season overrides network baseline; falls back when absent', () => {
+test('area season overrides legacy network baseline; missing area season does not silently fall back', () => {
   const rows = [row('network', network, 'sk-area', 140),
     row('reportingArea', area, 'sk-area', 130)];
   assert.equal(selectPrice(rows, 'sk-area', area), 130);
-  assert.equal(selectPrice(rows, 'sk-area', 'osttirol'), 140);
+  assert.equal(selectPrice(rows, 'sk-area', 'osttirol'), null);
 });
 
 test('DNS week and season tickets ignore reporting-area prices', () => {
@@ -37,7 +37,7 @@ test('channel and period are matched exactly, without cross-channel fallback', (
     row('reportingArea', area, 'sk-area', 120, 'official', 'presale')];
   assert.equal(selectPrice(rows, 'day', area, 'track'), 20);
   assert.equal(selectPrice(rows, 'sk-area', area, 'official', 'presale'), 120);
-  assert.equal(selectPrice(rows, 'sk-area', area), 140);
+  assert.equal(selectPrice(rows, 'sk-area', area), null);
   assert.equal(selectPrice(rows, 'day', area, 'online'), null);
 });
 

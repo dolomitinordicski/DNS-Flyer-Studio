@@ -232,7 +232,7 @@ export function SimpleContentEditorTab({
           </div>}
         </section>
       )}
-      {product?.type === 'dns_price_list' && (
+      {product?.type === 'dns_price_list' && isDNSAdmin && (
         <section className="p-3 rounded-xl border border-[#AAD0D1] bg-[#EDF5F5] space-y-3">
           <h4 className="text-xs font-bold text-[#0D4D5E]">
             {ui('Gebietstarife ab — frei editierbar', 'Tariffe regionali «a partire da» — testo libero')}
@@ -257,6 +257,11 @@ export function SimpleContentEditorTab({
             {ui('DNS-Netzpreise werden automatisch aus Data Entry übernommen.', 'I prezzi DNS sono importati automaticamente da Data Entry.')}
           </p>
         </section>
+      )}
+      {product?.type === 'dns_price_list' && !isDNSAdmin && (
+        <p className="p-3 rounded-xl bg-slate-50 text-[11px] text-slate-600 border border-slate-200">
+          {ui('DNS-Netzpreise und redaktionelle Preisangaben werden zentral verwaltet.', 'I prezzi DNS e le indicazioni editoriali del listino generale sono gestiti centralmente.')}
+        </p>
       )}
       {product?.type === 'regional_price_list' && (
         <p className="p-3 rounded-xl bg-slate-50 text-[11px] text-slate-600 border border-slate-200">
@@ -291,6 +296,16 @@ export function SimpleContentEditorTab({
               </label>
             ))}
           </div>
+          <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs">
+            <input type="checkbox" className="mt-0.5" checked={content.trailRulesEnabled === true}
+              onChange={e => onChangeContent({ trailRulesEnabled: e.target.checked })}/>
+            <span>
+              <strong className="block text-[#0D4D5E]">{ui('Loipenregeln anzeigen', 'Mostra regole piste')}</strong>
+              <small className="block mt-1 text-[10px] leading-relaxed text-slate-500">
+                {ui('Standardisierte DNS-Symbole und dreisprachige Hinweise.', 'Icone DNS standard e didascalie trilingui.')}
+              </small>
+            </span>
+          </label>
         </section>
       )}
       {product?.type === 'hotel_package' && (

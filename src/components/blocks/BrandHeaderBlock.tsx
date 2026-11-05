@@ -60,7 +60,7 @@ export const BrandHeaderBlock: React.FC<BlockProps> = ({
           </div>
 
           {/* Right: Selected Regional Partner Badge */}
-          {content.regionId && content.regionId !== 'dns_central' && (
+          {!isDNSList && content.regionId && content.regionId !== 'dns_central' && (
             <div 
               className={`flex items-center ${hasDualRegionalLogos ? 'gap-1.5' : 'gap-2'} ${isA5 ? 'px-1.5 py-1' : 'px-2.5 py-1.5'} min-w-0 ${hasDualRegionalLogos ? 'max-w-[66%]' : 'max-w-[55%]'} shrink justify-end ${
                 (content.logoCornerStyle || 'rounded') === 'none'

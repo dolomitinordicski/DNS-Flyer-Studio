@@ -8,7 +8,7 @@ import type { FlyerContent, PriceListTexts } from '../../types';
 export function getPriceTablePresentation(content: FlyerContent, texts: PriceListTexts) {
   const isRegional = content.layoutTemplateId === 'regional_price_list';
   const isDNS = content.layoutTemplateId === 'official_price_list';
-  const isNetwork = isDNS && content.regionId === 'dns_central';
+  const isNetwork = isDNS;
 
   return {
     kind: isRegional ? 'regional' : isDNS ? 'dns' : 'legacy',

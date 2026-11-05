@@ -3,6 +3,7 @@ import { Check, Cloud, LayoutTemplate, Loader2 } from 'lucide-react';
 import type { FlyerContent, LayoutTemplateId } from '../../types';
 import { FLYER_TEMPLATES } from '../../data/templates';
 import { FLYER_PRODUCTS } from '../../model/flyerProductModel';
+import { isFlyerProductEnabled, type DNSFlyerAvailabilityPolicy } from '../../data/dnsFlyerAvailabilityPolicy';
 import type { SavedDesign } from '../../lib/firebase';
 
 interface SimpleTemplatesEditorTabProps {
@@ -16,6 +17,8 @@ interface SimpleTemplatesEditorTabProps {
   onLoadSaved: (saved: SavedDesign) => void;
   activeDraftId: string | null;
   isDNSAdmin: boolean;
+  availabilityPolicy: DNSFlyerAvailabilityPolicy;
+  canBypassAvailability: boolean;
 }
 
 export function SimpleTemplatesEditorTab({
@@ -28,10 +31,13 @@ export function SimpleTemplatesEditorTab({
   onOpenSavedDesignsModal,
   onLoadSaved,
   isDNSAdmin,
+  availabilityPolicy,
+  canBypassAvailability,
   activeDraftId,
 }: SimpleTemplatesEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const templates = FLYER_PRODUCTS
+    .filter(product => canBypassAvailability || isFlyerProductEnabled(availabilityPolicy, product.type))
     .map(product => ({
       product,
       template: FLYER_TEMPLATES.find(item => item.id === product.templateId),

@@ -14,6 +14,7 @@ import { SimplePageEditorTab } from './editor/SimplePageEditorTab';
 import { QRCodeEditorTab } from './editor/QRCodeEditorTab';
 import { getFlyerProductByTemplate, lockContentToProduct } from '../model/flyerProductModel';
 import { inspectProductBlocks } from '../model/productBlockDiagnostics';
+import type { DNSFlyerAvailabilityPolicy } from '../data/dnsFlyerAvailabilityPolicy';
 
 interface EditorPanelProps {
   uiLanguage: 'de' | 'it';
@@ -30,6 +31,8 @@ interface EditorPanelProps {
   onChangeFormat?: (format: FlyerContent['format']) => void;
   onToggleOrientation?: () => void;
   isDNSAdmin?: boolean;
+  availabilityPolicy: DNSFlyerAvailabilityPolicy;
+  canBypassAvailability?: boolean;
   onOpenLegacy?: () => void;
 }
 
@@ -45,6 +48,8 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onApplyTemplate,
   onOpenSavedDesignsModal,
   isDNSAdmin = false,
+  availabilityPolicy,
+  canBypassAvailability = false,
   onMakeItPerfect,
   onChangeFormat,
   onToggleOrientation,
@@ -130,6 +135,8 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             onSave={saveDraft}
             onOpenSavedDesignsModal={onOpenSavedDesignsModal}
             isDNSAdmin={isDNSAdmin}
+            availabilityPolicy={availabilityPolicy}
+            canBypassAvailability={canBypassAvailability}
             activeDraftId={activeDraftId}
             onLoadSaved={saved => {
               const savedProduct = getFlyerProductByTemplate(saved.content.layoutTemplateId);

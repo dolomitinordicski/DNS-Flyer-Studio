@@ -427,6 +427,8 @@ export interface FlyerContent {
   /** Optional region-only copy and services; empty means compact landscape. */
   regionalLocalText?: string;
   regionalLocalServices?: string[];
+  /** Optional standard DNS trail-rules strip for regional price lists. */
+  trailRulesEnabled?: boolean;
 
   // Footer partner logos visibility
   showPartnerLogos: boolean;

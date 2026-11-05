@@ -57,3 +57,26 @@ test('regional track surcharge must use corresponding scoped track and official 
   assert.equal(selectPrice(rows, 'wk-area', area, 'track')! - selectPrice(rows, 'wk-area', area)!, 10);
   assert.equal(selectPrice(rows, 'wk-dns', area, 'track')! - selectPrice(rows, 'wk-dns', area)!, 10);
 });
+
+test('Val Casies season tariff is always read from its reporting area, never legacy DNS network', () => {
+  const gsies = 'gsiesertal-welsberg-taisten';
+  const rows = [row('sk-area', 140), row('sk-area', 125, 'reportingArea', gsies),
+    row('sk-area', 130, 'reportingArea', 'osttirol'), row('sk-dns', 145)];
+  assert.equal(selectPrice(rows, 'sk-area', gsies), 125);
+  assert.equal(selectPrice(rows, 'sk-area', 'drei-zinnen'), null);
+  assert.equal(selectPrice(rows, 'sk-dns', gsies), 145);
+});
+
+test('Val Casies presale and regular season prices remain separate', () => {
+  const gsies = 'gsiesertal-welsberg-taisten';
+  const rows = [row('sk-area', 120, 'reportingArea', gsies, 'official', 'presale'),
+    row('sk-area', 130, 'reportingArea', gsies, 'official', 'regular')];
+  assert.equal(selectPrice(rows, 'sk-area', gsies, 'official', 'presale'), 120);
+  assert.equal(selectPrice(rows, 'sk-area', gsies), 130);
+});
+
+test('an organization-only seasonal override cannot masquerade as the area tariff', () => {
+  const gsies = 'gsiesertal-welsberg-taisten';
+  const rows = [row('sk-area', 100, 'organization', 'gsies-partner'), row('sk-area', 125, 'reportingArea', gsies)];
+  assert.equal(selectPrice(rows, 'sk-area', gsies), 125);
+});

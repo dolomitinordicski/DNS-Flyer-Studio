@@ -2,7 +2,6 @@ import {
   collection,
   deleteDoc,
   doc,
-  documentId,
   getDoc,
   getDocs,
   query,
@@ -128,18 +127,17 @@ export async function loadCurrentFlyerDocument(content: FlyerContent): Promise<F
   const scope = scopeFromContent(content);
   await assertFlyerScope(scope.scopeType, scope.scopeId, false);
   const id = canonicalFlyerDocumentId(content);
-  // Query the exact canonical ID and scope. Unlike getDoc() on a missing
-  // document (which can throw permission-denied when rules inspect resource.data),
-  // this scoped query can return an empty result only if its authorization
-  // constraints are satisfied. Permission and index errors must propagate.
+  // Query only the permitted scope and select the canonical ID locally.
+  // Missing getDoc() can be denied, and documentId() filters fail on absent
+  // documents under current rules. Area-scoped list is emulator-verified.
+  // Propagate permission and index errors to prevent unsafe autosaving.
   const matches = await getDocs(query(
     collection(dnsCoreDb, DOCUMENTS),
     where('scopeType', '==', scope.scopeType),
     where('scopeId', '==', scope.scopeId),
-    where(documentId(), '==', id),
   ));
-  if (matches.empty) return null;
-  const snapshot = matches.docs[0];
+  const snapshot = matches.docs.find(item => item.id === id);
+  if (!snapshot) return null;
   const record = hydrateDocumentRecord(snapshot.id, snapshot.data());
   if (!record || record.id !== id || record.scopeType !== scope.scopeType
       || record.scopeId !== scope.scopeId

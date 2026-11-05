@@ -20,7 +20,7 @@ export const OfficialPriceTableVariant: React.FC<FlyerVariantProps> = ({
   const isDNSList = content.layoutTemplateId === 'official_price_list';
   const isRegionalList = content.layoutTemplateId === 'regional_price_list';
   const isEditorial = isDNSList || isRegionalList;
-  const hasRegionalExtras = isRegionalList && (!!content.regionalLocalText?.trim() || !!content.regionalLocalServices?.length || content.trailRulesEnabled === true);
+  const hasRegionalExtras = isRegionalList && (!!content.regionalLocalText?.trim() || !!content.regionalLocalServices?.length);
   const isLandscape = content.orientation === 'landscape';
   const fmt = content.format || 'A4';
   const isA5 = fmt === 'A5';

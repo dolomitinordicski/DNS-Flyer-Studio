@@ -18,6 +18,7 @@ import {
   isFlyerDocumentV1,
   type FlyerDocumentV1,
 } from '../model/flyerDocument';
+import { getFlyerProductByTemplate } from '../model/flyerProductModel';
 import { dnsCoreDb, getDNSCoreUser } from '../lib/dnsCore';
 import { coreReportingAreaId } from './regionalLogos';
 import { loadCurrentFlyerAccess } from './currentFlyerAccess';
@@ -111,6 +112,38 @@ export function seasonIdFromContent(content: FlyerContent): string {
   return '2026-27';
 }
 
+export function canonicalFlyerDocumentId(content: FlyerContent): string {
+  const scope = scopeFromContent(content);
+  const seasonId = seasonIdFromContent(content);
+  const product = getFlyerProductByTemplate(content.layoutTemplateId);
+  const type = product?.type ?? content.layoutTemplateId ?? 'custom';
+  return ['current', scope.scopeType, scope.scopeId, seasonId, type]
+    .join('__')
+    .replace(/[^A-Za-z0-9_-]/g, '-');
+}
+
+export async function loadCurrentFlyerDocument(content: FlyerContent): Promise<FlyerDocumentRecord | null> {
+  requireDNSCoreUser();
+  const scope = scopeFromContent(content);
+  await assertFlyerScope(scope.scopeType, scope.scopeId, false);
+  const id = canonicalFlyerDocumentId(content);
+  let snapshot;
+  try {
+    snapshot = await getDoc(doc(dnsCoreDb, DOCUMENTS, id));
+  } catch (error: any) {
+    // Firestore read rules use resource.data; a missing document can surface as
+    // permission-denied instead of a normal non-existent snapshot. Scope access
+    // has already been verified above, so treat this as "no current state yet".
+    if (error?.code === 'permission-denied') return null;
+    throw error;
+  }
+  if (!snapshot.exists()) return null;
+  const record = hydrateDocumentRecord(snapshot.id, snapshot.data());
+  if (!record || record.scopeType !== scope.scopeType || record.scopeId !== scope.scopeId
+      || record.seasonId !== seasonIdFromContent(content)) return null;
+  return record;
+}
+
 export async function saveFlyerDocument(
   content: FlyerContent,
   options: {
@@ -120,7 +153,7 @@ export async function saveFlyerDocument(
   } = {},
 ): Promise<FlyerDocumentRecord> {
   const user = requireDNSCoreUser();
-  const id = options.id ?? `flyer_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const id = canonicalFlyerDocumentId(content);
   const scope = scopeFromContent(content);
   await assertFlyerScope(scope.scopeType, scope.scopeId, true);
   const seasonId = seasonIdFromContent(content);
@@ -153,13 +186,9 @@ export async function saveFlyerDocument(
   };
 
   const reference = doc(dnsCoreDb, DOCUMENTS, id);
-  if (options.id) {
-    // Existing drafts are updated, never silently re-created after deletion.
-    const existing = await getDoc(reference);
-    if (!existing.exists()) throw new Error('FLYER_DOCUMENT_MISSING_OR_INACCESSIBLE');
-    const data = existing.data();
-    if (data.scopeType !== scope.scopeType || data.scopeId !== scope.scopeId ||
-        data.seasonId !== seasonId) throw new Error('FLYER_AREA_SCOPE_DENIED');
+  try {
+    // Update first: this preserves immutable owner/scope fields when DNS Admin
+    // and the area account collaborate on the same current Flyer.
     await updateDoc(reference, {
       title: record.title,
       status: record.status,
@@ -167,7 +196,11 @@ export async function saveFlyerDocument(
       updatedBy: user.uid,
       updatedAt: serverTimestamp(),
     });
-  } else {
+  } catch (error: any) {
+    // A missing canonical document can surface as not-found or permission-denied
+    // under rules that inspect resource.data. Creation is safe: if a document
+    // actually exists but is not writable, Firestore will reject this set too.
+    if (!['not-found', 'permission-denied'].includes(error?.code)) throw error;
     await setDoc(reference, {
       ...record,
       createdAt: serverTimestamp(),

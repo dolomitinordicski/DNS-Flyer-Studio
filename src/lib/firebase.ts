@@ -3,6 +3,7 @@ import type { FlyerDocumentV1 } from '../model/flyerDocument';
 import {
   deleteFlyerDocument,
   loadOwnedFlyerDocuments,
+  loadCurrentFlyerDocument,
   loadOwnedPublications,
   publicationProjection,
   publishFlyerDocument,
@@ -62,6 +63,14 @@ export async function saveDesignToFirebase(
     status: 'draft',
   });
   return record.id;
+}
+
+export async function loadCurrentDesignFromFirebase(content: FlyerContent): Promise<SavedDesign | null> {
+  if (!getDNSCoreUser()) return null;
+  const record = await loadCurrentFlyerDocument(content);
+  if (!record) return null;
+  const projected = savedDesignProjection(record);
+  return { ...projected, createdAt: '', updatedAt: '' } as SavedDesign;
 }
 
 export async function loadDesignsFromFirebase(): Promise<SavedDesign[]> {

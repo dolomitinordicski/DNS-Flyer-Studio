@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import type { FlyerContent, LayoutTemplateId } from '../types';
-import {
-  loadDesignsFromFirebase,
-  type SavedDesign,
-} from '../lib/firebase';
 import { PrintProofControl } from './print-proof/PrintProofControl';
 import { EditorChrome, type EditorTabId } from './editor/EditorChrome';
 import { SimpleTemplatesEditorTab } from './editor/SimpleTemplatesEditorTab';
@@ -12,7 +8,7 @@ import { SimpleImageEditorTab } from './editor/SimpleImageEditorTab';
 import { SimpleStyleEditorTab } from './editor/SimpleStyleEditorTab';
 import { SimplePageEditorTab } from './editor/SimplePageEditorTab';
 import { QRCodeEditorTab } from './editor/QRCodeEditorTab';
-import { getFlyerProductByTemplate, lockContentToProduct } from '../model/flyerProductModel';
+import { getFlyerProductByTemplate } from '../model/flyerProductModel';
 import { inspectProductBlocks } from '../model/productBlockDiagnostics';
 import type { DNSFlyerAvailabilityPolicy } from '../data/dnsFlyerAvailabilityPolicy';
 
@@ -20,13 +16,9 @@ interface EditorPanelProps {
   uiLanguage: 'de' | 'it';
   content: FlyerContent;
   onChangeContent: (updated: Partial<FlyerContent>) => void;
-  onSaveDraft: () => Promise<void>;
-  onOpenSavedDraft: (content: FlyerContent, id: string) => void;
   autosaveStatus: 'local' | 'pending' | 'saving' | 'saved' | 'error';
   autosaveErrorCode?: string | null;
-  activeDraftId: string | null;
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
-  onOpenSavedDesignsModal: () => void;
   onMakeItPerfect?: () => void;
   onChangeFormat?: (format: FlyerContent['format']) => void;
   onToggleOrientation?: () => void;
@@ -40,13 +32,9 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   uiLanguage,
   content,
   onChangeContent,
-  onSaveDraft,
-  onOpenSavedDraft,
   autosaveStatus,
   autosaveErrorCode,
-  activeDraftId,
   onApplyTemplate,
-  onOpenSavedDesignsModal,
   isDNSAdmin = false,
   availabilityPolicy,
   canBypassAvailability = false,
@@ -57,43 +45,10 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [activeTab, setActiveTab] = useState<EditorTabId>('templates');
-  const [savedModels, setSavedModels] = useState<SavedDesign[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveToast, setSaveToast] = useState<string | null>(null);
   const product = getFlyerProductByTemplate(content.layoutTemplateId);
   const blockDiagnostics = product ? inspectProductBlocks(content, product) : [];
   const blockErrors = blockDiagnostics.flatMap(entry => entry.issues.filter(issue => issue.level === 'error').map(issue => `${entry.sectionId}: ${issue.message}`));
 
-  const refreshSaved = async () => {
-    try {
-      setSavedModels(await loadDesignsFromFirebase());
-    } catch (error) {
-      console.error('Failed to load Flyer documents:', error);
-      setSavedModels([]);
-    }
-  };
-
-  useEffect(() => {
-    void refreshSaved();
-  }, []);
-
-  const saveDraft = async () => {
-    setIsSaving(true);
-    try {
-      await onSaveDraft();
-      await refreshSaved();
-      setSaveToast(ui('Entwurf in DNS Core gespeichert.', 'Bozza salvata in DNS Core.'));
-      setTimeout(() => setSaveToast(null), 3000);
-    } catch (error: any) {
-      const message = error?.message === 'DNS_CORE_AUTH_REQUIRED'
-        ? ui('Bitte zuerst bei DNS Core anmelden.', 'Accedi prima a DNS Core.')
-        : (error?.message || ui('Speichern fehlgeschlagen.', 'Salvataggio non riuscito.'));
-      setSaveToast(message);
-      setTimeout(() => setSaveToast(null), 4500);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <aside className="w-full lg:w-96 bg-white border-r border-slate-200 text-slate-800 flex flex-col h-[calc(100vh-4rem)] overflow-hidden no-print">
@@ -101,7 +56,6 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         uiLanguage={uiLanguage}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onOpenSavedDesignsModal={onOpenSavedDesignsModal}
         onOpenLegacy={onOpenLegacy}
       />
 
@@ -128,20 +82,10 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         {activeTab === 'templates' && (
           <SimpleTemplatesEditorTab
             uiLanguage={uiLanguage}
-            firebaseSavedModels={savedModels}
-            isSaving={isSaving}
-            saveToast={saveToast}
             onApplyTemplate={onApplyTemplate}
-            onSave={saveDraft}
-            onOpenSavedDesignsModal={onOpenSavedDesignsModal}
             isDNSAdmin={isDNSAdmin}
             availabilityPolicy={availabilityPolicy}
             canBypassAvailability={canBypassAvailability}
-            activeDraftId={activeDraftId}
-            onLoadSaved={saved => {
-              const savedProduct = getFlyerProductByTemplate(saved.content.layoutTemplateId);
-              onOpenSavedDraft(savedProduct ? lockContentToProduct(saved.content, savedProduct) : saved.content, saved.id);
-            }}
           />
         )}
 

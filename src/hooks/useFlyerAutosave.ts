@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FlyerContent } from '../types';
 import { saveDesignToFirebase } from '../lib/firebase';
-import { scopeFromContent, seasonIdFromContent } from '../data/flyerRepository';
-
-function draftScope(content: FlyerContent): string {
-  const scope = scopeFromContent(content);
-  return `${scope.scopeType}:${scope.scopeId}:${seasonIdFromContent(content)}`;
-}
+import { canonicalFlyerDocumentId } from '../data/flyerRepository';
 
 export type AutosaveStatus = 'local' | 'pending' | 'saving' | 'saved' | 'error';
 
@@ -27,7 +22,6 @@ export function useFlyerAutosave(
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
   const idRef = useRef<string | null>(null);
-  const scopeRef = useRef<string | null>(null);
   const epochRef = useRef(0);
   const lastSavedRef = useRef<string | null>(null);
   const queueRef = useRef<Promise<unknown>>(Promise.resolve());
@@ -37,12 +31,9 @@ export function useFlyerAutosave(
     if (userRef.current === userId) return;
     userRef.current = userId;
     epochRef.current += 1;
-    const restoredId = userId ? localStorage.getItem(`dns_active_draft_${userId}`) : null;
-    const restoredScope = userId ? localStorage.getItem(`dns_active_draft_scope_${userId}`) : null;
-    // Old drafts without a scope record are never overwritten blindly.
-    idRef.current = restoredScope === draftScope(content) ? restoredId : null;
-    scopeRef.current = restoredScope === draftScope(content) ? restoredScope : null;
-    setDraftId(idRef.current);
+    const currentId = canonicalFlyerDocumentId(content);
+    idRef.current = currentId;
+    setDraftId(currentId);
     lastSavedRef.current = null;
     setStatus(userId ? 'pending' : 'local');
     setErrorCode(null);
@@ -51,16 +42,12 @@ export function useFlyerAutosave(
   const selectDraft = useCallback((id: string | null, loaded?: FlyerContent) => {
     epochRef.current += 1;
     idRef.current = id;
-    scopeRef.current = id && loaded ? draftScope(loaded) : null;
     setDraftId(id);
     lastSavedRef.current = loaded ? JSON.stringify(loaded) : null;
     if (userRef.current) {
       const key = `dns_active_draft_${userRef.current}`;
       if (id) localStorage.setItem(key, id);
       else localStorage.removeItem(key);
-      const scopeKey = `dns_active_draft_scope_${userRef.current}`;
-      if (scopeRef.current) localStorage.setItem(scopeKey, scopeRef.current);
-      else localStorage.removeItem(scopeKey);
       setStatus(id && loaded ? 'saved' : 'pending');
     } else {
       setStatus('local');
@@ -75,7 +62,7 @@ export function useFlyerAutosave(
     const epoch = epochRef.current;
     const owner = userRef.current;
     const signature = JSON.stringify(snapshot);
-    const snapshotScope = draftScope(snapshot);
+    const currentId = canonicalFlyerDocumentId(snapshot);
     if (signature === lastSavedRef.current && !title) return queueRef.current.then(() => {});
     setStatus('saving');
     setErrorCode(null);
@@ -83,11 +70,8 @@ export function useFlyerAutosave(
     const next = queueRef.current.catch(() => {}).then(async () => {
       if (epoch !== epochRef.current || owner !== userRef.current) return;
       if (signature === lastSavedRef.current && !title) return;
-      // Firestore rules prohibit changing scope/season on an existing draft.
-      // A switch creates a fresh document, preserving the old draft.
-      const sameScope = scopeRef.current === snapshotScope;
       const savedId = await saveDesignToFirebase(
-        sameScope ? idRef.current : null,
+        currentId,
         title || snapshot.title || 'DNS Flyer',
         snapshot,
         snapshot.graphicStyle,
@@ -95,10 +79,8 @@ export function useFlyerAutosave(
       );
       if (epoch !== epochRef.current || owner !== userRef.current) return;
       idRef.current = savedId;
-      scopeRef.current = snapshotScope;
       setDraftId(savedId);
       localStorage.setItem(`dns_active_draft_${owner}`, savedId);
-      localStorage.setItem(`dns_active_draft_scope_${owner}`, snapshotScope);
       lastSavedRef.current = signature;
       setStatus('saved');
       setErrorCode(null);

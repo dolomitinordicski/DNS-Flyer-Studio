@@ -35,11 +35,11 @@ export const ServiceGridBlock: React.FC<BlockProps> = ({
     parking: 'Parkplatz · Parcheggio · Parking',
   };
   const trailRules = [
-    { icon: 'TicketCheck', text: 'Loipenbenutzung nur mit gültigem Ticket · Utilizzo delle piste solo con biglietto valido · Use of the tracks only with a valid ticket' },
-    { icon: 'Smile', text: 'Kinder bis 13,9 Jahre kostenlos · Gratis per bambini fino a 13,9 anni · Children up to 13.9 years free of charge' },
-    { icon: 'Ban', text: 'Hunde und Wanderer nicht erlaubt · Cani ed escursionisti non ammessi · Dogs and hikers are not allowed' },
-    { icon: 'Route', text: 'Loipenbericht: OFFEN/GESCHLOSSEN · Stato piste: APERTO/CHIUSO · Track status: OPEN/CLOSED' },
-    { icon: 'Clock3', text: 'Loipenöffnungszeiten 08:30–17:00 · Orario piste 08:30–17:00 · Opening times 8:30am–5:00pm' },
+    { icon: 'TicketCheck', text: 'Ticket erforderlich · Ticket obbligatorio · Valid ticket' },
+    { icon: 'Smile', text: 'Kinder bis 13,9 gratis · Bambini fino 13,9 gratis · Children up to 13.9 free' },
+    { icon: 'Ban', text: 'Keine Hunde/Wanderer · No cani/escursionisti · No dogs/hikers' },
+    { icon: 'Route', text: 'OFFEN/GESCHLOSSEN · APERTO/CHIUSO · OPEN/CLOSED' },
+    { icon: 'Clock3', text: '08:30–17:00' },
   ] as const;
   return (
     <div className="space-y-2 min-w-0 flex flex-col justify-between w-full">
@@ -57,17 +57,15 @@ export const ServiceGridBlock: React.FC<BlockProps> = ({
         </section>
       )}
       {isRegional && content.trailRulesEnabled && (
-        <section data-trail-rules className="border border-slate-200 rounded-sm p-2 space-y-1.5">
-          <h4 className="text-[9px] font-black uppercase tracking-wide" style={{ color: theme.primaryHex }}>
-            LOIPENREGELN · REGOLE PISTE · TRACK RULES
-          </h4>
-          <div className={`grid ${isLandscape ? 'grid-cols-2' : 'grid-cols-1'} gap-1.5`}>
+        <section data-trail-rules className="border border-slate-200 rounded-sm p-1.5">
+          <div className="grid grid-cols-5 gap-1">
             {trailRules.map(rule => (
-              <div key={rule.icon} className="flex items-start gap-1.5 text-[7.5px] leading-snug text-slate-700">
-                <span className="shrink-0 rounded-full p-1" style={{ backgroundColor: `${theme.primaryHex}12`, color: theme.primaryHex }}>
-                  {renderIcon(rule.icon, 'w-3 h-3')}
+              <div key={rule.icon} className="min-w-0 text-center text-[6.5px] leading-tight text-slate-700">
+                <span className="mx-auto mb-0.5 grid h-5 w-5 place-items-center rounded-full"
+                  style={{ backgroundColor: `${theme.primaryHex}12`, color: theme.primaryHex }}>
+                  {renderIcon(rule.icon, 'w-2.5 h-2.5')}
                 </span>
-                <span>{rule.text}</span>
+                <span className="block break-words">{rule.text}</span>
               </div>
             ))}
           </div>

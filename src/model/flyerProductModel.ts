@@ -71,7 +71,7 @@ export const FLYER_PRODUCTS: readonly FlyerProductDefinition[] = [
     editableFields: [
       'title', 'subtitle', 'validityPeriod', 'heroImageUrl',
       'customPrimaryColor', 'customAccentColor',
-      'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode', 'regionalLocalText', 'regionalLocalServices',
+      'contactEmail', 'contactPhone', 'websiteUrl', 'qrCode', 'regionalLocalText', 'regionalLocalServices', 'trailRulesEnabled',
     ],
     pagePolicy: { formats: ['A3', 'A4'], orientations: ['portrait', 'landscape'], magicLayout: true },
     dataPolicy: {

@@ -153,6 +153,7 @@ export default function App() {
       setCanReadFlyer(false);
       setCanWriteFlyer(false);
       setCurrentStateReady(false);
+      setCurrentStateError(null);
       // Never retain a previous user's visible editor state when authentication changes.
       setContent({ ...FLYER_TEMPLATES[0].defaultContent } as FlyerContent);
       setActiveView('editor');
@@ -257,6 +258,7 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [currentStateReady, setCurrentStateReady] = useState(false);
+  const [currentStateError, setCurrentStateError] = useState<string | null>(null);
   // DNS Core saves the active draft after edits settle; local recovery remains immediate.
   // Temporary export-language snapshots are deliberately excluded.
   const autosaveAllowed = canWriteFlyer && !!coreUserId && currentStateReady && !isExporting
@@ -264,6 +266,7 @@ export default function App() {
   const autosave = useFlyerAutosave(content, coreUserId, autosaveAllowed);
 
   const handleSaveDraftNow = async (snapshot: FlyerContent = content, title?: string) => {
+    if (!currentStateReady || currentStateError) throw new Error('FLYER_CURRENT_STATE_UNVERIFIED');
     if (!canWriteFlyer) throw new Error('FLYER_WRITE_PERMISSION_REQUIRED');
     if (!isDNSAdmin && (!currentReportingAreaId ||
       coreReportingAreaId(snapshot.regionId) !== currentReportingAreaId)) throw new Error('FLYER_AREA_SCOPE_DENIED');
@@ -363,6 +366,7 @@ export default function App() {
 
     setActiveTemplateId(templateId);
     setCurrentStateReady(false);
+    setCurrentStateError(null);
     try {
       const current = await loadCurrentDesignFromFirebase(scoped);
       if (current) {
@@ -373,24 +377,29 @@ export default function App() {
         autosave.selectDraft(currentId);
         setContent(scoped);
       }
-    } catch (error) {
-      console.error('Failed to load current Flyer state:', error);
-      const currentId = canonicalFlyerDocumentId(scoped);
-      autosave.selectDraft(currentId);
-      setContent(scoped);
-    } finally {
+      // The editor is safe to autosave only after a verified current-state
+      // read or a verified absence of a current document.
       setCurrentStateReady(true);
+    } catch (error: unknown) {
+      console.error('Failed to load current Flyer state:', error);
+      const code = error && typeof error === 'object' && 'code' in error
+        ? String(error.code)
+        : error instanceof Error ? error.message : 'FLYER_LOAD_FAILED';
+      // Keep the previous content visible for reference, but never autosave a
+      // default template over an unknown cloud state after a read failure.
+      setCurrentStateError(code);
+      setCurrentStateReady(false);
     }
   };
 
   useEffect(() => {
-    if (!coreUserId || !canReadFlyer || !canWriteFlyer || currentStateReady) return;
+    if (!coreUserId || !canReadFlyer || !canWriteFlyer || currentStateReady || currentStateError) return;
     if (!isDNSAdmin && !currentReportingAreaId) return;
     // Auth and policy snapshots are asynchronous: retry initial flyer restore
     // once policy resolves. A denied/missing policy must never load a default flyer.
     if (!isDNSAdmin && availabilityStatus !== 'ready') return;
     void handleApplyTemplate(activeTemplateId);
-  }, [coreUserId, canReadFlyer, canWriteFlyer, currentReportingAreaId, isDNSAdmin, activeTemplateId, currentStateReady, availabilityStatus]);
+  }, [coreUserId, canReadFlyer, canWriteFlyer, currentReportingAreaId, isDNSAdmin, activeTemplateId, currentStateReady, availabilityStatus, currentStateError]);
 
 
   const handleApplyLegacyTemplate = (templateId: LayoutTemplateId) => {
@@ -627,6 +636,16 @@ export default function App() {
         </div>
       )}
 
+      {coreUserId && canReadFlyer && currentStateError && (
+        <div role="alert" className="bg-red-50 border-b border-red-300 text-red-900 px-5 py-3 text-sm no-print flex flex-wrap items-center justify-between gap-3">
+          <span>{uiLanguage === 'de'
+            ? `Flyer konnte nicht sicher aus DNS Core geladen werden (${currentStateError}). Automatisches Speichern ist gesperrt, um vorhandene Daten zu schützen.`
+            : `Impossibile caricare in sicurezza il flyer da DNS Core (${currentStateError}). Salvataggio automatico bloccato per proteggere i dati esistenti.`}</span>
+          <button type="button" className="font-bold underline" onClick={() => void handleApplyTemplate(activeTemplateId)}>
+            {uiLanguage === 'de' ? 'Erneut versuchen' : 'Riprova'}
+          </button>
+        </div>
+      )}
       {coreUserId && canReadFlyer && availabilityStatus !== 'ready' && (
         <div role="alert" className="bg-amber-50 border-b border-amber-300 text-amber-950 px-5 py-3 text-sm no-print">
           {availabilityStatus === 'error'

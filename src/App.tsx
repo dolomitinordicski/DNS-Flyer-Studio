@@ -686,6 +686,7 @@ export default function App() {
                 onToggleOrientation={handleToggleOrientation}
                 isDNSAdmin={isDNSAdmin || hasDNSNetworkAccess}
                 availabilityPolicy={availabilityPolicy}
+                canBypassAvailability={isDNSAdmin}
                 onOpenLegacy={() => setLegacyReviewMode(true)}
               />
             )}

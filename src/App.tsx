@@ -386,8 +386,11 @@ export default function App() {
   useEffect(() => {
     if (!coreUserId || !canReadFlyer || !canWriteFlyer || currentStateReady) return;
     if (!isDNSAdmin && !currentReportingAreaId) return;
+    // Auth and policy snapshots are asynchronous: retry initial flyer restore
+    // once policy resolves. A denied/missing policy must never load a default flyer.
+    if (!isDNSAdmin && availabilityStatus !== 'ready') return;
     void handleApplyTemplate(activeTemplateId);
-  }, [coreUserId, canReadFlyer, canWriteFlyer, currentReportingAreaId, isDNSAdmin, activeTemplateId, currentStateReady]);
+  }, [coreUserId, canReadFlyer, canWriteFlyer, currentReportingAreaId, isDNSAdmin, activeTemplateId, currentStateReady, availabilityStatus]);
 
 
   const handleApplyLegacyTemplate = (templateId: LayoutTemplateId) => {

@@ -21,7 +21,6 @@ interface EditorChromeProps {
   uiLanguage: 'de' | 'it';
   activeTab: EditorTabId;
   onTabChange: (tab: EditorTabId) => void;
-  onOpenSavedDesignsModal: () => void;
   onOpenLegacy?: () => void;
 }
 
@@ -29,7 +28,6 @@ export function EditorChrome({
   uiLanguage,
   activeTab,
   onTabChange,
-  onOpenSavedDesignsModal,
   onOpenLegacy,
 }: EditorChromeProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
@@ -65,12 +63,6 @@ export function EditorChrome({
               LEGACY
             </button>
           )}
-          <button
-            onClick={onOpenSavedDesignsModal}
-            className="px-2.5 py-1 bg-white/15 hover:bg-white/25 rounded-lg text-[11px] font-bold text-white border border-white/20 transition-all"
-          >
-            {ui('Meine Flyer', 'I miei flyer')}
-          </button>
         </div>
       </div>
 

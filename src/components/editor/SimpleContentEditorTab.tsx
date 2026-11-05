@@ -291,6 +291,16 @@ export function SimpleContentEditorTab({
               </label>
             ))}
           </div>
+          <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs">
+            <input type="checkbox" className="mt-0.5" checked={content.trailRulesEnabled === true}
+              onChange={e => onChangeContent({ trailRulesEnabled: e.target.checked })}/>
+            <span>
+              <strong className="block text-[#0D4D5E]">{ui('Loipenregeln anzeigen', 'Mostra regole piste')}</strong>
+              <small className="block mt-1 text-[10px] leading-relaxed text-slate-500">
+                {ui('Standardisierte DNS-Symbole und dreisprachige Hinweise.', 'Icone DNS standard e didascalie trilingui.')}
+              </small>
+            </span>
+          </label>
         </section>
       )}
       {product?.type === 'hotel_package' && (

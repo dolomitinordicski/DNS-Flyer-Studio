@@ -5,7 +5,14 @@ import { printVectorFlyerFromDOM } from './features/creative-export/nativeVector
 import { Navbar } from './components/Navbar';
 import { initWorkspaceShell } from './lib/workspaceShell';
 import { DNSDesignControl } from './components/DNSDesignControl';
+import { DNSFlyerAvailabilityControl } from './components/DNSFlyerAvailabilityControl';
 import { DEFAULT_POLICY, subscribeDesignPolicy, type DNSFlyerDesignPolicy } from './data/dnsFlyerDesignPolicy';
+import {
+  DEFAULT_FLYER_AVAILABILITY,
+  isFlyerProductEnabled,
+  subscribeFlyerAvailabilityPolicy,
+  type DNSFlyerAvailabilityPolicy,
+} from './data/dnsFlyerAvailabilityPolicy';
 import { FlyerCanvas } from './components/FlyerCanvas';
 import { EditorPanel } from './components/EditorPanel';
 import { LegacyEditorPanel } from './components/LegacyEditorPanel';
@@ -47,12 +54,17 @@ export default function App() {
   const [isDNSAdmin, setIsDNSAdmin] = useState(false);
   const [designPolicy, setDesignPolicy] = useState<DNSFlyerDesignPolicy>(DEFAULT_POLICY);
   const [designPanelOpen, setDesignPanelOpen] = useState(false);
+  const [availabilityPolicy, setAvailabilityPolicy] = useState<DNSFlyerAvailabilityPolicy>(DEFAULT_FLYER_AVAILABILITY);
+  const [availabilityPanelOpen, setAvailabilityPanelOpen] = useState(false);
   useEffect(() => {
     if (!coreUserId) {
       setDesignPolicy(DEFAULT_POLICY);
+      setAvailabilityPolicy(DEFAULT_FLYER_AVAILABILITY);
       return;
     }
-    return subscribeDesignPolicy(setDesignPolicy, error => console.warn('DNS Design Control configuration not available:', error));
+    const stopDesign = subscribeDesignPolicy(setDesignPolicy, error => console.warn('DNS Design Control configuration not available:', error));
+    const stopAvailability = subscribeFlyerAvailabilityPolicy(setAvailabilityPolicy, error => console.warn('DNS Flyer availability configuration not available:', error));
+    return () => { stopDesign(); stopAvailability(); };
   }, [coreUserId]);
   const [hasDNSNetworkAccess, setHasDNSNetworkAccess] = useState(false);
   const [canWriteFlyer, setCanWriteFlyer] = useState(false);
@@ -312,6 +324,9 @@ export default function App() {
     if (template && template.defaultContent) {
       const selectedProduct = getFlyerProductByTemplate(templateId);
       if (selectedProduct?.dataPolicy.access === 'dns-only' && !(isDNSAdmin || hasDNSNetworkAccess)) {
+        return;
+      }
+      if (selectedProduct && !isDNSAdmin && !isFlyerProductEnabled(availabilityPolicy, selectedProduct.type)) {
         return;
       }
       setActiveTemplateId(templateId);
@@ -623,7 +638,11 @@ export default function App() {
         </div>
       )}
 
-      {isDNSAdmin && !isLegacyMode && <div className="no-print flex justify-end border-b bg-white px-5 py-2"><button type="button" onClick={() => setDesignPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">DNS Design Control</button></div>}
+      {isDNSAdmin && !isLegacyMode && <div className="no-print flex justify-end gap-2 border-b bg-white px-5 py-2">
+        <button type="button" onClick={() => setAvailabilityPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">Flyer disponibili</button>
+        <button type="button" onClick={() => setDesignPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">DNS Design Control</button>
+      </div>}
+      {isDNSAdmin && availabilityPanelOpen && <DNSFlyerAvailabilityControl policy={availabilityPolicy} onClose={() => setAvailabilityPanelOpen(false)} />}
       {isDNSAdmin && designPanelOpen && <DNSDesignControl policy={designPolicy} onClose={() => setDesignPanelOpen(false)} />}
       {/* Main View Switching */}
       {activeView === 'dashboard' ? (
@@ -666,6 +685,8 @@ export default function App() {
                 onChangeFormat={handleChangeFormat}
                 onToggleOrientation={handleToggleOrientation}
                 isDNSAdmin={isDNSAdmin || hasDNSNetworkAccess}
+                availabilityPolicy={availabilityPolicy}
+                canManageAvailability={isDNSAdmin}
                 onOpenLegacy={() => setLegacyReviewMode(true)}
               />
             )}

@@ -119,6 +119,35 @@ test('writer: UI edit autosaves one current flyer and restores it after login',a
   await expect(page.getByLabel(/^(Titel|Titolo)$/)).toHaveValue('Virtual DNS package saved');
 });
 
+test('area availability: admin changes appear and disappear live without F5',async({page})=>{
+  await login(page,'writer');
+  await expect(editor(page)).toBeVisible();
+  const regional=page.getByRole('button',{name:/^(Regionale Preisliste|Listino regionale)$/});
+  const packageFlyer=page.getByRole('button',{name:/^(Pakete & Angebote|Pacchetti e offerte)$/});
+  await expect(regional).toBeVisible();
+  await expect(packageFlyer).toHaveCount(0);
+  await env.withSecurityRulesDisabled(async c=>{
+    await setDoc(doc(c.firestore(),'flyerAvailabilityPolicies','dns-global'),{
+      schemaVersion:1,
+      enabled:{dns_price_list:true,regional_price_list:true,ticket_weekly_dns:false,
+        ticket_weekly_area:false,ticket_daily_area:false,hotel_package:true,
+        voucher:false,gutschein:false,promotion:false},
+      updatedAt:'2026-11-05T15:01:00.000Z',updatedBy:'flyer-admin',
+    });
+  });
+  await expect(packageFlyer).toBeVisible();
+  await env.withSecurityRulesDisabled(async c=>{
+    await setDoc(doc(c.firestore(),'flyerAvailabilityPolicies','dns-global'),{
+      schemaVersion:1,
+      enabled:{dns_price_list:true,regional_price_list:true,ticket_weekly_dns:false,
+        ticket_weekly_area:false,ticket_daily_area:false,hotel_package:false,
+        voucher:false,gutschein:false,promotion:false},
+      updatedAt:'2026-11-05T15:02:00.000Z',updatedBy:'flyer-admin',
+    });
+  });
+  await expect(packageFlyer).toHaveCount(0);
+});
+
 test('area library: writer upload, reader shared reload and foreign-area denial',async({page})=>{
   await login(page,'writer');await expect(editor(page)).toBeVisible();
   const result=await page.evaluate(async()=>{

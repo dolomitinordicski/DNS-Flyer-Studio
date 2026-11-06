@@ -27,11 +27,18 @@ export function subscribeOfficialPriceTexts(
   onPrices: (prices: Partial<PriceListTexts>) => void,
   onError: (error: Error) => void,
 ): () => void {
+  // An area account cannot enumerate every organization-scoped config.
+  // Firestore evaluates list permissions against all possible query results,
+  // so the old season-only query fails even when the area prices are readable.
+  // Query only network and reportingArea scopes, which readPricing authorizes
+  // for active DNS accounts; keep season selection client-side so this query
+  // uses the automatic single-field index and needs no production index deploy.
   return onSnapshot(query(
     collection(dnsCoreDb, 'ticketPricingConfigs'),
-    where('seasonId', '==', seasonId),
+    where('scopeType', 'in', ['network', 'reportingArea']),
   ), snapshot => {
-    const rows = snapshot.docs.map(doc => doc.data() as PricingRow).filter(row => row.active !== false);
+    const rows = snapshot.docs.map(doc => doc.data() as PricingRow)
+      .filter(row => row.seasonId === seasonId && row.active !== false);
     onPrices(resolveOfficialPriceTexts(rows, regionId, isNetworkList));
   }, onError);
 }

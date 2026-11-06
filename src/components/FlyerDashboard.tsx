@@ -85,6 +85,14 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLoadFlyerIntoEditor }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
+  const categoryLabel = (id: string) => ({
+    hotel_skipass: ui('Hotel + Skipass', 'Hotel + Skipass'),
+    events_races: ui('Rennen & Veranstaltungen', 'Gare ed eventi'),
+    cross_country_course: ui('Kurse & Skischulen', 'Corsi e scuole'),
+    season_pass: ui('Saisonkarten', 'Abbonamenti stagionali'),
+    family_promo: ui('Familienangebote', 'Offerte famiglia'),
+    general: ui('Allgemein & Aktionen', 'Generale e promozioni'),
+  } as Record<string, string>)[id] ?? id;
   const [records, setRecords] = useState<FlyerRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -202,15 +210,14 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
 
   // Chart 2 Data: Monthly Timeline Data (October 2025 - April 2026)
   const timelineChartData = useMemo(() => {
-    const months = [
-      { key: '2025-10', label: 'Ott 25' },
-      { key: '2025-11', label: 'Nov 25' },
-      { key: '2025-12', label: 'Dic 25' },
-      { key: '2026-01', label: 'Gen 26' },
-      { key: '2026-02', label: 'Feb 26' },
-      { key: '2026-03', label: 'Mar 26' },
-      { key: '2026-04', label: 'Apr 26' }
-    ];
+    const monthKeys = ['2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03', '2026-04'];
+    const formatter = new Intl.DateTimeFormat(uiLanguage === 'de' ? 'de-DE' : 'it-IT', {
+      month: 'short', year: '2-digit', timeZone: 'UTC',
+    });
+    const months = monthKeys.map(key => ({
+      key,
+      label: formatter.format(new Date(`${key}-01T12:00:00Z`)),
+    }));
 
     const sourceData = selectedRegionId === 'all' 
       ? records 
@@ -226,7 +233,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
         'In Programmazione': scheduled
       };
     });
-  }, [records, selectedRegionId]);
+  }, [records, selectedRegionId, uiLanguage]);
 
   // Chart 3 Data: Category Breakdown
   const categoryChartData = useMemo(() => {
@@ -241,18 +248,18 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
     });
 
     return Object.keys(counts).map(catKey => ({
-      name: CATEGORY_LABELS[catKey] || catKey,
+      name: categoryLabel(catKey),
       categoryKey: catKey,
       value: counts[catKey],
       color: CATEGORY_COLORS[catKey] || '#417483'
     }));
-  }, [records, selectedRegionId]);
+  }, [records, selectedRegionId, uiLanguage]);
 
   // Handle saving new scheduled flyer record
   const handleSaveNewRecord = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      alert('Inserisci un titolo per la pubblicazione del flyer.');
+      alert(ui('Bitte einen Flyer-Titel eingeben.', 'Inserisci il titolo del flyer.'));
       return;
     }
 
@@ -286,16 +293,16 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
 
       setIsScheduleModalOpen(false);
       await fetchRecords();
-      alert('Nuova programmazione flyer salvata con successo!');
+      alert(ui('Flyer-Planung gespeichert.', 'Programmazione flyer salvata.'));
     } catch (err) {
       console.error('Failed to create flyer record:', err);
-      alert('Errore durante il salvataggio.');
+      alert(ui('Speichern fehlgeschlagen.', 'Salvataggio non riuscito.'));
     }
   };
 
   const handleDeleteRecord = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!window.confirm('Sei sicuro di voler eliminare questo flyer dal registro?')) return;
+    if (!window.confirm(ui('Flyer aus dem Register löschen?', 'Eliminare il flyer dal registro?'))) return;
     try {
       await deleteFlyerRecordFromFirebase(id);
       setRecords(prev => prev.filter(r => r.id !== id));
@@ -322,10 +329,10 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
       
       const newRecord = await saveFlyerRecordToFirebase(duplicatedRecord);
       setRecords(prev => [newRecord, ...prev]);
-      alert('Flyer duplicato con successo!');
+      alert(ui('Flyer dupliziert.', 'Flyer duplicato.'));
     } catch (err) {
       console.error('Error duplicating record:', err);
-      alert('Errore durante la duplicazione.');
+      alert(ui('Duplizieren fehlgeschlagen.', 'Duplicazione non riuscita.'));
     }
   };
 
@@ -344,9 +351,6 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-vietnam tracking-tight">
                 {ui('Flyer-Register & Planung', 'Registro Grafico & Programmazione Flyer')}
               </h1>
-              <p className="text-slate-200 text-sm sm:text-base font-normal leading-relaxed">
-                {ui('Zentrale Übersicht über veröffentlichte und geplante Flyer der 8 DNS-Gebiete. Nach Organisation filtern, Zeiträume analysieren und offizielle Veröffentlichungen verwalten.', 'Panoramica centralizzata dei flyer pubblicati e in programma per tutte le 8 aree DNS. Filtra per organizzazione, analizza la copertura temporale e gestisci le release ufficiali.')}
-              </p>
             </div>
 
             {/* Quick Action Button */}
@@ -396,7 +400,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
             </div>
             <div>
               <div className="text-2xl font-black text-sky-600 font-vietnam">{metrics.scheduled}</div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">In Programmazione</div>
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{ui("In Planung", "In programmazione")}</div>
             </div>
           </div>
 
@@ -471,9 +475,9 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                   className="bg-transparent border-none focus:outline-none text-xs font-bold text-slate-800 cursor-pointer"
                 >
                   <option value="all">{ui('Alle Kategorien', 'Tutte le Categorie')}</option>
-                  {Object.entries(CATEGORY_LABELS).map(([catKey, label]) => (
+                  {Object.keys(CATEGORY_LABELS).map(catKey => (
                     <option key={catKey} value={catKey}>
-                      {label}
+                      {categoryLabel(catKey)}
                     </option>
                   ))}
                 </select>
@@ -489,7 +493,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                     setSearchQuery('');
                   }}
                   className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all"
-                  title="Reset Filtri"
+                  title={ui("Filter zurücksetzen", "Azzera filtri")}
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                 </button>
@@ -522,7 +526,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                 }`}
               >
                 <TrendingUp className="w-3.5 h-3.5" />
-                <span>Grafici & Analisi</span>
+                <span>{ui("Diagramme & Analyse", "Grafici e analisi")}</span>
               </button>
 
               <button
@@ -534,7 +538,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                 }`}
               >
                 <Calendar className="w-3.5 h-3.5" />
-                <span>Calendario Release</span>
+                <span>{ui("Veröffentlichungskalender", "Calendario pubblicazioni")}</span>
               </button>
 
               <button
@@ -546,12 +550,12 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" />
-                <span>Tabella Registro</span>
+                <span>{ui("Flyer-Register", "Registro flyer")}</span>
               </button>
             </div>
 
             <div className="text-xs text-slate-500 font-medium hidden sm:block">
-              Mostrando {filteredRecords.length} di {records.length} flyer
+              {ui("Angezeigt", "Visualizzati")} {filteredRecords.length} / {records.length} Flyer
             </div>
           </div>
         </div>
@@ -567,20 +571,17 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 font-vietnam">
-                    Distribuzione Flyer per Organizzazione
+                    {ui("Flyer nach Organisation", "Flyer per organizzazione")}
                   </h3>
-                  <p className="text-xs text-slate-500">
-                    Confronto tra flyer emessi ed in programma per le 9 regioni di Dolomiti NordicSki
-                  </p>
                 </div>
                 <div className="flex items-center gap-3 text-xs font-semibold">
                   <span className="flex items-center gap-1">
                     <span className="w-3 h-3 rounded-full bg-[#0D4D5E]" />
-                    <span>Emessi</span>
+                    <span>{ui("Veröffentlicht", "Pubblicati")}</span>
                   </span>
                   <span className="flex items-center gap-1">
                     <span className="w-3 h-3 rounded-full bg-[#AAD0D1]" />
-                    <span>In Programmazione</span>
+                    <span>{ui("In Planung", "In programmazione")}</span>
                   </span>
                 </div>
               </div>
@@ -600,8 +601,8 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#0D4D5E', color: '#FFFFFF', borderRadius: '12px', border: 'none', fontSize: '12px' }}
                     />
-                    <Bar dataKey="Emessi" fill="#0D4D5E" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="In Programmazione" fill="#AAD0D1" radius={[6, 6, 0, 0]} />
+                    <Bar name={ui("Veröffentlicht", "Pubblicati")} dataKey="Emessi" fill="#0D4D5E" radius={[6, 6, 0, 0]} />
+                    <Bar name={ui("In Planung", "Programmato")} dataKey="In Programmazione" fill="#AAD0D1" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -617,7 +618,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                     {ui('Zeitplanung Veröffentlichungen (Saison 2025/26)', 'Programmazione Temporale Release (Stagione 2025/26)')}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Volume mensile di pubblicazione flyer per organizzazione
+                    {ui("Monatliche Veröffentlichungen", "Pubblicazioni mensili")}
                   </p>
                 </div>
 
@@ -628,8 +629,8 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                       <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748B' }} />
                       <YAxis tick={{ fontSize: 11, fill: '#64748B' }} allowDecimals={false} />
                       <Tooltip contentStyle={{ backgroundColor: '#072F3A', color: '#FFFFFF', borderRadius: '12px' }} />
-                      <Area type="monotone" dataKey="Flyer Emessi" stackId="1" stroke="#10B981" fill="#10B981" fillOpacity={0.6} />
-                      <Area type="monotone" dataKey="In Programmazione" stackId="1" stroke="#0284C7" fill="#0284C7" fillOpacity={0.6} />
+                      <Area type="monotone" name={ui("Veröffentlicht", "Pubblicati")} dataKey="Flyer Emessi" stackId="1" stroke="#10B981" fill="#10B981" fillOpacity={0.6} />
+                      <Area type="monotone" name={ui("In Planung", "Programmato")} dataKey="In Programmazione" stackId="1" stroke="#0284C7" fill="#0284C7" fillOpacity={0.6} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -639,11 +640,8 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 font-vietnam">
-                    Ripartizione per Tipologia Offer
+                    {ui("Flyer nach Kategorie", "Flyer per categoria")}
                   </h3>
-                  <p className="text-xs text-slate-500">
-                    Scomposizione percentuale tra Skipass, Gare, Corsi e Pacchetti Hotel
-                  </p>
                 </div>
 
                 <div className="h-64 w-full flex items-center justify-center">
@@ -687,14 +685,14 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
             {isLoading ? (
               <div className="py-20 text-center text-slate-500">
                 <RefreshCw className="w-8 h-8 animate-spin mx-auto text-[#0D4D5E] mb-2" />
-                <p className="font-semibold text-sm">Caricamento registro flyer in corso...</p>
+                <p className="font-semibold text-sm">{ui("Flyer-Register wird geladen…", "Caricamento registro flyer…")}</p>
               </div>
             ) : filteredRecords.length === 0 ? (
               <div className="bg-white p-12 rounded-2xl border border-dashed border-slate-300 text-center space-y-3">
                 <FileText className="w-10 h-10 text-slate-300 mx-auto" />
-                <h4 className="font-bold text-slate-700 text-base">Nessun flyer trovato</h4>
+                <h4 className="font-bold text-slate-700 text-base">{ui("Keine Flyer gefunden", "Nessun flyer trovato")}</h4>
                 <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Nessun flyer corrisponde ai filtri selezionati. Prova a modificare la ricerca o il filtro per organizzazione.
+                  {ui("Keine passenden Ergebnisse. Filter anpassen.", "Nessun risultato. Modifica i filtri.")}
                 </p>
               </div>
             ) : (
@@ -723,7 +721,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                             : 'bg-sky-100 text-sky-800 border border-sky-200'
                         }`}>
                           {isIssued ? <CheckCircle2 className="w-3 h-3 text-emerald-600" /> : <Clock className="w-3 h-3 text-sky-600" />}
-                          <span>{isIssued ? 'Emesso' : 'In Programma'}</span>
+                          <span>{isIssued ? ui('Veröffentlicht', 'Pubblicato') : ui('Geplant', 'Programmato')}</span>
                         </span>
                       </div>
 
@@ -741,10 +739,9 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                         <div className="absolute inset-0 bg-[#072F3A]/70 opacity-0 group-hover/preview:opacity-100 transition-opacity flex flex-col items-center justify-center p-4 gap-2">
                           <span className="px-3.5 py-2 rounded-xl bg-white text-[#0D4D5E] text-xs font-black shadow-xl flex items-center gap-2 font-vietnam transform translate-y-2 group-hover/preview:translate-y-0 transition-transform">
                             <Eye className="w-4 h-4 text-[#0D4D5E]" />
-                            <span>Ingrandisci Anteprima HD</span>
+                            <span>{ui("Vorschau vergrößern", "Ingrandisci anteprima")}</span>
                           </span>
-                          <span className="text-[11px] text-slate-200 font-medium">Clicca per aprire la grafica completa</span>
-                        </div>
+                                                  </div>
                       </div>
 
                       {/* Card Body */}
@@ -763,7 +760,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
 
                           <div className="flex flex-wrap items-center gap-2 pt-1">
                             <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold border border-slate-200">
-                              {CATEGORY_LABELS[item.category] || item.category}
+                              {categoryLabel(item.category)}
                             </span>
                             {item.validityPeriod && (
                               <span className="text-[11px] text-slate-600 font-medium">
@@ -788,7 +785,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                           )}
                           {item.targetAudience && (
                             <div className="text-[10.5px] text-slate-500 line-clamp-1 italic">
-                              Target: {item.targetAudience}
+                              {ui('Zielgruppe', 'Destinatari')}: {item.targetAudience}
                             </div>
                           )}
                         </div>
@@ -799,7 +796,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                             <button
                               onClick={() => setPreviewRecord(item)}
                               className="p-2 rounded-xl bg-slate-100 hover:bg-[#AAD0D1]/40 text-[#0D4D5E] transition-all"
-                              title="Anteprima Ingrandita HD"
+                              title={ui("Vorschau vergrößern", "Ingrandisci anteprima")}
                             >
                               <Eye className="w-4 h-4 text-[#0D4D5E]" />
                             </button>
@@ -818,7 +815,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                             className="flex-1 py-2 px-3 rounded-xl bg-[#0D4D5E] hover:bg-[#072F3A] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs font-vietnam"
                           >
                             <Edit3 className="w-3.5 h-3.5 text-[#AAD0D1]" />
-                            <span>Modifica</span>
+                            <span>{ui("Bearbeiten", "Modifica")}</span>
                           </button>
 
                           <button
@@ -848,9 +845,6 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <h3 className="text-lg font-bold text-slate-900 font-vietnam">
                 {ui('Veröffentlichungskalender (Saison 2025/2026)', 'Calendario Programmazione Release (Stagione 2025/2026)')}
               </h3>
-              <p className="text-xs text-slate-500">
-                Sviluppo cronologico delle campagne pubblicitarie regionali
-              </p>
             </div>
 
             <div className="space-y-8 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200">
@@ -887,14 +881,14 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                           isIssued ? 'bg-emerald-50 text-emerald-700' : 'bg-sky-50 text-sky-700'
                         }`}>
-                          {isIssued ? 'Pubblicato' : 'In Arrivo'}
+                          {isIssued ? ui('Veröffentlicht', 'Pubblicato') : ui('Geplant', 'Programmato')}
                         </span>
                         
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => setPreviewRecord(record)}
                             className="p-2 rounded-xl bg-slate-100 hover:bg-[#AAD0D1]/40 text-[#0D4D5E] transition-all"
-                            title="Anteprima Ingrandita HD"
+                            title={ui("Vorschau vergrößern", "Ingrandisci anteprima")}
                           >
                             <Eye className="w-4 h-4 text-[#0D4D5E]" />
                           </button>
@@ -913,7 +907,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                           className="px-3 py-2 rounded-xl bg-[#0D4D5E] hover:bg-[#072F3A] text-white text-xs font-bold transition-all flex items-center gap-1 font-vietnam"
                         >
                           <Edit3 className="w-3.5 h-3.5 text-[#AAD0D1]" />
-                          <span className="hidden sm:inline">Modifica</span>
+                          <span className="hidden sm:inline">{ui("Bearbeiten", "Modifica")}</span>
                         </button>
 
                         <button
@@ -940,13 +934,13 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <table className="w-full text-left text-xs font-medium text-slate-700">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase font-vietnam">
                   <tr>
-                    <th className="p-4">Organizzazione / Regione</th>
-                    <th className="p-4">Titolo Flyer</th>
-                    <th className="p-4">Stato</th>
-                    <th className="p-4">Data Pubblicazione</th>
-                    <th className="p-4">Categoria</th>
-                    <th className="p-4">Target / Note</th>
-                    <th className="p-4 text-right">Azione</th>
+                    <th className="p-4">{ui("Organisation / Gebiet", "Organizzazione / Area")}</th>
+                    <th className="p-4">{ui("Flyer-Titel", "Titolo flyer")}</th>
+                    <th className="p-4">{ui("Status", "Stato")}</th>
+                    <th className="p-4">{ui("Veröffentlichungsdatum", "Data pubblicazione")}</th>
+                    <th className="p-4">{ui("Kategorie", "Categoria")}</th>
+                    <th className="p-4">{ui("Zielgruppe / Hinweise", "Destinatari / Note")}</th>
+                    <th className="p-4 text-right">{ui("Aktion", "Azione")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -962,14 +956,14 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                           r.status === 'issued' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
                         }`}>
-                          {r.status === 'issued' ? 'Emesso' : 'In Programma'}
+                          {r.status === 'issued' ? ui('Veröffentlicht', 'Pubblicato') : ui('Geplant', 'Programmato')}
                         </span>
                       </td>
                       <td className="p-4 text-slate-600 font-semibold">
                         {r.publishDate}
                       </td>
                       <td className="p-4 text-slate-600">
-                        {CATEGORY_LABELS[r.category] || r.category}
+                        {categoryLabel(r.category)}
                       </td>
                       <td className="p-4 text-slate-500 max-w-xs truncate">
                         {r.targetAudience || r.location}
@@ -979,7 +973,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                           <button
                             onClick={() => setPreviewRecord(r)}
                             className="p-2 rounded-lg bg-slate-100 text-[#0D4D5E] hover:bg-[#AAD0D1]/40 transition-all"
-                            title="Anteprima HD"
+                            title={ui("Flyer-Vorschau", "Anteprima flyer")}
                           >
                             <Eye className="w-4 h-4" />
                           </button>
@@ -995,7 +989,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                             className="px-3 py-1.5 rounded-lg bg-[#0D4D5E] text-white font-bold text-xs hover:bg-[#072F3A] transition-all inline-flex items-center gap-1 font-vietnam"
                           >
                             <Edit3 className="w-3.5 h-3.5 text-[#AAD0D1]" />
-                            <span>Modifica</span>
+                            <span>{ui('Bearbeiten', 'Modifica')}</span>
                           </button>
                           <button
                             onClick={(e) => handleDeleteRecord(r.id, e)}
@@ -1028,9 +1022,6 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                 <h3 className="text-xl font-black text-slate-900 font-vietnam">
                   {ui('Neuen Flyer planen', 'Programma Nuovo Flyer')}
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Registra o pianifica un'uscita promozionale per una regione
-                </p>
               </div>
               <button
                 onClick={() => setIsScheduleModalOpen(false)}
@@ -1068,7 +1059,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                 <input
                   type="text"
                   required
-                  placeholder="Es. Pacchetto Settimana Bianca 2026"
+                  placeholder={ui("z. B. Winterpaket 2026", "Es. Pacchetto invernale 2026")}
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"
@@ -1079,7 +1070,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Stato Release
+                    {ui("Status", "Stato")}
                   </label>
                   <select
                     value={formData.status}
@@ -1087,13 +1078,13 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                   >
                     <option value="scheduled">📅 {ui('In Planung', 'In Programmazione')}</option>
-                    <option value="issued">🟢 Emesso / Pubblicato</option>
+                    <option value="issued">🟢 {ui("Veröffentlicht", "Pubblicato")}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Data Pubblicazione
+                    {ui("Veröffentlichungsdatum", "Data pubblicazione")}
                   </label>
                   <input
                     type="date"
@@ -1107,16 +1098,16 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               {/* Category */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  Tipologia Offerta
+                  {ui("Angebotskategorie", "Categoria offerta")}
                 </label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as any }))}
                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                 >
-                  {Object.entries(CATEGORY_LABELS).map(([catKey, label]) => (
+                  {Object.keys(CATEGORY_LABELS).map(catKey => (
                     <option key={catKey} value={catKey}>
-                      {label}
+                      {categoryLabel(catKey)}
                     </option>
                   ))}
                 </select>
@@ -1126,11 +1117,11 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Periodo Validità
+                    {ui("Gültigkeitszeitraum", "Periodo validità")}
                   </label>
                   <input
                     type="text"
-                    placeholder="Es. Gennaio - Marzo 2026"
+                    placeholder={ui("z. B. Januar–März 2026", "Es. Gennaio–marzo 2026")}
                     value={formData.validityPeriod}
                     onChange={(e) => setFormData(prev => ({ ...prev, validityPeriod: e.target.value }))}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"
@@ -1139,11 +1130,11 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Località / Piste
+                    {ui("Ort / Loipen", "Località / Piste")}
                   </label>
                   <input
                     type="text"
-                    placeholder="Es. Centro Fondo Sesto"
+                    placeholder={ui("z. B. Langlaufzentrum Sexten", "Es. Centro fondo Sesto")}
                     value={formData.location}
                     onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"
@@ -1154,7 +1145,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               {/* Template Preset */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  Layout Grafico Base
+                  {ui("Layoutvorlage", "Modello grafico")}
                 </label>
                 <select
                   value={formData.templateId}
@@ -1175,13 +1166,13 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                   onClick={() => setIsScheduleModalOpen(false)}
                   className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all"
                 >
-                  Annulla
+                  {ui("Abbrechen", "Annulla")}
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2.5 rounded-xl bg-[#0D4D5E] hover:bg-[#072F3A] text-white text-xs font-bold shadow-sm transition-all font-vietnam"
                 >
-                  Salva in Registro Regioni
+                  {ui("Im Register speichern", "Salva nel registro")}
                 </button>
               </div>
 
@@ -1211,11 +1202,11 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                       previewRecord.status === 'issued' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
                     }`}>
-                      {previewRecord.status === 'issued' ? 'Emesso' : 'In Programma'}
+                      {previewRecord.status === 'issued' ? ui('Veröffentlicht', 'Pubblicato') : ui('Geplant', 'Programmato')}
                     </span>
                   </div>
                   <h3 className="text-lg sm:text-xl font-black text-slate-900 font-vietnam">
-                    Anteprima Grafica: {previewRecord.title}
+                    {ui('Flyer-Vorschau', 'Anteprima flyer')}: {previewRecord.title}
                   </h3>
                 </div>
               </div>
@@ -1238,7 +1229,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
             {/* Modal Footer Controls */}
             <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
               <div className="text-xs text-slate-500 font-medium">
-                Formato: <span className="font-bold uppercase text-slate-800">{previewRecord.content.format}</span> • Orientamento: <span className="font-bold capitalize text-slate-800">{previewRecord.content.orientation}</span>
+                {ui('Format', 'Formato')}: <span className="font-bold uppercase text-slate-800">{previewRecord.content.format}</span> · {ui('Ausrichtung', 'Orientamento')}: <span className="font-bold capitalize text-slate-800">{previewRecord.content.orientation === 'portrait' ? ui('Hochformat', 'Verticale') : ui('Querformat', 'Orizzontale')}</span>
               </div>
 
               <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -1246,7 +1237,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                   onClick={() => setPreviewRecord(null)}
                   className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all"
                 >
-                  Chiudi
+                  {ui("Schließen", "Chiudi")}
                 </button>
                 
                 <button
@@ -1257,7 +1248,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                   className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-[#0D4D5E] hover:bg-[#072F3A] text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm font-vietnam"
                 >
                   <Edit3 className="w-4 h-4 text-[#AAD0D1]" />
-                  <span>Apri e Modifica nell'Editor</span>
+                  <span>{ui('Im Editor öffnen', 'Apri nell’editor')}</span>
                 </button>
               </div>
             </div>

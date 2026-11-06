@@ -74,8 +74,8 @@ test.afterAll(async()=>{await env?.cleanup();});
 async function login(page,role){
   await page.goto('/');
   await page.getByLabel('Email',{exact:true}).fill(`flyer-${role}@example.test`);
-  await page.getByLabel('Password',{exact:true}).fill(password);
-  await page.locator('form').getByRole('button',{name:'Accedi',exact:true}).click();
+  await page.getByLabel(/^(Passwort|Password)$/).fill(password);
+  await page.locator('form').getByRole('button',{name:/^(Anmelden|Accedi)$/}).click();
   await expect(page.getByRole('button',{name:/^(Abmelden|Esci)$/})).toHaveAttribute('title',`flyer-${role}@example.test`);
 }
 async function logout(page){
@@ -357,5 +357,17 @@ test('two organizations: separate sessions and no local draft leakage after logo
   expect(await other.evaluate(async id=>{const m=await import('/tests/acceptance/operations.ts');try{await m.getDoc(m.doc(m.dnsCoreDb,'flyerDocuments',id));return false;}catch{return true;}},id)).toBe(true);
   await logout(page);await login(page,'other');await expect(editor(page)).toBeVisible();
   await expect(page.getByText('Private first account draft',{exact:true})).toHaveCount(0);
+  await second.close();
+});
+
+test('Foundation language changes in Workspace update an already-open Flyer editor without reload',async({page,context})=>{
+  await login(page,'writer');
+  await expect(editor(page)).toBeVisible();
+  const second=await context.newPage();
+  await second.goto('/');
+  await second.evaluate(()=>localStorage.setItem('dns-ui-language-v1','it'));
+  await expect(editor(page).getByRole('button',{name:'Contenuti'})).toBeVisible();
+  await second.evaluate(()=>localStorage.setItem('dns-ui-language-v1','de'));
+  await expect(editor(page).getByRole('button',{name:'Inhalte'})).toBeVisible();
   await second.close();
 });

@@ -43,7 +43,7 @@ export function SimpleImageEditorTab({
     setLibrary(previous => {
       const existing = new Map(previous.map(item => [item.url, item]));
       return [...new Set(urls)].map((url, index) =>
-        existing.get(url) || { url, path: url, name: `Bild ${index + 1}` });
+        existing.get(url) || { url, path: url, name: `Foto ${index + 1}` });
     });
     setLibraryError('');
   }, [content.regionId]);

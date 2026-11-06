@@ -21,7 +21,6 @@ export function SimplePageEditorTab({
     <section className="space-y-4">
       <div>
         <h3 className="text-sm font-bold text-slate-900 font-vietnam">{ui('Seitenformat & Layout', 'Formato e impaginazione')}</h3>
-        <p className="text-xs text-slate-500">{ui('Nur vom DNS-Modell freigegebene Optionen.', 'Solo le opzioni ammesse dal modello DNS.')}</p>
       </div>
       {product && (
         <>
@@ -49,7 +48,6 @@ export function SimplePageEditorTab({
           {product.type === 'dns_price_list' && (
             <div className="border-t border-slate-200 pt-4 space-y-2">
               <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Grafikelement · Langläufer', 'Elemento grafico · Sciatore')}</h4>
-              <p className="text-[11px] text-slate-500">{ui('Position des optionalen DNS-Langläufers.', 'Posizione dello sciatore DNS opzionale.')}</p>
               <div className="grid grid-cols-2 gap-2">
                 {([
                   ['none', ui('Ausblenden', 'Nascondi')],
@@ -70,7 +68,7 @@ export function SimplePageEditorTab({
           {product.pagePolicy.magicLayout && (
             <button type="button" onClick={onMakeItPerfect} disabled={!onMakeItPerfect}
               className="w-full inline-flex items-center justify-center gap-2 bg-[#0D4D5E] text-white rounded px-3 py-2.5 text-xs font-bold disabled:opacity-50">
-              <WandSparkles className="w-4 h-4" /> Make It Perfect
+              <WandSparkles className="w-4 h-4" /> {ui('Layout optimieren', 'Ottimizza layout')}
             </button>
           )}
         </>

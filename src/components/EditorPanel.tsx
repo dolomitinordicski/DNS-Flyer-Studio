@@ -129,7 +129,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         )}
 
         {!readOnly && activeTab === 'qr' && (
-          <QRCodeEditorTab content={content} onChangeContent={onChangeContent} />
+          <QRCodeEditorTab uiLanguage={uiLanguage} content={content} onChangeContent={onChangeContent} />
         )}
       </div>
     </aside>

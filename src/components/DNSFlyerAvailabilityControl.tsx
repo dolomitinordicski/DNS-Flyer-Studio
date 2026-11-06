@@ -8,10 +8,13 @@ import {
 export function DNSFlyerAvailabilityControl({
   policy,
   onClose,
+  uiLanguage,
 }: {
   policy: DNSFlyerAvailabilityPolicy;
+  uiLanguage: 'de' | 'it';
   onClose: () => void;
 }) {
+  const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [draft, setDraft] = useState<DNSFlyerAvailabilityPolicy>(() => structuredClone(policy));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -21,9 +24,9 @@ export function DNSFlyerAvailabilityControl({
     setMessage('');
     try {
       await saveFlyerAvailabilityPolicy(draft);
-      setMessage('Disponibilità flyer salvata.');
+      setMessage(ui('Flyer-Verfügbarkeit gespeichert.', 'Disponibilità flyer salvata.'));
     } catch (error) {
-      setMessage('Salvataggio non riuscito: ' + (error instanceof Error ? error.message : String(error)));
+      setMessage(ui('Speichern fehlgeschlagen: ', 'Salvataggio non riuscito: ') + (error instanceof Error ? error.message : String(error)));
     } finally {
       setSaving(false);
     }
@@ -33,18 +36,16 @@ export function DNSFlyerAvailabilityControl({
     <div className="w-full max-w-xl rounded-2xl bg-white p-7 shadow-2xl space-y-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#0D4D5E]">DNS · Flyer disponibili</h2>
-          <p className="text-sm text-slate-500">Spunta soltanto i tipi che vuoi rendere disponibili alle aree.</p>
+          <h2 className="text-2xl font-bold text-[#0D4D5E]">{ui('DNS · Flyer-Verfügbarkeit', 'DNS · Flyer disponibili')}</h2>
         </div>
-        <button type="button" onClick={onClose} className="rounded-lg border px-3 py-1.5">Chiudi</button>
+        <button type="button" onClick={onClose} className="rounded-lg border px-3 py-1.5">{ui('Schließen', 'Chiudi')}</button>
       </div>
 
       <div className="space-y-2">
         {FLYER_PRODUCTS.map(product => (
           <label key={product.type} className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 px-4 py-3">
             <div>
-              <strong className="block text-sm text-slate-900">{product.label.it}</strong>
-              <span className="text-xs text-slate-500">{product.label.de}</span>
+              <strong className="block text-sm text-slate-900">{product.label[uiLanguage]}</strong>
             </div>
             <input
               type="checkbox"
@@ -59,12 +60,11 @@ export function DNSFlyerAvailabilityControl({
         ))}
       </div>
 
-      <p className="text-xs text-slate-500">I flyer disattivati restano nel sistema e possono essere riattivati in qualsiasi momento.</p>
       {message && <p role="status" className="text-sm">{message}</p>}
       <div className="flex justify-end">
         <button type="button" disabled={saving} onClick={save}
           className="rounded-lg bg-[#0D4D5E] px-5 py-3 font-bold text-white disabled:opacity-50">
-          {saving ? 'Salvataggio…' : 'Salva disponibilità'}
+          {saving ? ui('Speichern…', 'Salvataggio…') : ui('Verfügbarkeit speichern', 'Salva disponibilità')}
         </button>
       </div>
     </div>

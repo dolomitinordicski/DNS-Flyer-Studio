@@ -21,10 +21,6 @@ export function SimpleStyleEditorTab({ uiLanguage, content, onChangeContent }: S
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-bold text-slate-900 font-vietnam">{ui('DNS-Farbvarianten', 'Varianti colori DNS')}</h3>
-      <p className="text-xs text-slate-500">
-        {ui('Drei offizielle DNS-Farben. Ein Klick wählt eine feste grafische Variante; Farben sind nicht frei veränderbar.',
-            'Tre colori ufficiali DNS. Un clic seleziona la variante grafica corrispondente; i colori non sono modificabili.')}
-      </p>
       <div className="grid grid-cols-1 gap-2">
         {DNS_PRESETS.map(preset => (
           <button
@@ -41,9 +37,6 @@ export function SimpleStyleEditorTab({ uiLanguage, content, onChangeContent }: S
           </button>
         ))}
       </div>
-      <p className="text-[11px] text-slate-500">
-        {ui('Logo, Grafik und Dokumentstruktur bleiben DNS-konform.', 'Logo, grafica e struttura del documento restano conformi a DNS.')}
-      </p>
     </div>
   );
 }

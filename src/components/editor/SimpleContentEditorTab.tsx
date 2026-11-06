@@ -22,6 +22,18 @@ export function SimpleContentEditorTab({
   onChangeContent,
 }: SimpleContentEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
+  const ticketFieldLabel = (key: string) => ({
+    issuerName: ui('Aussteller', 'Emittente'),
+    contactEmail: ui('E-Mail', 'Email'),
+    contactPhone: ui('Telefon', 'Telefono'),
+    websiteUrl: ui('Website', 'Sito web'),
+    title: ui('Titel', 'Titolo'),
+    subtitle: ui('Untertitel', 'Sottotitolo'),
+    body: ui('Text', 'Testo'),
+    imageUrl: ui('Bild-URL', 'URL immagine'),
+    qrImageUrl: ui('QR-Bild-URL', 'URL immagine QR'),
+    qrLabel: ui('QR-Beschriftung', 'Didascalia QR'),
+  } as Record<string,string>)[key] ?? key;
   const can = (field: string) => !product || product.editableFields.includes(field);
   const uploadTicketImage = (target: 'ticketLocalLogoUrl' | 'imageUrl' | 'qrImageUrl') => {
     const input = document.createElement('input');
@@ -74,12 +86,6 @@ export function SimpleContentEditorTab({
     <div className="space-y-4">
       <div>
         <h3 className="text-sm font-bold text-slate-900 font-vietnam">{ui('Inhalte', 'Contenuti')}</h3>
-        <p className="text-xs text-slate-500 mt-1">
-          {ui(
-            'Nur die für diesen Flyertyp freigegebenen Inhalte können geändert werden.',
-            'Puoi modificare solo i contenuti abilitati per questo tipo di flyer.'
-          )}
-        </p>
       </div>
 
       {product?.dataPolicy.languageMode === 'monolingual' && (
@@ -103,9 +109,6 @@ export function SimpleContentEditorTab({
               </button>
             ))}
           </div>
-          <p className="text-[10px] text-slate-500">
-            {ui('Das Ticket wird jeweils in einer einzigen Sprache ausgegeben.', 'Il ticket viene prodotto in una sola lingua alla volta.')}
-          </p>
         </div>
       )}
 
@@ -140,7 +143,6 @@ export function SimpleContentEditorTab({
               <option key={area.id} value={area.id}>{area.localizedName[uiLanguage] || area.canonicalName}</option>
             ))}
           </select>
-          {!isDNSAdmin && <p className="text-[10px] text-slate-500">{ui('Gebiet wird von DNS Core vorgegeben.', 'Area assegnata da DNS Core.')}</p>}
         </section>
       )}
       {(product?.type === 'gutschein' || product?.type === 'voucher') && (
@@ -195,9 +197,8 @@ export function SimpleContentEditorTab({
               {REGIONAL_LOGOS.filter(area => area.id !== 'dns_central').map(area => <option key={area.id} value={area.id}>{area.regionName}</option>)}
             </select>
           </label>}
-          <p className="text-[10px] text-slate-500">{ui('Alle drei Tickettypen verwenden das Logo der ausstellenden Area.', 'Tutti e tre i ticket utilizzano il logo dell’area emittente.')}</p>
           {(['issuerName', 'contactEmail', 'contactPhone', 'websiteUrl'] as const).map(key => (
-            <label key={key} className="block space-y-1"><span className="text-[10px] font-bold">{key}</span>
+            <label key={key} className="block space-y-1"><span className="text-[10px] font-bold">{ticketFieldLabel(key)}</span>
               <input className="w-full rounded-lg border p-2 text-xs" value={content[key] || ''} onChange={e => onChangeContent({ [key]: e.target.value })} />
             </label>
           ))}
@@ -218,7 +219,7 @@ export function SimpleContentEditorTab({
               <option value="info">Info</option><option value="promo">Promo</option>
             </select>
             {(['title', 'subtitle', 'body', 'imageUrl', 'qrImageUrl', 'qrLabel'] as const).map(key => (
-              <label key={key} className="block space-y-1"><span className="text-[10px] font-bold">{key}</span>
+              <label key={key} className="block space-y-1"><span className="text-[10px] font-bold">{ticketFieldLabel(key)}</span>
                 {key === 'body' ? <textarea rows={3} maxLength={350} className="w-full rounded-lg border p-2 text-xs" value={content.ticketContent?.[key] || ''}
                     onChange={e => onChangeContent({ ticketContent: { ...content.ticketContent!, [key]: e.target.value } })} />
                   : <input className="w-full rounded-lg border p-2 text-xs" value={content.ticketContent?.[key] || ''}
@@ -271,7 +272,6 @@ export function SimpleContentEditorTab({
       {product?.type === 'regional_price_list' && (
         <section className="p-3 rounded-xl border border-[#AAD0D1] space-y-3">
           <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Eigene Gebietsinfos', 'Informazioni proprie dell’area')}</h4>
-          <p className="text-[10px] text-slate-500">{ui('Nur ausgefüllte Angaben werden gezeigt. Das Querformat passt sich automatisch an.', 'Mostriamo solo i contenuti inseriti: il layout orizzontale si adatta automaticamente.')}</p>
           <label className="block space-y-1">
             <span className="text-[10px] font-semibold">{ui('Kurztext (DE / IT / EN)', 'Breve testo (DE / IT / EN)')}</span>
             <textarea rows={3} maxLength={350} className="w-full border rounded-lg p-2 text-xs"
@@ -311,7 +311,7 @@ export function SimpleContentEditorTab({
       {product?.type === 'hotel_package' && (
         <section className="rounded-xl border border-[#AAD0D1] bg-slate-50 p-3 space-y-2">
           <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Pakete & Angebote', 'Pacchetti e offerte')}</h4>
-          <p className="text-[11px] text-slate-600">{ui('Manuelle Vorlagen; vorhandene Texte werden bei Auswahl ersetzt.', 'Preset manuali; la selezione sostituisce i testi esistenti.')}</p>
+          <p className="text-[11px] text-slate-600">{ui('Auswahl ersetzt vorhandene Texte.', 'La scelta sostituisce i testi esistenti.')}</p>
           <div className="grid grid-cols-3 gap-2">
             {PACKAGE_OFFER_PRESETS.map(preset => <button key={preset.id} type="button"
               className="rounded-lg border border-slate-200 bg-white p-2 text-[11px] font-semibold text-[#0D4D5E] hover:border-[#0D4D5E]"

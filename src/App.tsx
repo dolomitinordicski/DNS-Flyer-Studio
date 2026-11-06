@@ -147,6 +147,18 @@ export default function App() {
   });
 
   useEffect(() => foundation.subscribeLanguage(setUiLanguageState), [foundation]);
+  // Workspace and Flyer Studio run as same-origin GitHub Pages documents.
+  // Foundation persists the language, but its subscription is document-local:
+  // an already-open iframe must observe changes made in Workspace.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== 'dns-ui-language-v1') return;
+      if (event.newValue !== 'de' && event.newValue !== 'it') return;
+      if (foundation.getLanguage() !== event.newValue) foundation.setLanguage(event.newValue);
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [foundation]);
 
   const setUiLanguage = (language: 'de' | 'it') => {
     foundation.setLanguage(language);
@@ -685,8 +697,8 @@ export default function App() {
         <button type="button" onClick={() => setAvailabilityPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">Flyer disponibili</button>
         <button type="button" onClick={() => setDesignPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">DNS Design Control</button>
       </div>}
-      {isDNSAdmin && availabilityPanelOpen && <DNSFlyerAvailabilityControl policy={availabilityPolicy} onClose={() => setAvailabilityPanelOpen(false)} />}
-      {isDNSAdmin && designPanelOpen && <DNSDesignControl policy={designPolicy} onClose={() => setDesignPanelOpen(false)} />}
+      {isDNSAdmin && availabilityPanelOpen && <DNSFlyerAvailabilityControl uiLanguage={uiLanguage} policy={availabilityPolicy} onClose={() => setAvailabilityPanelOpen(false)} />}
+      {isDNSAdmin && designPanelOpen && <DNSDesignControl uiLanguage={uiLanguage} policy={designPolicy} onClose={() => setDesignPanelOpen(false)} />}
       {coreUserId && canReadFlyer && isReadOnlyDNS && availabilityStatus === 'ready' && currentStateReady && !currentStateError && (
         <div role="status" className="no-print border-b border-blue-300 bg-blue-50 px-5 py-3 text-sm font-medium text-blue-950">
           {uiLanguage === 'de'
@@ -822,9 +834,6 @@ export default function App() {
       <footer data-dns-tool-footer className="no-print">
         <div className="dns-tool-footer-shell">
           <div className="dns-tool-footer-primary">Dolomiti NordicSki · Flyer Studio</div>
-          <div className="dns-tool-footer-meta">
-            {uiLanguage === 'de' ? 'Gemeinsame DNS Foundation · Benutzeroberfläche DE / IT' : 'DNS Foundation condivisa · Interfaccia DE / IT'}
-          </div>
         </div>
       </footer>
 
@@ -867,12 +876,12 @@ export default function App() {
         <section className="flex-1 flex items-center justify-center p-8 no-print">
           <div className="w-full max-w-md rounded-xl border bg-white p-6 shadow-sm">
             <h1 className="text-xl font-bold text-[#0D4D5E]">DNS Flyer Studio</h1>
-            <p className="my-3 text-sm text-slate-700">{coreUserId ? 'Account non autorizzato a Flyer Studio oppure accesso in verifica.' : 'Accedi con il tuo account DNS Identity.'}</p>
+            <p className="my-3 text-sm text-slate-700">{coreUserId ? (uiLanguage === 'de' ? 'Zugriff auf Flyer Studio nicht freigegeben oder wird geprüft.' : 'Accesso a Flyer Studio non autorizzato o in verifica.') : (uiLanguage === 'de' ? 'Mit DNS Identity anmelden.' : 'Accedi con DNS Identity.')}</p>
             {!coreUserId && <form onSubmit={handleEmailSignIn} className="flex flex-col gap-3">
               <input aria-label="Email" type="email" required autoComplete="username" value={loginEmail} onChange={event => setLoginEmail(event.target.value)} className="rounded border p-2" placeholder="Email" />
-              <input aria-label="Password" type="password" required autoComplete="current-password" value={loginPassword} onChange={event => setLoginPassword(event.target.value)} className="rounded border p-2" placeholder="Password" />
-              <button type="submit" className="rounded bg-[#0D4D5E] p-2 font-bold text-white">Accedi</button>
-              <button type="button" onClick={handleCoreSignIn} className="rounded border p-2">Accedi con Google</button>
+              <input aria-label={uiLanguage === "de" ? "Passwort" : "Password"} type="password" required autoComplete="current-password" value={loginPassword} onChange={event => setLoginPassword(event.target.value)} className="rounded border p-2" placeholder={uiLanguage === "de" ? "Passwort" : "Password"} />
+              <button type="submit" className="rounded bg-[#0D4D5E] p-2 font-bold text-white">{uiLanguage === "de" ? "Anmelden" : "Accedi"}</button>
+              <button type="button" onClick={handleCoreSignIn} className="rounded border p-2">{uiLanguage === "de" ? "Mit Google anmelden" : "Accedi con Google"}</button>
             </form>}
           </div>
         </section>

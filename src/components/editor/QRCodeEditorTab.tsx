@@ -3,26 +3,25 @@ import { QrCode } from 'lucide-react';
 import type { FlyerContent } from '../../types';
 
 interface QRCodeEditorTabProps {
+  uiLanguage: 'de' | 'it';
   content: FlyerContent;
   onChangeContent: (updated: Partial<FlyerContent>) => void;
 }
 
-export function QRCodeEditorTab({ content, onChangeContent }: QRCodeEditorTabProps) {
+export function QRCodeEditorTab({ uiLanguage, content, onChangeContent }: QRCodeEditorTabProps) {
+  const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   return (
     <div className="space-y-4 text-xs">
       <div>
         <h3 className="text-sm font-bold text-slate-900 font-vietnam flex items-center gap-2">
           <QrCode className="w-4 h-4 text-[#0D4D5E]" />
-          QR Code Dinamico
+          {ui('QR-Code', 'Codice QR')}
         </h3>
-        <p className="text-xs text-slate-500 mt-1">
-          Genera un QR code personalizzato per reindirizzare i clienti all'offerta online.
-        </p>
       </div>
 
       <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
         <div className="flex items-center justify-between">
-          <label className="font-bold text-slate-900">Attiva QR Code nel Flyer</label>
+          <label className="font-bold text-slate-900">{ui('QR-Code im Flyer anzeigen', 'Mostra codice QR nel flyer')}</label>
           <input
             type="checkbox"
             checked={content.qrCode?.enabled === true}
@@ -36,7 +35,7 @@ export function QRCodeEditorTab({ content, onChangeContent }: QRCodeEditorTabPro
         {content.qrCode?.enabled && (
           <>
             <div>
-              <label className="block text-slate-700 font-bold mb-1">Link / URL dell'Offerta</label>
+              <label className="block text-slate-700 font-bold mb-1">{ui('Zieladresse (URL)', 'Indirizzo di destinazione (URL)')}</label>
               <input
                 type="text"
                 value={content.qrCode?.url ?? ''}
@@ -49,14 +48,14 @@ export function QRCodeEditorTab({ content, onChangeContent }: QRCodeEditorTabPro
             </div>
 
             <div>
-              <label className="block text-slate-700 font-bold mb-1">Etichetta Sotto QR Code</label>
+              <label className="block text-slate-700 font-bold mb-1">{ui('Beschriftung unter dem QR-Code', 'Didascalia sotto il codice QR')}</label>
               <input
                 type="text"
                 value={content.qrCode?.label ?? ''}
                 onChange={(e) => onChangeContent({
                   qrCode: { ...content.qrCode!, label: e.target.value },
                 })}
-                placeholder="Scansiona per prenotare"
+                placeholder={ui("Scannen für weitere Informationen", "Scansiona per maggiori informazioni")}
                 className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900"
               />
             </div>

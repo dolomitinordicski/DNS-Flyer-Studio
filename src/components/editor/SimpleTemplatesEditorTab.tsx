@@ -48,7 +48,7 @@ export function SimpleTemplatesEditorTab({
         {templates.map(({ product, template }) => {
           const restricted = product.dataPolicy.access === 'dns-only' && !isDNSAdmin;
           const isPriceList = product.type === 'dns_price_list' || product.type === 'regional_price_list';
-          const canEdit = canWriteFlyer && !restricted && (product.type !== 'dns_price_list' || isDNSAdmin);
+          const canEdit = canWriteFlyer && !restricted && (product.type !== 'dns_price_list' || canEditDNSGlobal);
           const isExpanded = expanded === product.type;
           return (
             <div key={product.type} className={`rounded-xl border p-3 shadow-2xs ${isPriceList ? 'bg-[#EDF5F5] border-[#AAD0D1]' : 'bg-slate-50 border-slate-200'}`}>

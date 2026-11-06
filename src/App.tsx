@@ -36,7 +36,15 @@ import { loadCurrentDesignFromFirebase } from './lib/firebase';
 import { canonicalFlyerDocumentId } from './data/flyerRepository';
 
 export default function App() {
-  useEffect(() => initWorkspaceShell('flyer-studio'), []);
+  useEffect(() => {
+    initWorkspaceShell('flyer-studio');
+    // Retired legacy mode is never reachable, including bookmarked URLs.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('legacy')) {
+      url.searchParams.delete('legacy');
+      window.history.replaceState({}, '', url);
+    }
+  }, []);
   // View mode: 'editor' | 'dashboard'
   const [activeView, setActiveView] = useState<'editor' | 'dashboard'>('editor');
   const [perfectToast, setPerfectToast] = useState<string | null>(null);
@@ -327,7 +335,8 @@ export default function App() {
     if (!template?.defaultContent) return;
     const selectedProduct = getFlyerProductByTemplate(templateId);
     if (selectedProduct?.dataPolicy.access === 'dns-only' && !(isDNSAdmin || hasDNSNetworkAccess)) return;
-    if (selectedProduct && !isDNSAdmin && (availabilityStatus !== 'ready' || !isFlyerProductEnabled(availabilityPolicy, selectedProduct.type))) return;
+    if (selectedProduct && !isDNSAdmin && (availabilityStatus !== 'ready' ||
+      (selectedProduct.type !== 'dns_price_list' && !isFlyerProductEnabled(availabilityPolicy, selectedProduct.type)))) return;
 
     const defaultVis = template.defaultContent.sectionVisibility || {
       header: true, bigTitle: true, heroImage: true, earlyBird: false,
@@ -595,7 +604,7 @@ export default function App() {
         orientation={content.orientation}
         onToggleOrientation={() => { if (!isReadOnlyDNS) handleToggleOrientation(); }}
         showCropMarks={content.showCropMarks}
-        onToggleCropMarks={handleToggleCropMarks}
+        onToggleCropMarks={() => { if (!isReadOnlyDNS) handleToggleCropMarks(); }}
         onOpenShareModal={() => { if (verifiedPreview) setIsShareModalOpen(true); }}
         onPrintPdf={() => { if (verifiedPreview) setIsExportModalOpen(true); }}
         onExportPng={() => { if (verifiedPreview) setIsExportModalOpen(true); }}

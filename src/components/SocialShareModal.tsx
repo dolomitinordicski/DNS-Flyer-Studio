@@ -89,13 +89,11 @@ ${normalizedUrl}
               <h3 className="font-vietnam font-bold text-base text-slate-900">
                 {ui('Direkt in sozialen Medien teilen', 'Condivisione Diretta Social')}
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                {ui('Flyer über die offiziellen Social-Media-Kanäle teilen', 'Pubblica il pacchetto offerta sui canali social ufficiali')}
-              </p>
             </div>
           </div>
           <button
             onClick={onClose}
+            aria-label={ui("Schließen", "Chiudi")}
             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-all"
           >
             <X className="w-5 h-5" />

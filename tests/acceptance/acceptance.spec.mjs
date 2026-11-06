@@ -309,7 +309,7 @@ test('DNS Admin: real PNG export produces a downloadable image',async({page})=>{
 
 test('area writer: regional Flyer PNG export works without DNS Admin privileges',async({page})=>{
   await page.route('**/*',async route=>{
-    if(route.request().resourceType()==='image'&&!['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname))
+    if(route.request().resourceType()==='image'&&(!['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)||new URL(route.request().url()).pathname.startsWith('/stock/')))
       await route.fulfill({contentType:'image/png',headers:{'Access-Control-Allow-Origin':'*'},body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aYuQAAAAASUVORK5CYII=','base64')});
     else await route.fallback();
   });
@@ -324,7 +324,7 @@ test('area writer: regional Flyer PNG export works without DNS Admin privileges'
   await page.getByRole('button',{name:'PNG',exact:true}).click();
   await page.getByRole('button',{name:/Preisliste als PNG herunterladen|Scarica Immagine PNG Listino/}).click();
   const file=await download;
-  expect(file.suggestedFilename()).toMatch(/\\.png$/i);
+  expect(file.suggestedFilename()).toMatch(/\.png$/i);
   const {stat}=await import('node:fs/promises');
   expect((await stat(await file.path())).size).toBeGreaterThan(500);
   expect(errors.filter(error=>/PNG export failed|Esportazione PNG non riuscita|PNG-Export fehlgeschlagen/.test(error))).toEqual([]);
@@ -332,7 +332,7 @@ test('area writer: regional Flyer PNG export works without DNS Admin privileges'
 
 test('area writer: regional PDF print calls the browser without a Flyer export error',async({page})=>{
   await page.route('**/*',async route=>{
-    if(route.request().resourceType()==='image'&&!['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname))
+    if(route.request().resourceType()==='image'&&(!['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)||new URL(route.request().url()).pathname.startsWith('/stock/')))
       await route.fulfill({contentType:'image/png',headers:{'Access-Control-Allow-Origin':'*'},body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aYuQAAAAASUVORK5CYII=','base64')});
     else await route.fallback();
   });

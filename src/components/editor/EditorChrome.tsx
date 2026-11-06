@@ -55,7 +55,7 @@ export function EditorChrome({
 
       </div>
 
-      <div className={`grid ${readOnly ? 'grid-cols-1' : 'grid-cols-6'} gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200">
+      <div className={`grid ${readOnly ? 'grid-cols-1' : 'grid-cols-6'} gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200`}>
         {tabs.filter(tab => !readOnly || tab.id === 'templates').map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

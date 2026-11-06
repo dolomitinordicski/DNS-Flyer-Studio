@@ -249,7 +249,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
     });
 
     return Object.keys(counts).map(catKey => ({
-      name: CATEGORY_LABELS[catKey] || catKey,
+      name: categoryLabel(catKey),
       categoryKey: catKey,
       value: counts[catKey],
       color: CATEGORY_COLORS[catKey] || '#417483'
@@ -260,7 +260,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
   const handleSaveNewRecord = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      alert('Inserisci un titolo per la pubblicazione del flyer.');
+      alert(ui('Bitte einen Flyer-Titel eingeben.', 'Inserisci il titolo del flyer.'));
       return;
     }
 
@@ -294,16 +294,16 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
 
       setIsScheduleModalOpen(false);
       await fetchRecords();
-      alert('Nuova programmazione flyer salvata con successo!');
+      alert(ui('Flyer-Planung gespeichert.', 'Programmazione flyer salvata.'));
     } catch (err) {
       console.error('Failed to create flyer record:', err);
-      alert('Errore durante il salvataggio.');
+      alert(ui('Speichern fehlgeschlagen.', 'Salvataggio non riuscito.'));
     }
   };
 
   const handleDeleteRecord = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!window.confirm('Sei sicuro di voler eliminare questo flyer dal registro?')) return;
+    if (!window.confirm(ui('Flyer aus dem Register löschen?', 'Eliminare il flyer dal registro?'))) return;
     try {
       await deleteFlyerRecordFromFirebase(id);
       setRecords(prev => prev.filter(r => r.id !== id));
@@ -330,10 +330,10 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
       
       const newRecord = await saveFlyerRecordToFirebase(duplicatedRecord);
       setRecords(prev => [newRecord, ...prev]);
-      alert('Flyer duplicato con successo!');
+      alert(ui('Flyer dupliziert.', 'Flyer duplicato.'));
     } catch (err) {
       console.error('Error duplicating record:', err);
-      alert('Errore durante la duplicazione.');
+      alert(ui('Duplizieren fehlgeschlagen.', 'Duplicazione non riuscita.'));
     }
   };
 
@@ -479,7 +479,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                   className="bg-transparent border-none focus:outline-none text-xs font-bold text-slate-800 cursor-pointer"
                 >
                   <option value="all">{ui('Alle Kategorien', 'Tutte le Categorie')}</option>
-                  {Object.entries(CATEGORY_LABELS).map(([catKey, label]) => (
+                  {Object.keys(CATEGORY_LABELS).map(catKey => (
                     <option key={catKey} value={catKey}>
                       {categoryLabel(catKey)}
                     </option>
@@ -605,8 +605,8 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#0D4D5E', color: '#FFFFFF', borderRadius: '12px', border: 'none', fontSize: '12px' }}
                     />
-                    <Bar dataKey="Emessi" fill="#0D4D5E" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="In Programmazione" fill="#AAD0D1" radius={[6, 6, 0, 0]} />
+                    <Bar name={ui("Veröffentlicht", "Pubblicati")} dataKey="Emessi" fill="#0D4D5E" radius={[6, 6, 0, 0]} />
+                    <Bar name={ui("In Planung", "Programmato")} dataKey="In Programmazione" fill="#AAD0D1" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -633,8 +633,8 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                       <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748B' }} />
                       <YAxis tick={{ fontSize: 11, fill: '#64748B' }} allowDecimals={false} />
                       <Tooltip contentStyle={{ backgroundColor: '#072F3A', color: '#FFFFFF', borderRadius: '12px' }} />
-                      <Area type="monotone" dataKey="Flyer Emessi" stackId="1" stroke="#10B981" fill="#10B981" fillOpacity={0.6} />
-                      <Area type="monotone" dataKey="In Programmazione" stackId="1" stroke="#0284C7" fill="#0284C7" fillOpacity={0.6} />
+                      <Area type="monotone" name={ui("Veröffentlicht", "Pubblicati")} dataKey="Flyer Emessi" stackId="1" stroke="#10B981" fill="#10B981" fillOpacity={0.6} />
+                      <Area type="monotone" name={ui("In Planung", "Programmato")} dataKey="In Programmazione" stackId="1" stroke="#0284C7" fill="#0284C7" fillOpacity={0.6} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -764,7 +764,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
 
                           <div className="flex flex-wrap items-center gap-2 pt-1">
                             <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold border border-slate-200">
-                              {CATEGORY_LABELS[item.category] || item.category}
+                              {categoryLabel(item.category)}
                             </span>
                             {item.validityPeriod && (
                               <span className="text-[11px] text-slate-600 font-medium">
@@ -789,7 +789,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                           )}
                           {item.targetAudience && (
                             <div className="text-[10.5px] text-slate-500 line-clamp-1 italic">
-                              Target: {item.targetAudience}
+                              {ui('Zielgruppe', 'Destinatari')}: {item.targetAudience}
                             </div>
                           )}
                         </div>
@@ -970,7 +970,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                         {r.publishDate}
                       </td>
                       <td className="p-4 text-slate-600">
-                        {CATEGORY_LABELS[r.category] || r.category}
+                        {categoryLabel(r.category)}
                       </td>
                       <td className="p-4 text-slate-500 max-w-xs truncate">
                         {r.targetAudience || r.location}
@@ -996,7 +996,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                             className="px-3 py-1.5 rounded-lg bg-[#0D4D5E] text-white font-bold text-xs hover:bg-[#072F3A] transition-all inline-flex items-center gap-1 font-vietnam"
                           >
                             <Edit3 className="w-3.5 h-3.5 text-[#AAD0D1]" />
-                            <span>Modifica</span>
+                            <span>{ui('Bearbeiten', 'Modifica')}</span>
                           </button>
                           <button
                             onClick={(e) => handleDeleteRecord(r.id, e)}
@@ -1112,9 +1112,9 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                   onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as any }))}
                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                 >
-                  {Object.entries(CATEGORY_LABELS).map(([catKey, label]) => (
+                  {Object.keys(CATEGORY_LABELS).map(catKey => (
                     <option key={catKey} value={catKey}>
-                      {label}
+                      {categoryLabel(catKey)}
                     </option>
                   ))}
                 </select>

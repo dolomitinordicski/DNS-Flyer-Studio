@@ -19,7 +19,7 @@ import { SocialShareModal } from './components/SocialShareModal';
 import { FlyerDashboard } from './components/FlyerDashboard';
 import { FlyerContent, PaperFormat, PaperOrientation, LayoutTemplateId, LanguageCode } from './types';
 import { FLYER_TEMPLATES } from './data/templates';
-import { Printer, Download, Eye, RotateCw, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Printer, Download, Eye, RotateCw, Sparkles, CheckCircle2, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { ExportModal } from './components/ExportModal';
 import { getContentForLanguage } from './utils/multilingual';
 import { runMakeItPerfect } from './features/make-it-perfect/runMakeItPerfect';
@@ -293,6 +293,8 @@ export default function App() {
   const [exportContent, setExportContent] = useState<FlyerContent | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [editorCollapsed, setEditorCollapsed] = useState(() => localStorage.getItem('dns-flyer-editor-collapsed') === 'true');
+  useEffect(() => { localStorage.setItem('dns-flyer-editor-collapsed', String(editorCollapsed)); }, [editorCollapsed]);
 
   // Auto-scale to fit container
   useEffect(() => {
@@ -323,9 +325,11 @@ export default function App() {
     };
 
     updateScale();
+    const observer = new ResizeObserver(updateScale);
+    if (containerRef.current) observer.observe(containerRef.current);
     window.addEventListener('resize', updateScale);
-    return () => window.removeEventListener('resize', updateScale);
-  }, [content.format, content.orientation, activeView]);
+    return () => { observer.disconnect(); window.removeEventListener('resize', updateScale); };
+  }, [content.format, content.orientation, activeView, editorCollapsed]);
 
   // Update Flyer Content partial
   const handleUpdateContent = (updated: Partial<FlyerContent>) => {
@@ -760,9 +764,10 @@ export default function App() {
         />
       ) : (
         /* Main Studio Workbench Area */
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
           
-          {/* Left Sidebar Editor Controls */}
+          {/* Keep the editor mounted so its editing state persists while hidden. */}
+          <div className={editorCollapsed ? "hidden" : "min-h-0 w-full lg:w-96 lg:shrink-0"}>
               <EditorPanel
                 autosaveStatus={autosave.status}
                 autosaveErrorCode={autosave.errorCode}
@@ -780,6 +785,15 @@ export default function App() {
                 availabilityPolicy={availabilityStatus === 'ready' ? availabilityPolicy : { ...DEFAULT_FLYER_AVAILABILITY, enabled: Object.fromEntries(Object.keys(DEFAULT_FLYER_AVAILABILITY.enabled).map(key => [key, false])) as DNSFlyerAvailabilityPolicy['enabled'] }}
                 canBypassAvailability={isDNSAdmin}
               />
+          </div>
+          <div className="z-10 flex shrink-0 items-center justify-center bg-white border-b lg:border-b-0 lg:border-r border-slate-200">
+            <button type="button" onClick={() => setEditorCollapsed(previous => !previous)}
+              aria-label={editorCollapsed ? (uiLanguage === 'de' ? 'Editor einblenden' : 'Mostra pannello editor') : (uiLanguage === 'de' ? 'Editor ausblenden' : 'Nascondi pannello editor')}
+              aria-expanded={!editorCollapsed}
+              className="flex h-8 w-12 lg:h-20 lg:w-7 items-center justify-center rounded hover:bg-[#EDF5F5] text-[#0D4D5E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0D4D5E]">
+              {editorCollapsed ? <ChevronsRight className="h-5 w-5" /> : <ChevronsLeft className="h-5 w-5" />}
+            </button>
+          </div>
 
           {/* Center / Right Canvas Live Preview Area */}
           <main 

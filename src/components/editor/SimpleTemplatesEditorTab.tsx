@@ -21,6 +21,7 @@ export function SimpleTemplatesEditorTab({
   onApplyTemplate,
   isDNSAdmin,
   canWriteFlyer,
+  canEditDNSGlobal,
   availabilityPolicy,
   canBypassAvailability,
 }: SimpleTemplatesEditorTabProps) {

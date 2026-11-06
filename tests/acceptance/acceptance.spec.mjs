@@ -307,6 +307,47 @@ test('DNS Admin: real PNG export produces a downloadable image',async({page})=>{
   expect((await stat(path)).size).toBeGreaterThan(500);
 });
 
+test('area writer: regional Flyer PNG export works without DNS Admin privileges',async({page})=>{
+  await page.route('**/*',async route=>{
+    if(new URL(route.request().url()).pathname.startsWith('/stock/') || (route.request().resourceType()==='image'&&!['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)))
+      await route.fulfill({contentType:'image/png',headers:{'Access-Control-Allow-Origin':'*'},body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aYuQAAAAASUVORK5CYII=','base64')});
+    else await route.fallback();
+  });
+  const errors=[];
+  page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
+  page.on('dialog',async dialog=>{errors.push('dialog: '+dialog.message());await dialog.dismiss();});
+  await login(page,'writer');
+  await expect(editor(page)).toBeVisible();
+  await page.getByRole('button',{name:/^(Regionale Preisliste|Listino regionale)$/}).click();
+  await expect(page.getByRole('button',{name:'PNG',exact:true})).toBeEnabled();
+  const download=page.waitForEvent('download',{timeout:20000});
+  await page.getByRole('button',{name:'PNG',exact:true}).click();
+  await page.getByRole('button',{name:/Preisliste als PNG herunterladen|Scarica Immagine PNG Listino/}).click();
+  const file=await download;
+  expect(file.suggestedFilename()).toMatch(/\.png$/i);
+  const {stat}=await import('node:fs/promises');
+  expect((await stat(await file.path())).size).toBeGreaterThan(500);
+  expect(errors.filter(error=>/PNG export failed|Esportazione PNG non riuscita|PNG-Export fehlgeschlagen/.test(error))).toEqual([]);
+});
+
+test('area writer: regional PDF print calls the browser without a Flyer export error',async({page})=>{
+  await page.route('**/*',async route=>{
+    if(new URL(route.request().url()).pathname.startsWith('/stock/') || (route.request().resourceType()==='image'&&!['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)))
+      await route.fulfill({contentType:'image/png',headers:{'Access-Control-Allow-Origin':'*'},body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aYuQAAAAASUVORK5CYII=','base64')});
+    else await route.fallback();
+  });
+  const errors=[];
+  page.on('console',message=>{if(message.type()==='error'&&/PDF export|Native PDF export/.test(message.text()))errors.push(message.text());});
+  page.on('dialog',async dialog=>{errors.push('dialog: '+dialog.message());await dialog.dismiss();});
+  await login(page,'writer');
+  await expect(editor(page)).toBeVisible();
+  await page.getByRole('button',{name:/^(Regionale Preisliste|Listino regionale)$/}).click();
+  await page.getByRole('button',{name:/^PDF/}).click();
+  await page.getByRole('button',{name:/PDF drucken|Stampa PDF/}).click();
+  await expect(page.locator('[data-dns-export-stage]')).toHaveCount(0,{timeout:20000});
+  expect(errors).toEqual([]);
+});
+
 test('two organizations: separate sessions and no local draft leakage after logout',async({page,browser})=>{
   await login(page,'writer');await expect(editor(page)).toBeVisible();
   const id=await page.evaluate(async()=>{const m=await import('/tests/acceptance/operations.ts');return (await m.saveFlyerDocument(m.content('dns-test-area','Private first account draft'))).id;});

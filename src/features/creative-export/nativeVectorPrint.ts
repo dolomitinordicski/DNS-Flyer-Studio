@@ -15,10 +15,25 @@ export async function printVectorFlyerFromDOM(roots: HTMLElement | readonly HTML
   await document.fonts.ready;
   const pictures = pages.flatMap(root => [...root.querySelectorAll('img')]);
   await Promise.all(pictures.map(async image => {
+    const url = image.currentSrc || image.src;
+    if (!url) throw new Error('Missing flyer image URL');
+    // Export pages are detached DOM clones. naturalWidth is often zero until
+    // the clone starts loading; that does NOT mean the source asset is missing.
+    // Decode independently before validating availability. The print iframe
+    // decodes its imported copies again after insertion into the document.
     if (!image.complete || image.naturalWidth <= 0) {
-      throw new Error('Missing flyer image: ' + (image.currentSrc || image.src));
+      const probe = new Image();
+      if (image.crossOrigin) probe.crossOrigin = image.crossOrigin;
+      probe.src = url;
+      try {
+        await probe.decode();
+      } catch {
+        throw new Error('Missing flyer image: ' + url);
+      }
+      if (probe.naturalWidth <= 0) throw new Error('Missing flyer image: ' + url);
+    } else if (image.decode) {
+      await image.decode();
     }
-    if (image.decode) await image.decode();
   }));
 
   const [w, h] = flyerPageMm(geometry);

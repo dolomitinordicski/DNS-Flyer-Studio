@@ -60,6 +60,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           <button
             onClick={onClose}
             disabled={isExporting}
+            aria-label={ui('Schließen', 'Chiudi')}
             className="p-1.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-all"
           >
             <X className="w-5 h-5" />
@@ -74,9 +75,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <Globe className="w-5 h-5 text-[#0D4D5E] shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-xs text-[#0D4D5E] block">{ui('DNS- und Gebiets-Preisliste (einheitliche Struktur)', 'Modello Listino DNS e Regioni (Struttura Unificata)')}</span>
-                <span className="text-[11px] text-slate-700 leading-relaxed block mt-0.5">
-                  {ui('Die offizielle Preisliste wird direkt aus dem Browser als Vektor-PDF gedruckt; Fotos bleiben Bilder.', 'Il listino ufficiale si stampa dal browser con testo e grafica vettoriale; le fotografie restano immagini.')}
-                </span>
               </div>
             </div>
           ) : (
@@ -84,9 +82,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <Globe className="w-5 h-5 text-[#0D4D5E] shrink-0" />
               <div>
                 <span className="font-bold text-slate-900 block">{ui('3 Sprachen konfiguriert (DE / IT / EN)', '3 Lingue Configurate (DE / IT / EN)')}</span>
-                <span className="text-[11px] text-slate-500">
-                  {ui('Du kannst ein dreiseitiges PDF oder eine einzelne Sprache als Vektor-PDF drucken', 'Puoi stampare un PDF trilingue di tre pagine oppure una singola lingua')} (<strong>{activeLanguage.toUpperCase()}</strong>).
-                </span>
               </div>
             </div>
           )}
@@ -118,14 +113,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 text-xs block group-hover:text-[#0D4D5E] transition-colors">
-                        📄 Documento Unico PDF (3 Pagine Trilingue: DE + IT + EN)
+                        {ui('Ein PDF · 3 Sprachen (DE / IT / EN)', 'PDF unico · 3 lingue (DE / IT / EN)')}
                       </span>
                       <span className="text-[11px] text-slate-500">
-                        Stampa vettoriale dal browser: un solo PDF con pagine DE, IT ed EN. Seleziona «Salva come PDF».
+                        {ui('Im Druckdialog „Als PDF speichern“ wählen.', 'Seleziona «Salva come PDF» nella finestra di stampa.')}
                       </span>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 px-2.5 py-1 rounded-md shrink-0">Consigliato</span>
+                  <span className="text-xs font-bold text-[#0D4D5E] bg-[#0D4D5E]/10 px-2.5 py-1 rounded-md shrink-0">{ui('Empfohlen', 'Consigliato')}</span>
                 </button>
 
                 {/* Option 3: Single Active Language PDF */}

@@ -397,6 +397,7 @@ test('flyer cards: expandable localized help, permission colors, and disabled Bi
   // DNS Admin can access the three tickets even when they are unavailable to areas.
   await logout(page);
   await login(page,'admin');
+  await page.evaluate(async()=>{const {getDNSFoundationRuntime}=await import('/src/lib/foundationRuntime.ts');getDNSFoundationRuntime().setLanguage('de');});
   for (const name of ['DNS Wochenkarte','Area Wochenkarte','Area Tageskarte']) {
     await editor(page).getByRole('button',{name}).click();
     const imageTab = editor(page).getByRole('button',{name:'Bild'});

@@ -43,10 +43,10 @@ export function SimpleImageEditorTab({
     setLibrary(previous => {
       const existing = new Map(previous.map(item => [item.url, item]));
       return [...new Set(urls)].map((url, index) =>
-        existing.get(url) || { url, path: url, name: `Bild ${index + 1}` });
+        existing.get(url) || { url, path: url, name: uiLanguage === 'de' ? `Bild ${index + 1}` : `Immagine ${index + 1}` });
     });
     setLibraryError('');
-  }, [content.regionId]);
+  }, [content.regionId, uiLanguage]);
 
   const refreshLibrary = async () => {
     const epoch = operationEpoch.current;

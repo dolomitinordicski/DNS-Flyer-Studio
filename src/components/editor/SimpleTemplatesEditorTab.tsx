@@ -87,6 +87,7 @@ export function SimpleTemplatesEditorTab({
                 </p>
               )}
             </div>
+          );
         })}
       </div>
     </div>

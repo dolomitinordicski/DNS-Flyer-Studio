@@ -74,8 +74,8 @@ test.afterAll(async()=>{await env?.cleanup();});
 async function login(page,role){
   await page.goto('/');
   await page.getByLabel('Email',{exact:true}).fill(`flyer-${role}@example.test`);
-  await page.getByLabel('Password',{exact:true}).fill(password);
-  await page.locator('form').getByRole('button',{name:'Accedi',exact:true}).click();
+  await page.getByLabel(/^(Passwort|Password)$/).fill(password);
+  await page.locator('form').getByRole('button',{name:/^(Anmelden|Accedi)$/}).click();
   await expect(page.getByRole('button',{name:/^(Abmelden|Esci)$/})).toHaveAttribute('title',`flyer-${role}@example.test`);
 }
 async function logout(page){

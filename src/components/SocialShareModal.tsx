@@ -31,14 +31,14 @@ export const SocialShareModal: React.FC<SocialShareModalProps> = ({
   const promoText = `❄️ ${content.title} | Dolomiti NordicSki ❄️
 ${content.subtitle}
 
-📍 Località: ${content.location}
-📅 Validità: ${content.validityPeriod}
-💰 Offerta: ${content.pricePrefix} ${content.priceAmount}${content.priceCurrency} ${content.priceSuffix}
+📍 ${ui('Ort', 'Località')}: ${content.location}
+📅 ${ui('Gültigkeit', 'Validità')}: ${content.validityPeriod}
+💰 ${ui('Angebot', 'Offerta')}: ${content.pricePrefix} ${content.priceAmount}${content.priceCurrency} ${content.priceSuffix}
 
-✨ Cosa include:
+✨ ${ui('Inklusive', 'Servizi inclusi')}:
 ${content.features.map(f => `• ${f.text}`).join('\n')}
 
-🔗 Scopri i dettagli e prenota ora:
+🔗 ${ui('Weitere Informationen', 'Maggiori informazioni')}:
 ${normalizedUrl}
 
 #DolomitiNordicSki #CrossCountrySkiing #SciDiFondo #Dolomiti #SouthTyrol #Trentino #Veneto #WinterHoliday`;

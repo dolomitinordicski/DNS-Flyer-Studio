@@ -147,6 +147,18 @@ export default function App() {
   });
 
   useEffect(() => foundation.subscribeLanguage(setUiLanguageState), [foundation]);
+  // Workspace and Flyer Studio run as same-origin GitHub Pages documents.
+  // Foundation persists the language, but its subscription is document-local:
+  // an already-open iframe must observe changes made in Workspace.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== 'dns-ui-language-v1') return;
+      if (event.newValue !== 'de' && event.newValue !== 'it') return;
+      if (foundation.getLanguage() !== event.newValue) foundation.setLanguage(event.newValue);
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [foundation]);
 
   const setUiLanguage = (language: 'de' | 'it') => {
     foundation.setLanguage(language);

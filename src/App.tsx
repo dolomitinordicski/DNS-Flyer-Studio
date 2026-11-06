@@ -604,6 +604,8 @@ export default function App() {
         canvasHint: 'I contenuti inseriti e la grafica rispettano il Corporate Identity Manual di Dolomiti NordicSki (Be Vietnam Pro, Roboto, Palette Istituzionale).',
       };
 
+  const verifiedPreview = isDNSAdmin || (availabilityStatus === 'ready' && currentStateReady && !currentStateError);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-roboto select-none">
       
@@ -615,10 +617,10 @@ export default function App() {
         onToggleOrientation={handleToggleOrientation}
         showCropMarks={content.showCropMarks}
         onToggleCropMarks={handleToggleCropMarks}
-        onOpenShareModal={() => setIsShareModalOpen(true)}
-        onPrintPdf={() => setIsExportModalOpen(true)}
-        onExportPng={() => setIsExportModalOpen(true)}
-        isExporting={isExporting}
+        onOpenShareModal={() => { if (verifiedPreview) setIsShareModalOpen(true); }}
+        onPrintPdf={() => { if (verifiedPreview) setIsExportModalOpen(true); }}
+        onExportPng={() => { if (verifiedPreview) setIsExportModalOpen(true); }}
+        isExporting={isExporting || !verifiedPreview}
         activeView={activeView}
         onToggleView={(view) => setActiveView(view)}
         isOnlineTicketModel={isOnlineTicketModel}
@@ -807,7 +809,7 @@ export default function App() {
       {/* Social Media Direct Sharing Modal */}
       <SocialShareModal
         uiLanguage={uiLanguage}
-        isOpen={isShareModalOpen}
+        isOpen={isShareModalOpen && verifiedPreview}
         onClose={() => setIsShareModalOpen(false)}
         content={content}
         onDownloadPng={handleExportPng}
@@ -823,7 +825,7 @@ export default function App() {
       {/* Multilingual Export & Print Modal */}
       <ExportModal
         uiLanguage={uiLanguage}
-        isOpen={isExportModalOpen}
+        isOpen={isExportModalOpen && verifiedPreview}
         onClose={() => setIsExportModalOpen(false)}
         format={content.format}
         activeLanguage={content.activeLanguage || 'it'}

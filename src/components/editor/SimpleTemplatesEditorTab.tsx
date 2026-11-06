@@ -11,6 +11,7 @@ interface SimpleTemplatesEditorTabProps {
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
   isDNSAdmin: boolean;
   canWriteFlyer: boolean;
+  canEditDNSGlobal: boolean;
   availabilityPolicy: DNSFlyerAvailabilityPolicy;
   canBypassAvailability: boolean;
 }

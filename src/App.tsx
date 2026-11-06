@@ -252,7 +252,7 @@ export default function App() {
   const [currentStateError, setCurrentStateError] = useState<string | null>(null);
   // DNS Core saves the active draft after edits settle; local recovery remains immediate.
   // Temporary export-language snapshots are deliberately excluded.
-  const isReadOnlyDNS = !isDNSAdmin && activeTemplateId === 'official_price_list';
+  const isReadOnlyDNS = !isDNSAdmin && (activeTemplateId === 'official_price_list' || content.layoutTemplateId === 'official_price_list');
   const autosaveAllowed = canWriteFlyer && !!coreUserId && currentStateReady && !isExporting
     && !isReadOnlyDNS;
   const autosave = useFlyerAutosave(content, coreUserId, autosaveAllowed);
@@ -699,9 +699,15 @@ export default function App() {
         <FlyerDashboard 
           uiLanguage={uiLanguage}
           onLoadFlyerIntoEditor={(loadedContent) => {
-            autosave.selectDraft(null);
-            setContent(loadedContent);
             setActiveView('editor');
+            if (!isDNSAdmin && loadedContent.layoutTemplateId === 'official_price_list') {
+              // Old area-owned DNS copies are never reopened as editable files.
+              void handleApplyTemplate('official_price_list');
+              return;
+            }
+            autosave.selectDraft(null);
+            setActiveTemplateId(loadedContent.layoutTemplateId);
+            setContent(loadedContent);
           }}
         />
       ) : (

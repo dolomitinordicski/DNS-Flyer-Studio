@@ -59,7 +59,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
 
 
   return (
-    <aside className="w-full lg:w-96 bg-white border-r border-slate-200 text-slate-800 flex flex-col h-[calc(100vh-4rem)] overflow-hidden no-print">
+    <aside className="w-full h-full min-h-0 bg-white border-r border-slate-200 text-slate-800 flex flex-col overflow-hidden no-print">
       <EditorChrome
         uiLanguage={uiLanguage}
         activeTab={activeTab}

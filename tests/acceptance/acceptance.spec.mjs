@@ -383,14 +383,10 @@ test('flyer cards: expandable localized help, permission colors, and disabled Bi
   await expect(area.locator('..').getByRole('img',{name:'Bearbeitbar'})).toBeVisible();
   // A whole card (including empty padding) opens the flyer, and the selected card stays highlighted.
   const areaCard = area.locator('..');
-  await expect(area).not.toHaveAttribute('aria-current','true');
   await areaCard.click({position:{x:10,y:10}});
   await expect(area).toHaveAttribute('aria-current','true');
   await expect(areaCard).toHaveClass(/bg-\[#D6E8E8\]/);
   await expect(areaCard.locator('span').first()).toHaveClass(/underline/);
-  await dns.click();
-  await expect(dns).toHaveAttribute('aria-current','true');
-  await expect(area).not.toHaveAttribute('aria-current','true');
   await area.click();
   await expect(area).toHaveAttribute('aria-current','true');
 

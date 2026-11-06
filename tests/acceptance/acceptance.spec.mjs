@@ -391,8 +391,9 @@ test('flyer cards: expandable localized help, permission colors, and disabled Bi
   await page.evaluate(()=>localStorage.setItem('dns-ui-language-v1','it'));
   // Same-document preferences are updated by the Foundation control.
   await page.evaluate(async()=>{const {getDNSFoundationRuntime}=await import('/src/lib/foundationRuntime.ts');getDNSFoundationRuntime().setLanguage('it');});
-  await expect(area.locator('../..').getByRole('button',{name:'Dettagli'})).toBeVisible();
-  await expect(area.locator('../..')).toContainText('Listino della vostra area');
+  const areaIt = editor(page).getByRole('button',{name:'Listino regionale'});
+  await expect(areaIt.locator('../..').getByRole('button',{name:'Dettagli'})).toBeVisible();
+  await expect(areaIt.locator('../..')).toContainText('Listino della vostra area');
 
   // DNS Admin can access the three tickets even when they are unavailable to areas.
   await logout(page);

@@ -34,7 +34,7 @@ export function DNSFlyerAvailabilityControl({
     }
   };
 
-  return <div className={embedded ? "flex h-full min-h-0 flex-col no-print" : "fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-2 sm:p-4 no-print"} role="dialog" aria-modal="true" aria-label="DNS Flyer Availability">
+  return <div className={embedded ? "flex h-full min-h-0 flex-col no-print" : "fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-2 sm:p-4 no-print"} role={embedded ? undefined : "dialog"} aria-modal={embedded ? undefined : true} aria-label="DNS Flyer Availability">
     <div className={embedded ? "flex h-full min-h-0 w-full flex-col overflow-hidden bg-white" : "flex w-full max-w-lg max-h-[calc(100dvh-1rem)] min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-2xl"}>
       {!embedded && <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
         <div>

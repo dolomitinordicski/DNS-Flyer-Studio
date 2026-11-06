@@ -89,7 +89,10 @@ export function requireDNSCoreUser() {
 }
 
 export function scopeFromContent(content: FlyerContent): { scopeType: FlyerScopeType; scopeId: string } {
-  if (!content.regionId || content.regionId === 'dns_central') {
+  // The official general DNS price list is always ONE network document.
+  // Never create one editable copy for each reporting area.
+  if (content.layoutTemplateId === 'official_price_list'
+      || !content.regionId || content.regionId === 'dns_central') {
     return { scopeType: 'network', scopeId: 'dolomiti-nordicski' };
   }
   return { scopeType: 'reportingArea', scopeId: coreReportingAreaId(content.regionId) };
@@ -125,8 +128,31 @@ export function canonicalFlyerDocumentId(content: FlyerContent): string {
 export async function loadCurrentFlyerDocument(content: FlyerContent): Promise<FlyerDocumentRecord | null> {
   requireDNSCoreUser();
   const scope = scopeFromContent(content);
-  await assertFlyerScope(scope.scopeType, scope.scopeId, false);
+  const isOfficialDNS = content.layoutTemplateId === 'official_price_list'
+    && scope.scopeType === 'network' && scope.scopeId === 'dolomiti-nordicski';
+  if (!isOfficialDNS) await assertFlyerScope(scope.scopeType, scope.scopeId, false);
   const id = canonicalFlyerDocumentId(content);
+  if (isOfficialDNS) {
+    // A verified read of the single canonical DNS document. The rules grant
+    // active staff read-only access to this ID; write remains DNS Admin only.
+    // Missing or denied documents fail closed — never render a sample as final.
+    let snapshot;
+    try { snapshot = await getDoc(doc(dnsCoreDb, DOCUMENTS, id)); }
+    catch (error: any) {
+      if (error?.code === 'permission-denied') {
+        throw new Error('FLYER_CENTRAL_UNAVAILABLE_OR_DENIED');
+      }
+      throw error;
+    }
+    if (!snapshot.exists()) throw new Error('FLYER_CENTRAL_NOT_PUBLISHED');
+    const record = hydrateDocumentRecord(snapshot.id, snapshot.data());
+    if (!record || record.scopeType !== 'network'
+      || record.scopeId !== 'dolomiti-nordicski'
+      || record.seasonId !== seasonIdFromContent(content)) {
+      throw new Error('FLYER_CENTRAL_SCOPE_MISMATCH');
+    }
+    return record;
+  }
   // Query only the permitted scope and select the canonical ID locally.
   // Missing getDoc() can be denied, and documentId() filters fail on absent
   // documents under current rules. Area-scoped list is emulator-verified.

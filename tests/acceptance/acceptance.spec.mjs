@@ -359,3 +359,15 @@ test('two organizations: separate sessions and no local draft leakage after logo
   await expect(page.getByText('Private first account draft',{exact:true})).toHaveCount(0);
   await second.close();
 });
+
+test('Foundation language changes in Workspace update an already-open Flyer editor without reload',async({page,context})=>{
+  await login(page,'writer');
+  await expect(editor(page)).toBeVisible();
+  const second=await context.newPage();
+  await second.goto('/');
+  await second.evaluate(()=>localStorage.setItem('dns-ui-language-v1','it'));
+  await expect(editor(page).getByRole('button',{name:'Contenuti'})).toBeVisible();
+  await second.evaluate(()=>localStorage.setItem('dns-ui-language-v1','de'));
+  await expect(editor(page).getByRole('button',{name:'Inhalte'})).toBeVisible();
+  await second.close();
+});

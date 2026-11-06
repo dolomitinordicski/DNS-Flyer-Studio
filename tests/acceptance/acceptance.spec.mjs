@@ -371,3 +371,38 @@ test('Foundation language changes in Workspace update an already-open Flyer edit
   await expect(editor(page).getByRole('button',{name:'Inhalte'})).toBeVisible();
   await second.close();
 });
+
+test('flyer cards: expandable localized help, permission colors, and disabled Bild on all three tickets', async({page})=>{
+  await login(page,'writer');
+  await expect(editor(page)).toBeVisible();
+  const dns = editor(page).getByRole('button',{name:'DNS Gesamtpreisliste'});
+  const area = editor(page).getByRole('button',{name:'Regionale Preisliste'});
+  await expect(dns).toBeVisible();
+  await expect(area).toBeVisible();
+  await expect(dns.locator('..').getByRole('img',{name:'Nicht bearbeitbar'})).toBeVisible();
+  await expect(area.locator('..').getByRole('img',{name:'Bearbeitbar'})).toBeVisible();
+
+  const details = area.locator('..').getByRole('button',{name:'Details'});
+  await expect(details).toHaveAttribute('aria-expanded','false');
+  await details.click();
+  await expect(details).toHaveAttribute('aria-expanded','true');
+  await expect(area.locator('..')).toContainText('Preisliste eures Gebiets');
+
+  await page.evaluate(()=>localStorage.setItem('dns-ui-language-v1','it'));
+  // Same-document preferences are updated by the Foundation control.
+  await page.evaluate(async()=>{const {getDNSFoundationRuntime}=await import('/src/lib/foundationRuntime.ts');getDNSFoundationRuntime().setLanguage('it');});
+  await expect(area.locator('..').getByRole('button',{name:'Dettagli'})).toBeVisible();
+  await expect(area.locator('..')).toContainText('Listino della vostra area');
+
+  // DNS Admin can access the three tickets even when they are unavailable to areas.
+  await logout(page);
+  await login(page,'admin');
+  for (const name of ['DNS Wochenkarte','Area Wochenkarte','Area Tageskarte']) {
+    await editor(page).getByRole('button',{name}).click();
+    const imageTab = editor(page).getByRole('button',{name:'Bild'});
+    await expect(imageTab).toBeVisible();
+    await expect(imageTab).toBeDisabled();
+  }
+  await editor(page).getByRole('button',{name:'Regionale Preisliste'}).click();
+  await expect(editor(page).getByRole('button',{name:'Bild'})).toBeEnabled();
+});

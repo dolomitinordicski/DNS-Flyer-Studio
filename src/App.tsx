@@ -179,6 +179,13 @@ export default function App() {
             }));
           }
           setIsDNSAdmin(access.isAdmin);
+          if (!access.isAdmin) {
+            const url = new URL(window.location.href);
+            if (url.searchParams.has('legacy')) {
+              url.searchParams.delete('legacy');
+              window.history.replaceState({}, '', url);
+            }
+          }
           setHasDNSNetworkAccess(access.hasNetworkAccess);
           setCanWriteFlyer(access.canWrite);
           setCanReadFlyer(access.canRead);
@@ -232,6 +239,7 @@ export default function App() {
   };
 
   const setLegacyReviewMode = (enabled: boolean) => {
+    if (enabled && !isDNSAdmin) return;
     const url = new URL(window.location.href);
     if (enabled) url.searchParams.set('legacy', '1');
     else url.searchParams.delete('legacy');
@@ -685,7 +693,7 @@ export default function App() {
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           
           {/* Left Sidebar Editor Controls */}
-            {isLegacyMode ? (
+            {isLegacyMode && isDNSAdmin ? (
               <LegacyEditorPanel
                 uiLanguage={uiLanguage}
                 content={content}
@@ -708,7 +716,7 @@ export default function App() {
                 isDNSAdmin={isDNSAdmin || hasDNSNetworkAccess}
                 availabilityPolicy={availabilityStatus === 'ready' ? availabilityPolicy : { ...DEFAULT_FLYER_AVAILABILITY, enabled: Object.fromEntries(Object.keys(DEFAULT_FLYER_AVAILABILITY.enabled).map(key => [key, false])) as DNSFlyerAvailabilityPolicy['enabled'] }}
                 canBypassAvailability={isDNSAdmin}
-                onOpenLegacy={() => setLegacyReviewMode(true)}
+                onOpenLegacy={isDNSAdmin ? () => setLegacyReviewMode(true) : undefined}
               />
             )}
 

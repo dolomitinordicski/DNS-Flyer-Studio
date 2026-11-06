@@ -19,7 +19,7 @@ import { SocialShareModal } from './components/SocialShareModal';
 import { FlyerDashboard } from './components/FlyerDashboard';
 import { FlyerContent, PaperFormat, PaperOrientation, LayoutTemplateId, LanguageCode } from './types';
 import { FLYER_TEMPLATES } from './data/templates';
-import { Printer, Download, Eye, RotateCw, Sparkles, CheckCircle2, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Printer, Download, Eye, RotateCw, Sparkles, CheckCircle2, PanelLeftOpen } from 'lucide-react';
 import { ExportModal } from './components/ExportModal';
 import { getContentForLanguage } from './utils/multilingual';
 import { runMakeItPerfect } from './features/make-it-perfect/runMakeItPerfect';
@@ -772,6 +772,7 @@ export default function App() {
                 autosaveStatus={autosave.status}
                 autosaveErrorCode={autosave.errorCode}
                 uiLanguage={uiLanguage}
+                onCollapse={() => setEditorCollapsed(true)}
                 content={content}
                 onChangeContent={handleUpdateContent}
                 onApplyTemplate={handleApplyTemplate}
@@ -786,21 +787,24 @@ export default function App() {
                 canBypassAvailability={isDNSAdmin}
               />
           </div>
-          <div className="z-10 flex shrink-0 items-center justify-center bg-white border-b lg:border-b-0 lg:border-r border-slate-200">
-            <button type="button" onClick={() => setEditorCollapsed(previous => !previous)}
-              aria-label={editorCollapsed ? (uiLanguage === 'de' ? 'Editor einblenden' : 'Mostra pannello editor') : (uiLanguage === 'de' ? 'Editor ausblenden' : 'Nascondi pannello editor')}
-              aria-expanded={!editorCollapsed}
-              className="flex h-8 w-12 lg:h-20 lg:w-7 items-center justify-center rounded hover:bg-[#EDF5F5] text-[#0D4D5E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0D4D5E]">
-              {editorCollapsed ? <ChevronsRight className="h-5 w-5" /> : <ChevronsLeft className="h-5 w-5" />}
-            </button>
-          </div>
-
           {/* Center / Right Canvas Live Preview Area */}
           <main 
             ref={containerRef}
-            className="flex-1 bg-slate-100/90 p-4 sm:p-6 lg:p-8 overflow-y-auto flex flex-col items-center justify-start"
+            className="relative flex-1 min-w-0 bg-slate-100/90 p-4 sm:p-6 lg:p-8 overflow-y-auto flex flex-col items-center justify-start"
           >
-            
+            {editorCollapsed && (
+              <button
+                type="button"
+                onClick={() => setEditorCollapsed(false)}
+                aria-label={uiLanguage === 'de' ? 'Editor einblenden' : 'Mostra pannello editor'}
+                title={uiLanguage === 'de' ? 'Editor einblenden' : 'Mostra pannello editor'}
+                aria-expanded={false}
+                className="absolute left-2 top-2 z-20 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#0D4D5E]/20 bg-[#0D4D5E] text-white shadow-md transition-colors hover:bg-[#17677A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D4D5E]"
+              >
+                <PanelLeftOpen aria-hidden="true" className="h-5 w-5" />
+              </button>
+            )}
+
             {/* Quick Format & Toolbar Info Overlay */}
             <div className="w-full max-w-[650px] mb-3 flex items-center justify-between text-xs text-slate-600 no-print">
               <div className="flex items-center gap-2">

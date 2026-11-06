@@ -25,7 +25,7 @@ interface EditorPanelProps {
   isDNSAdmin?: boolean;
   availabilityPolicy: DNSFlyerAvailabilityPolicy;
   canBypassAvailability?: boolean;
-  onOpenLegacy?: () => void;
+  readOnly?: boolean;
 }
 
 export const EditorPanel: React.FC<EditorPanelProps> = ({
@@ -41,7 +41,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onMakeItPerfect,
   onChangeFormat,
   onToggleOrientation,
-  onOpenLegacy,
+  readOnly = false,
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [activeTab, setActiveTab] = useState<EditorTabId>('templates');
@@ -56,30 +56,31 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         uiLanguage={uiLanguage}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onOpenLegacy={onOpenLegacy}
+        readOnly={readOnly}
       />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        <div role="status" aria-live="polite" className="text-[11px] text-slate-600">
+        {readOnly && <p role="status" className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-sm text-blue-950">{ui('DNS-Gesamtflyer: Nur Ansicht. Für Änderungen wählt bitte die regionale Preisliste.', 'Flyer generale DNS: sola lettura. Per le modifiche scegli il listino della tua area.')}</p>}
+        {!readOnly && <div role="status" aria-live="polite" className="text-[11px] text-slate-600">
           {autosaveStatus === 'local' ? ui('Lokal gespeichert · DNS Core Anmeldung erforderlich', 'Salvato sul dispositivo · accedi a DNS Core')
             : autosaveStatus === 'pending' ? ui('Änderungen werden automatisch gespeichert…', 'Modifiche in attesa di sincronizzazione…')
             : autosaveStatus === 'saving' ? ui('In DNS Core speichern…', 'Salvataggio in DNS Core…')
             : autosaveStatus === 'saved' ? ui('In DNS Core gespeichert ✓', 'Salvato automaticamente in DNS Core ✓')
             : ui('Cloud-Speicherung fehlgeschlagen · Erneut versuchen', 'Errore salvataggio cloud · riprova')}
         </div>
-        {autosaveStatus === 'error' && autosaveErrorCode && (
+        {!readOnly && autosaveStatus === 'error' && autosaveErrorCode && (
           <div role="alert" className="text-[11px] p-2 bg-red-50 text-red-800 rounded border border-red-200">
             {ui('DNS Core Firestore: Entwurf nicht gespeichert', 'DNS Core Firestore: bozza non salvata')}: <code>{autosaveErrorCode}</code>
           </div>
         )}
-        {blockErrors.length > 0 && (
+        {!readOnly && blockErrors.length > 0 && (
           <div role="status" className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
             <strong>{ui('Blockdaten prüfen', 'Verifica dati blocchi')}</strong>
             <ul className="list-disc pl-4 mt-1">{blockErrors.map((message, index) => <li key={index}>{message}</li>)}</ul>
           </div>
         )}
-        <PrintProofControl content={content} language={uiLanguage} />
-        {activeTab === 'templates' && (
+        {!readOnly && <PrintProofControl content={content} language={uiLanguage} />
+        {(readOnly || activeTab === 'templates') && (
           <SimpleTemplatesEditorTab
             uiLanguage={uiLanguage}
             onApplyTemplate={onApplyTemplate}
@@ -89,7 +90,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
           />
         )}
 
-        {activeTab === 'content' && (
+        {!readOnly && activeTab === 'content' && (
           <SimpleContentEditorTab
             uiLanguage={uiLanguage}
             content={content}
@@ -99,7 +100,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
           />
         )}
 
-        {activeTab === 'images' && (
+        {!readOnly && activeTab === 'images' && (
           <SimpleImageEditorTab
             uiLanguage={uiLanguage}
             content={content}
@@ -107,7 +108,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
           />
         )}
 
-        {activeTab === 'style' && (
+        {!readOnly && activeTab === 'style' && (
           <SimpleStyleEditorTab
             uiLanguage={uiLanguage}
             content={content}
@@ -115,7 +116,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
           />
         )}
 
-        {activeTab === 'layout' && (
+        {!readOnly && activeTab === 'layout' && (
           <SimplePageEditorTab
             uiLanguage={uiLanguage}
             content={content}
@@ -127,7 +128,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
           />
         )}
 
-        {activeTab === 'qr' && (
+        {!readOnly && activeTab === 'qr' && (
           <QRCodeEditorTab content={content} onChangeContent={onChangeContent} />
         )}
       </div>

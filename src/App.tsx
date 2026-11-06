@@ -806,7 +806,7 @@ export default function App() {
             )}
 
             {/* Quick Format & Toolbar Info Overlay */}
-            <div className="w-full max-w-[650px] mb-3 flex items-center justify-between text-xs text-slate-600 no-print">
+            <div className={`w-full max-w-[650px] mb-3 flex items-center justify-between text-xs text-slate-600 no-print ${editorCollapsed ? "pt-8 sm:pt-0 sm:pl-10" : ""}`}>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-white font-vietnam uppercase bg-[#0D4D5E] px-2.5 py-0.5 rounded-md shadow-xs">
                   {uiCopy.format} {content.format}

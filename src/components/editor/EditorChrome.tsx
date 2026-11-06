@@ -4,6 +4,7 @@ import {
   Image as ImageIcon,
   LayoutTemplate,
   PanelLeftClose,
+  Settings2,
   PanelsTopLeft,
   Palette,
   QrCode,
@@ -25,6 +26,8 @@ interface EditorChromeProps {
   readOnly?: boolean;
   disableImageTab?: boolean;
   onCollapse: () => void;
+  showBackend?: boolean;
+  onOpenBackend?: () => void;
 }
 
 export function EditorChrome({
@@ -34,6 +37,8 @@ export function EditorChrome({
   readOnly = false,
   disableImageTab = false,
   onCollapse,
+  showBackend = false,
+  onOpenBackend,
 }: EditorChromeProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const tabs = [
@@ -49,24 +54,26 @@ export function EditorChrome({
     <>
       <div className="bg-[#0D4D5E] px-3.5 py-2 text-white flex items-center justify-between border-b border-[#0D4D5E]/80">
         <div className="flex items-center gap-2">
-          <Cloud className="w-4 h-4 text-[#AAD0D1]" />
-          <div>
-            <div className="text-xs font-bold font-vietnam">DNS Core · Flyer Studio</div>
-            <div className="text-[9px] text-white/60">
-              {ui('Kontrollierter Editor', 'Editor controllato')}
-            </div>
-          </div>
+          <Cloud aria-hidden="true" className="w-4 h-4 text-[#AAD0D1]" />
+          <span className="text-sm font-bold tracking-wide font-vietnam">EDITOR</span>
         </div>
-        <button
-          type="button"
-          onClick={onCollapse}
-          aria-label={ui('Editor ausblenden', 'Nascondi pannello editor')}
-          title={ui('Editor ausblenden', 'Nascondi pannello editor')}
-          aria-expanded="true"
-          className="group relative ml-2 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/25 bg-white/10 text-[#D9EFF0] shadow-sm transition-colors hover:border-white/55 hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          <PanelLeftClose aria-hidden="true" className="h-[19px] w-[19px]" />
-        </button>
+        <div className="flex items-center gap-1.5">
+          {showBackend && onOpenBackend && (
+            <button type="button" onClick={onOpenBackend}
+              title={ui('DNS-Verwaltung öffnen', 'Apri backend DNS')}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#AAD0D1]/50 bg-white/10 px-2.5 text-[11px] font-semibold text-white transition-colors hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+              <Settings2 aria-hidden="true" className="h-4 w-4 text-[#AAD0D1]" />
+              BACKEND
+            </button>
+          )}
+          <button type="button" onClick={onCollapse}
+            aria-label={ui('Editor ausblenden', 'Nascondi pannello editor')}
+            title={ui('Editor ausblenden', 'Nascondi pannello editor')}
+            aria-expanded="true"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/25 bg-white/10 text-[#D9EFF0] shadow-sm hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+            <PanelLeftClose aria-hidden="true" className="h-[19px] w-[19px]" />
+          </button>
+        </div>
       </div>
 
       <div className={`grid ${readOnly ? 'grid-cols-1' : 'grid-cols-6'} gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200`}>

@@ -56,9 +56,6 @@ export function SimpleTemplatesEditorTab({
                   <div className="text-[9px] font-extrabold uppercase tracking-wider text-[#0D4D5E]">
                     {product.label[uiLanguage]}
                   </div>
-                  <div className="text-xs font-bold text-slate-900 mt-1 font-vietnam">
-                    {template!.name.replace(/^\d+\.\s*/, '')}
-                  </div>
                   {product.type === 'dns_price_list' && !isDNSAdmin && (
                     <p className="text-[10px] font-bold text-blue-800 mt-1">
                       {ui('Nur Ansicht · zentral von DNS verwaltet', 'Sola lettura · gestito centralmente da DNS')}

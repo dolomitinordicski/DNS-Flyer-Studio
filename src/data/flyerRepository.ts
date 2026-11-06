@@ -144,7 +144,13 @@ export async function loadCurrentFlyerDocument(content: FlyerContent): Promise<F
       }
       throw error;
     }
-    if (!snapshot.exists()) throw new Error('FLYER_CENTRAL_NOT_PUBLISHED');
+    if (!snapshot.exists()) {
+      // DNS Admin may create the one official document, but area accounts
+      // must never use a fallback/default in place of an unpublished Flyer.
+      const access = await loadCurrentFlyerAccess();
+      if (access.isAdmin) return null;
+      throw new Error('FLYER_CENTRAL_NOT_PUBLISHED');
+    }
     const record = hydrateDocumentRecord(snapshot.id, snapshot.data());
     if (!record || record.scopeType !== 'network'
       || record.scopeId !== 'dolomiti-nordicski'

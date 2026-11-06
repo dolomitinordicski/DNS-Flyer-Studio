@@ -4,8 +4,7 @@ import { captureCreativeFlyer, exportCreativePNG } from './features/creative-exp
 import { printVectorFlyerFromDOM } from './features/creative-export/nativeVectorPrint';
 import { Navbar } from './components/Navbar';
 import { initWorkspaceShell } from './lib/workspaceShell';
-import { DNSDesignControl } from './components/DNSDesignControl';
-import { DNSFlyerAvailabilityControl } from './components/DNSFlyerAvailabilityControl';
+import { FlyerAdminBackend } from './components/FlyerAdminBackend';
 import { DEFAULT_POLICY, subscribeDesignPolicy, type DNSFlyerDesignPolicy } from './data/dnsFlyerDesignPolicy';
 import {
   DEFAULT_FLYER_AVAILABILITY,
@@ -60,11 +59,10 @@ export default function App() {
   const [currentReportingAreaId, setCurrentReportingAreaId] = useState<string | null>(null);
   const [isDNSAdmin, setIsDNSAdmin] = useState(false);
   const [designPolicy, setDesignPolicy] = useState<DNSFlyerDesignPolicy>(DEFAULT_POLICY);
-  const [designPanelOpen, setDesignPanelOpen] = useState(false);
+  const [backendOpen, setBackendOpen] = useState(false);
   const [availabilityPolicy, setAvailabilityPolicy] = useState<DNSFlyerAvailabilityPolicy>(DEFAULT_FLYER_AVAILABILITY);
   const [availabilityStatus, setAvailabilityStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
-  const [availabilityPanelOpen, setAvailabilityPanelOpen] = useState(false);
   useEffect(() => {
     if (!coreUserId) {
       setDesignPolicy(DEFAULT_POLICY);
@@ -167,6 +165,7 @@ export default function App() {
   useEffect(() => {
     void probeDNSCoreHeader().then(setCoreStatus);
     return subscribeDNSCoreUser(user => {
+      setBackendOpen(false);
       setCanReadFlyer(false);
       setCanWriteFlyer(false);
       setCurrentStateReady(false);
@@ -641,6 +640,8 @@ export default function App() {
         coreUserEmail={coreUserEmail}
         onCoreSignIn={handleCoreSignIn}
         onCoreSignOut={handleCoreSignOut}
+        showBackend={isDNSAdmin && !!coreUserId && canReadFlyer}
+        onOpenBackend={() => setBackendOpen(true)}
       />
       {coreAuthError && (
         <div role="alert" className="bg-red-50 border-b border-red-200 text-red-800 px-4 py-2 text-sm flex items-center justify-between gap-4 no-print">
@@ -697,12 +698,12 @@ export default function App() {
         </div>
       )}
 
-      {isDNSAdmin && <div className="no-print flex justify-end gap-2 border-b bg-white px-5 py-2">
-        <button type="button" onClick={() => setAvailabilityPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">Flyer disponibili</button>
-        <button type="button" onClick={() => setDesignPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">DNS Design Control</button>
-      </div>}
-      {isDNSAdmin && availabilityPanelOpen && <DNSFlyerAvailabilityControl uiLanguage={uiLanguage} policy={availabilityPolicy} onClose={() => setAvailabilityPanelOpen(false)} />}
-      {isDNSAdmin && designPanelOpen && <DNSDesignControl uiLanguage={uiLanguage} policy={designPolicy} onClose={() => setDesignPanelOpen(false)} />}
+      {isDNSAdmin && backendOpen && <FlyerAdminBackend
+        uiLanguage={uiLanguage}
+        availabilityPolicy={availabilityPolicy}
+        designPolicy={designPolicy}
+        onClose={() => setBackendOpen(false)}
+      />}
       {coreUserId && canReadFlyer && isReadOnlyDNS && availabilityStatus === 'ready' && currentStateReady && !currentStateError && (
         <div role="status" className="no-print border-b border-blue-300 bg-blue-50 px-5 py-3 text-sm font-medium text-blue-950">
           {uiLanguage === 'de'

@@ -22,6 +22,18 @@ export function SimpleContentEditorTab({
   onChangeContent,
 }: SimpleContentEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
+  const ticketFieldLabel = (key: string) => ({
+    issuerName: ui('Aussteller', 'Emittente'),
+    contactEmail: ui('E-Mail', 'Email'),
+    contactPhone: ui('Telefon', 'Telefono'),
+    websiteUrl: ui('Website', 'Sito web'),
+    title: ui('Titel', 'Titolo'),
+    subtitle: ui('Untertitel', 'Sottotitolo'),
+    body: ui('Text', 'Testo'),
+    imageUrl: ui('Bild-URL', 'URL immagine'),
+    qrImageUrl: ui('QR-Bild-URL', 'URL immagine QR'),
+    qrLabel: ui('QR-Beschriftung', 'Didascalia QR'),
+  } as Record<string,string>)[key] ?? key;
   const can = (field: string) => !product || product.editableFields.includes(field);
   const uploadTicketImage = (target: 'ticketLocalLogoUrl' | 'imageUrl' | 'qrImageUrl') => {
     const input = document.createElement('input');
@@ -131,7 +143,6 @@ export function SimpleContentEditorTab({
               <option key={area.id} value={area.id}>{area.localizedName[uiLanguage] || area.canonicalName}</option>
             ))}
           </select>
-          {!isDNSAdmin && <p className="text-[10px] text-slate-500">{ui('Gebiet wird von DNS Core vorgegeben.', 'Area assegnata da DNS Core.')}</p>}
         </section>
       )}
       {(product?.type === 'gutschein' || product?.type === 'voucher') && (
@@ -186,9 +197,8 @@ export function SimpleContentEditorTab({
               {REGIONAL_LOGOS.filter(area => area.id !== 'dns_central').map(area => <option key={area.id} value={area.id}>{area.regionName}</option>)}
             </select>
           </label>}
-          <p className="text-[10px] text-slate-500">{ui('Alle drei Tickettypen verwenden das Logo der ausstellenden Area.', 'Tutti e tre i ticket utilizzano il logo dell’area emittente.')}</p>
           {(['issuerName', 'contactEmail', 'contactPhone', 'websiteUrl'] as const).map(key => (
-            <label key={key} className="block space-y-1"><span className="text-[10px] font-bold">{key}</span>
+            <label key={key} className="block space-y-1"><span className="text-[10px] font-bold">{ticketFieldLabel(key)}</span>
               <input className="w-full rounded-lg border p-2 text-xs" value={content[key] || ''} onChange={e => onChangeContent({ [key]: e.target.value })} />
             </label>
           ))}
@@ -209,7 +219,7 @@ export function SimpleContentEditorTab({
               <option value="info">Info</option><option value="promo">Promo</option>
             </select>
             {(['title', 'subtitle', 'body', 'imageUrl', 'qrImageUrl', 'qrLabel'] as const).map(key => (
-              <label key={key} className="block space-y-1"><span className="text-[10px] font-bold">{key}</span>
+              <label key={key} className="block space-y-1"><span className="text-[10px] font-bold">{ticketFieldLabel(key)}</span>
                 {key === 'body' ? <textarea rows={3} maxLength={350} className="w-full rounded-lg border p-2 text-xs" value={content.ticketContent?.[key] || ''}
                     onChange={e => onChangeContent({ ticketContent: { ...content.ticketContent!, [key]: e.target.value } })} />
                   : <input className="w-full rounded-lg border p-2 text-xs" value={content.ticketContent?.[key] || ''}

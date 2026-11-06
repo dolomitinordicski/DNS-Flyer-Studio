@@ -74,12 +74,6 @@ export function SimpleContentEditorTab({
     <div className="space-y-4">
       <div>
         <h3 className="text-sm font-bold text-slate-900 font-vietnam">{ui('Inhalte', 'Contenuti')}</h3>
-        <p className="text-xs text-slate-500 mt-1">
-          {ui(
-            'Nur die für diesen Flyertyp freigegebenen Inhalte können geändert werden.',
-            'Puoi modificare solo i contenuti abilitati per questo tipo di flyer.'
-          )}
-        </p>
       </div>
 
       {product?.dataPolicy.languageMode === 'monolingual' && (
@@ -103,9 +97,6 @@ export function SimpleContentEditorTab({
               </button>
             ))}
           </div>
-          <p className="text-[10px] text-slate-500">
-            {ui('Das Ticket wird jeweils in einer einzigen Sprache ausgegeben.', 'Il ticket viene prodotto in una sola lingua alla volta.')}
-          </p>
         </div>
       )}
 
@@ -271,7 +262,6 @@ export function SimpleContentEditorTab({
       {product?.type === 'regional_price_list' && (
         <section className="p-3 rounded-xl border border-[#AAD0D1] space-y-3">
           <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Eigene Gebietsinfos', 'Informazioni proprie dell’area')}</h4>
-          <p className="text-[10px] text-slate-500">{ui('Nur ausgefüllte Angaben werden gezeigt. Das Querformat passt sich automatisch an.', 'Mostriamo solo i contenuti inseriti: il layout orizzontale si adatta automaticamente.')}</p>
           <label className="block space-y-1">
             <span className="text-[10px] font-semibold">{ui('Kurztext (DE / IT / EN)', 'Breve testo (DE / IT / EN)')}</span>
             <textarea rows={3} maxLength={350} className="w-full border rounded-lg p-2 text-xs"
@@ -311,7 +301,7 @@ export function SimpleContentEditorTab({
       {product?.type === 'hotel_package' && (
         <section className="rounded-xl border border-[#AAD0D1] bg-slate-50 p-3 space-y-2">
           <h4 className="text-xs font-bold text-[#0D4D5E]">{ui('Pakete & Angebote', 'Pacchetti e offerte')}</h4>
-          <p className="text-[11px] text-slate-600">{ui('Manuelle Vorlagen; vorhandene Texte werden bei Auswahl ersetzt.', 'Preset manuali; la selezione sostituisce i testi esistenti.')}</p>
+          <p className="text-[11px] text-slate-600">{ui('Auswahl ersetzt vorhandene Texte.', 'La scelta sostituisce i testi esistenti.')}</p>
           <div className="grid grid-cols-3 gap-2">
             {PACKAGE_OFFER_PRESETS.map(preset => <button key={preset.id} type="button"
               className="rounded-lg border border-slate-200 bg-white p-2 text-[11px] font-semibold text-[#0D4D5E] hover:border-[#0D4D5E]"

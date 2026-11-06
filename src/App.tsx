@@ -774,6 +774,8 @@ export default function App() {
                 onChangeFormat={format => { if (!isReadOnlyDNS) handleChangeFormat(format); }}
                 onToggleOrientation={() => { if (!isReadOnlyDNS) handleToggleOrientation(); }}
                 isDNSAdmin={isDNSAdmin || hasDNSNetworkAccess}
+                canWriteFlyer={canWriteFlyer}
+                canEditDNSGlobal={isDNSAdmin}
                 readOnly={isReadOnlyDNS}
                 availabilityPolicy={availabilityStatus === 'ready' ? availabilityPolicy : { ...DEFAULT_FLYER_AVAILABILITY, enabled: Object.fromEntries(Object.keys(DEFAULT_FLYER_AVAILABILITY.enabled).map(key => [key, false])) as DNSFlyerAvailabilityPolicy['enabled'] }}
                 canBypassAvailability={isDNSAdmin}

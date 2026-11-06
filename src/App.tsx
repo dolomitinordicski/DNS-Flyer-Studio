@@ -380,6 +380,13 @@ export default function App() {
         const currentId = canonicalFlyerDocumentId(scoped);
         autosave.selectDraft(currentId);
         setContent(scoped);
+        if (selectedProduct?.type === 'dns_price_list' && isDNSAdmin) {
+          // Never silently publish the old default sample as the central flyer.
+          // DNS Admin must inspect the content and explicitly create it.
+          setCurrentStateError('FLYER_CENTRAL_INITIALIZATION_REQUIRED');
+          setCurrentStateReady(false);
+          return;
+        }
       }
       // The editor is safe to autosave only after a verified current-state
       // read or a verified absence of a current document.
@@ -626,7 +633,27 @@ export default function App() {
         </div>
       )}
 
-      {coreUserId && canReadFlyer && currentStateError && (
+      {isDNSAdmin && currentStateError === 'FLYER_CENTRAL_INITIALIZATION_REQUIRED' && (
+        <div role="alert" className="no-print border-b border-amber-300 bg-amber-50 px-5 py-3 text-sm text-amber-950">
+          <p className="font-semibold">
+            {uiLanguage === 'de'
+              ? 'Noch kein zentraler DNS-Gesamtflyer gespeichert. Bitte Inhalte und Tarife prüfen.'
+              : 'Non esiste ancora un flyer generale DNS centrale. Verifica contenuti e tariffe prima di crearlo.'}
+          </p>
+          <button type="button" className="mt-2 rounded-lg bg-[#0D4D5E] px-4 py-2 font-semibold text-white" onClick={() => {
+            void autosave.saveNow(content).then(() => {
+              setCurrentStateError(null);
+              setCurrentStateReady(true);
+            }).catch(error => {
+              console.error('DNS central Flyer initialization failed:', error);
+              setCurrentStateError(String(error?.code || error?.message || 'FLYER_CENTRAL_CREATE_FAILED'));
+            });
+          }}>
+            {uiLanguage === 'de' ? 'Geprüften DNS-Gesamtflyer zentral speichern' : 'Confermo e salvo il flyer DNS centrale'}
+          </button>
+        </div>
+      )}
+      {coreUserId && canReadFlyer && currentStateError && currentStateError !== 'FLYER_CENTRAL_INITIALIZATION_REQUIRED' && (
         <div role="alert" className="bg-red-50 border-b border-red-300 text-red-900 px-5 py-3 text-sm no-print flex flex-wrap items-center justify-between gap-3">
           <span>{uiLanguage === 'de'
             ? `Flyer konnte nicht sicher aus DNS Core geladen werden (${currentStateError}). Automatisches Speichern ist gesperrt, um vorhandene Daten zu schützen.`

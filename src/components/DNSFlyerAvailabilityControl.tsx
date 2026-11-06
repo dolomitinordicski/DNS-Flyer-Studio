@@ -9,10 +9,12 @@ export function DNSFlyerAvailabilityControl({
   policy,
   onClose,
   uiLanguage,
+  embedded = false,
 }: {
   policy: DNSFlyerAvailabilityPolicy;
   uiLanguage: 'de' | 'it';
   onClose: () => void;
+  embedded?: boolean;
 }) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [draft, setDraft] = useState<DNSFlyerAvailabilityPolicy>(() => structuredClone(policy));
@@ -32,14 +34,14 @@ export function DNSFlyerAvailabilityControl({
     }
   };
 
-  return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-2 sm:p-4 no-print" role="dialog" aria-modal="true" aria-label="DNS Flyer Availability">
-    <div className="flex w-full max-w-lg max-h-[calc(100dvh-1rem)] min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+  return <div className={embedded ? "flex h-full min-h-0 flex-col no-print" : "fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-2 sm:p-4 no-print"} role={embedded ? undefined : "dialog"} aria-modal={embedded ? undefined : true} aria-label="DNS Flyer Availability">
+    <div className={embedded ? "flex h-full min-h-0 w-full flex-col overflow-hidden bg-white" : "flex w-full max-w-lg max-h-[calc(100dvh-1rem)] min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-2xl"}>
+      {!embedded && <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
         <div>
           <h2 className="text-base sm:text-lg font-bold text-[#0D4D5E]">{ui('DNS · Flyer-Verfügbarkeit', 'DNS · Flyer disponibili')}</h2>
         </div>
         <button type="button" onClick={onClose} className="shrink-0 rounded-lg border px-3 py-1.5 text-sm">{ui('Schließen', 'Chiudi')}</button>
-      </div>
+      </div>}
 
       <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto px-4 py-3">
         {FLYER_PRODUCTS.map(product => (

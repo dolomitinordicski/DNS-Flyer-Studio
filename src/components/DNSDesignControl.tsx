@@ -7,7 +7,7 @@ const fields: { id: DesignProperty; title: string; options: { value: string; tit
   { id: 'pills', title: 'Pills / etichette', options: [{value:'square',title:'Squadrate'}, {value:'soft',title:'Morbide'}, {value:'pill',title:'Pills'}] },
   { id: 'heroFade', title: 'Sfumatura fotografia (un lato)', options: [{value:'none',title:'Nessuna'}, {value:'top',title:'Alto'}, {value:'right',title:'Destra'}, {value:'bottom',title:'Basso'}, {value:'left',title:'Sinistra'}] },
 ];
-export function DNSDesignControl({ policy, onClose, uiLanguage }: { policy: DNSFlyerDesignPolicy; onClose: () => void; uiLanguage: 'de' | 'it' }) {
+export function DNSDesignControl({ policy, onClose, uiLanguage, embedded = false }: { policy: DNSFlyerDesignPolicy; onClose: () => void; uiLanguage: 'de' | 'it'; embedded?: boolean }) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [draft, setDraft] = useState<DNSFlyerDesignPolicy>(() => structuredClone(policy ?? DEFAULT_POLICY));
   const [target, setTarget] = useState('global');
@@ -33,12 +33,12 @@ export function DNSDesignControl({ policy, onClose, uiLanguage }: { policy: DNSF
     catch (error) { setMessage(ui('Speichern fehlgeschlagen: ', 'Salvataggio non riuscito: ') + (error instanceof Error ? error.message : String(error))); }
     finally { setSaving(false); }
   };
-  return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-2 sm:p-4 no-print" role="dialog" aria-modal="true" aria-label="DNS Design Control">
-    <div className="flex w-full max-w-lg max-h-[calc(100dvh-1rem)] min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+  return <div className={embedded ? "flex h-full min-h-0 flex-col no-print" : "fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-2 sm:p-4 no-print"} role={embedded ? undefined : "dialog"} aria-modal={embedded ? undefined : true} aria-label="DNS Design Control">
+    <div className={embedded ? "flex h-full min-h-0 w-full flex-col overflow-hidden bg-white" : "flex w-full max-w-lg max-h-[calc(100dvh-1rem)] min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-2xl"}>
+      {!embedded && <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
         <div><h2 className="text-base sm:text-lg font-bold text-[#0D4D5E]">DNS · Design Control</h2></div>
         <button type="button" onClick={onClose} className="shrink-0 rounded-lg border px-3 py-1.5 text-sm">{ui('Schließen', 'Chiudi')}</button>
-      </div>
+      </div>}
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3 space-y-3">
       <label className="block text-sm font-semibold">{ui('Anwendungsbereich', 'Livello di applicazione')}
         <select className="mt-1 w-full rounded-lg border p-2" value={target} onChange={event=>setTarget(event.target.value)}>

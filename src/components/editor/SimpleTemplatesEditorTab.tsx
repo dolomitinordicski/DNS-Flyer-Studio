@@ -8,6 +8,7 @@ import { isFlyerProductEnabled, type DNSFlyerAvailabilityPolicy } from '../../da
 
 interface SimpleTemplatesEditorTabProps {
   uiLanguage: 'de' | 'it';
+  activeTemplateId: LayoutTemplateId;
   onApplyTemplate: (templateId: LayoutTemplateId) => void;
   isDNSAdmin: boolean;
   canWriteFlyer: boolean;
@@ -18,6 +19,7 @@ interface SimpleTemplatesEditorTabProps {
 
 export function SimpleTemplatesEditorTab({
   uiLanguage,
+  activeTemplateId,
   onApplyTemplate,
   isDNSAdmin,
   canWriteFlyer,
@@ -50,20 +52,26 @@ export function SimpleTemplatesEditorTab({
           const isPriceList = product.type === 'dns_price_list' || product.type === 'regional_price_list';
           const canEdit = canWriteFlyer && !restricted && (product.type !== 'dns_price_list' || canEditDNSGlobal);
           const isExpanded = expanded === product.type;
+          const isActive = activeTemplateId === product.templateId;
           return (
-            <div key={product.type} className={`rounded-xl border p-3 shadow-2xs ${isPriceList ? 'bg-[#EDF5F5] border-[#AAD0D1]' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-start justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={() => onApplyTemplate(product.templateId)}
-                  disabled={restricted}
-                  aria-label={product.label[uiLanguage]}
-                  className="min-w-0 flex-1 text-left disabled:cursor-not-allowed disabled:opacity-65"
-                >
-                  <span className="block text-[10px] font-extrabold uppercase tracking-wider text-[#0D4D5E]">
-                    {product.label[uiLanguage]}
-                  </span>
-                </button>
+            <div
+              key={product.type}
+              className={`group relative rounded-xl border p-3 shadow-2xs transition-colors ${isActive
+                ? 'bg-[#D6E8E8] border-[#417483] ring-1 ring-[#417483]/35'
+                : isPriceList ? 'bg-[#EDF5F5] border-[#AAD0D1]' : 'bg-slate-50 border-slate-200'}`}
+            >
+              <button
+                type="button"
+                onClick={() => onApplyTemplate(product.templateId)}
+                disabled={restricted}
+                aria-label={product.label[uiLanguage]}
+                aria-current={isActive ? 'true' : undefined}
+                className="absolute inset-0 w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D4D5E] disabled:cursor-not-allowed disabled:opacity-65"
+              />
+              <div className="pointer-events-none relative flex items-start justify-between gap-2">
+                <span className={`block text-[10px] font-extrabold uppercase tracking-wider transition-colors group-hover:underline group-hover:underline-offset-2 ${isActive ? 'text-[#073E4D] underline underline-offset-2' : 'text-[#0D4D5E]'}`}>
+                  {product.label[uiLanguage]}
+                </span>
                 <span
                   role="img"
                   aria-label={canEdit ? ui('Bearbeitbar', 'Modificabile') : ui('Nicht bearbeitbar', 'Non modificabile')}
@@ -76,13 +84,13 @@ export function SimpleTemplatesEditorTab({
                 aria-expanded={isExpanded}
                 aria-controls={`flyer-help-${product.type}`}
                 onClick={() => setExpanded(previous => previous === product.type ? null : product.type)}
-                className="mt-1 flex items-center gap-1 rounded text-[11px] font-medium text-slate-600 hover:text-[#0D4D5E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0D4D5E]"
+                className="relative z-10 mt-1 flex items-center gap-1 rounded text-[11px] font-medium text-slate-600 hover:text-[#0D4D5E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0D4D5E]"
               >
                 {ui('Details', 'Dettagli')}
                 <ChevronDown aria-hidden="true" className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
               </button>
               {isExpanded && (
-                <p id={`flyer-help-${product.type}`} className="mt-2 border-t border-slate-200 pt-2 text-[11px] leading-relaxed text-slate-600">
+                <p id={`flyer-help-${product.type}`} className="pointer-events-none relative mt-2 border-t border-slate-200 pt-2 text-[11px] leading-relaxed text-slate-600">
                   {FLYER_HELP[product.type][uiLanguage]}
                 </p>
               )}

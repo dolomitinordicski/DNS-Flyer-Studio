@@ -24,6 +24,7 @@ interface EditorPanelProps {
   onToggleOrientation?: () => void;
   isDNSAdmin?: boolean;
   canWriteFlyer?: boolean;
+  canEditDNSGlobal?: boolean;
   availabilityPolicy: DNSFlyerAvailabilityPolicy;
   canBypassAvailability?: boolean;
   readOnly?: boolean;

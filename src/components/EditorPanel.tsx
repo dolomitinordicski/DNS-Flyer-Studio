@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { FlyerContent, LayoutTemplateId } from '../types';
 import { PrintProofControl } from './print-proof/PrintProofControl';
 import { EditorChrome, type EditorTabId } from './editor/EditorChrome';
@@ -23,6 +23,8 @@ interface EditorPanelProps {
   onChangeFormat?: (format: FlyerContent['format']) => void;
   onToggleOrientation?: () => void;
   isDNSAdmin?: boolean;
+  canWriteFlyer?: boolean;
+  canEditDNSGlobal?: boolean;
   availabilityPolicy: DNSFlyerAvailabilityPolicy;
   canBypassAvailability?: boolean;
   readOnly?: boolean;
@@ -36,6 +38,8 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   autosaveErrorCode,
   onApplyTemplate,
   isDNSAdmin = false,
+  canWriteFlyer = false,
+  canEditDNSGlobal = false,
   availabilityPolicy,
   canBypassAvailability = false,
   onMakeItPerfect,
@@ -46,6 +50,10 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [activeTab, setActiveTab] = useState<EditorTabId>('templates');
   const product = getFlyerProductByTemplate(content.layoutTemplateId);
+  const disableImageTab = Boolean(product?.dataPolicy.ticketType);
+  useEffect(() => {
+    if (disableImageTab && activeTab === 'images') setActiveTab('content');
+  }, [disableImageTab, activeTab]);
   const blockDiagnostics = product ? inspectProductBlocks(content, product) : [];
   const blockErrors = blockDiagnostics.flatMap(entry => entry.issues.filter(issue => issue.level === 'error').map(issue => `${entry.sectionId}: ${issue.message}`));
 
@@ -57,6 +65,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         activeTab={activeTab}
         onTabChange={setActiveTab}
         readOnly={readOnly}
+        disableImageTab={disableImageTab}
       />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -85,6 +94,8 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             uiLanguage={uiLanguage}
             onApplyTemplate={onApplyTemplate}
             isDNSAdmin={isDNSAdmin}
+            canWriteFlyer={canWriteFlyer}
+            canEditDNSGlobal={canEditDNSGlobal}
             availabilityPolicy={availabilityPolicy}
             canBypassAvailability={canBypassAvailability}
           />
@@ -100,7 +111,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
           />
         )}
 
-        {!readOnly && activeTab === 'images' && (
+        {!readOnly && !disableImageTab && activeTab === 'images' && (
           <SimpleImageEditorTab
             uiLanguage={uiLanguage}
             content={content}

@@ -92,6 +92,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         {(readOnly || activeTab === 'templates') && (
           <SimpleTemplatesEditorTab
             uiLanguage={uiLanguage}
+            activeTemplateId={content.layoutTemplateId}
             onApplyTemplate={onApplyTemplate}
             isDNSAdmin={isDNSAdmin}
             canWriteFlyer={canWriteFlyer}

@@ -381,19 +381,28 @@ test('flyer cards: expandable localized help, permission colors, and disabled Bi
   await expect(area).toBeVisible();
   await expect(dns.locator('..').getByRole('img',{name:'Nicht bearbeitbar'})).toBeVisible();
   await expect(area.locator('..').getByRole('img',{name:'Bearbeitbar'})).toBeVisible();
+  // A whole card (including empty padding) opens the flyer, and the selected card stays highlighted.
+  const areaCard = area.locator('..');
+  await areaCard.click({position:{x:10,y:10}});
+  await expect(area).toHaveAttribute('aria-current','true');
+  await expect(areaCard).toHaveClass(/bg-\[#D6E8E8\]/);
+  await expect(areaCard.locator('span').first()).toHaveClass(/underline/);
+  await area.click();
+  await expect(area).toHaveAttribute('aria-current','true');
 
-  const details = area.locator('../..').getByRole('button',{name:'Details'});
+
+  const details = area.locator('..').getByRole('button',{name:'Details'});
   await expect(details).toHaveAttribute('aria-expanded','false');
   await details.click();
   await expect(details).toHaveAttribute('aria-expanded','true');
-  await expect(area.locator('../..')).toContainText('Preisliste eures Gebiets');
+  await expect(area.locator('..')).toContainText('Preisliste eures Gebiets');
 
   await page.evaluate(()=>localStorage.setItem('dns-ui-language-v1','it'));
   // Same-document preferences are updated by the Foundation control.
   await page.evaluate(async()=>{const {getDNSFoundationRuntime}=await import('/src/lib/foundationRuntime.ts');getDNSFoundationRuntime().setLanguage('it');});
   const areaIt = editor(page).getByRole('button',{name:'Listino regionale'});
-  await expect(areaIt.locator('../..').getByRole('button',{name:'Dettagli'})).toBeVisible();
-  await expect(areaIt.locator('../..')).toContainText('Listino della vostra area');
+  await expect(areaIt.locator('..').getByRole('button',{name:'Dettagli'})).toBeVisible();
+  await expect(areaIt.locator('..')).toContainText('Listino della vostra area');
 
   // DNS Admin can access the three tickets even when they are unavailable to areas.
   await logout(page);

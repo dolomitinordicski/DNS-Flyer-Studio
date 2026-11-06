@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Settings2, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Settings2 } from 'lucide-react';
 import { DNSFlyerAvailabilityControl } from './DNSFlyerAvailabilityControl';
 import { DNSDesignControl } from './DNSDesignControl';
 import type { DNSFlyerAvailabilityPolicy } from '../data/dnsFlyerAvailabilityPolicy';
@@ -15,29 +15,23 @@ interface Props {
 export function FlyerAdminBackend({ availabilityPolicy, designPolicy, uiLanguage, onClose }: Props) {
   const [tab, setTab] = useState<'availability' | 'design'>('availability');
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
   return (
-    <div role="dialog" aria-modal="true" aria-label="DNS Flyer Studio Backend"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/65 p-2 sm:p-5 no-print">
-      <section className="flex h-[min(780px,calc(100dvh-1rem))] w-full max-w-3xl min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-        <header className="flex shrink-0 items-center justify-between gap-3 bg-[#0D4D5E] px-4 py-3 text-white">
-          <div className="flex min-w-0 items-center gap-2">
-            <Settings2 aria-hidden="true" className="h-5 w-5 shrink-0 text-[#AAD0D1]" />
-            <div>
-              <h2 className="text-base font-bold font-vietnam">DNS Flyer Studio · Backend</h2>
-              <p className="text-xs text-white/70">{ui('Verwaltung der Flyer-Einstellungen', 'Gestione delle impostazioni flyer')}</p>
-            </div>
+    <section aria-label="DNS Flyer Studio Backend" className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#F4F9FA] no-print">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#0D4D5E]/15 bg-white px-4 py-3 sm:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <Settings2 aria-hidden="true" className="h-5 w-5 shrink-0 text-[#0D4D5E]" />
+          <div>
+            <h2 className="text-base font-bold font-vietnam text-[#0D4D5E]">DNS Flyer Studio · Backend</h2>
+            <p className="text-xs text-slate-600">{ui('Flyer-Einstellungen verwalten', 'Gestione impostazioni flyer')}</p>
           </div>
-          <button type="button" onClick={onClose} aria-label={ui('Backend schließen', 'Chiudi backend')}
-            title={ui('Backend schließen', 'Chiudi backend')}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/25 bg-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
-            <X aria-hidden="true" className="h-4 w-4" />
-          </button>
-        </header>
+        </div>
+        <button type="button" onClick={onClose} className="inline-flex items-center gap-2 rounded-lg border border-[#0D4D5E]/30 bg-white px-3 py-2 text-xs font-semibold text-[#0D4D5E] hover:bg-[#E9F3F3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0D4D5E]">
+          <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+          {ui('Zurück zum Editor', "Torna all'editor")}
+        </button>
+      </header>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 sm:p-5">
+        <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <nav role="tablist" aria-label={ui('Backend-Bereiche', 'Sezioni backend')}
           className="flex shrink-0 gap-1 border-b border-slate-200 bg-slate-50 px-3 pt-2">
           {([
@@ -61,7 +55,8 @@ export function FlyerAdminBackend({ availabilityPolicy, designPolicy, uiLanguage
             <DNSDesignControl embedded policy={designPolicy} onClose={onClose} uiLanguage={uiLanguage} />
           </div>
         </div>
-      </section>
-    </div>
+        </div>
+      </div>
+    </section>
   );
 }

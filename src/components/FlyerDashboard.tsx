@@ -210,15 +210,14 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
 
   // Chart 2 Data: Monthly Timeline Data (October 2025 - April 2026)
   const timelineChartData = useMemo(() => {
-    const months = [
-      { key: '2025-10', label: 'Ott 25' },
-      { key: '2025-11', label: 'Nov 25' },
-      { key: '2025-12', label: 'Dic 25' },
-      { key: '2026-01', label: 'Gen 26' },
-      { key: '2026-02', label: 'Feb 26' },
-      { key: '2026-03', label: 'Mar 26' },
-      { key: '2026-04', label: 'Apr 26' }
-    ];
+    const monthKeys = ['2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03', '2026-04'];
+    const formatter = new Intl.DateTimeFormat(uiLanguage === 'de' ? 'de-DE' : 'it-IT', {
+      month: 'short', year: '2-digit', timeZone: 'UTC',
+    });
+    const months = monthKeys.map(key => ({
+      key,
+      label: formatter.format(new Date(`${key}-01T12:00:00Z`)),
+    }));
 
     const sourceData = selectedRegionId === 'all' 
       ? records 
@@ -234,7 +233,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
         'In Programmazione': scheduled
       };
     });
-  }, [records, selectedRegionId]);
+  }, [records, selectedRegionId, uiLanguage]);
 
   // Chart 3 Data: Category Breakdown
   const categoryChartData = useMemo(() => {
@@ -254,7 +253,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
       value: counts[catKey],
       color: CATEGORY_COLORS[catKey] || '#417483'
     }));
-  }, [records, selectedRegionId]);
+  }, [records, selectedRegionId, uiLanguage]);
 
   // Handle saving new scheduled flyer record
   const handleSaveNewRecord = async (e: React.FormEvent) => {

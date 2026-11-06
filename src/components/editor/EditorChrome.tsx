@@ -22,6 +22,7 @@ interface EditorChromeProps {
   activeTab: EditorTabId;
   onTabChange: (tab: EditorTabId) => void;
   readOnly?: boolean;
+  disableImageTab?: boolean;
 }
 
 export function EditorChrome({
@@ -29,6 +30,7 @@ export function EditorChrome({
   activeTab,
   onTabChange,
   readOnly = false,
+  disableImageTab = false,
 }: EditorChromeProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const tabs = [
@@ -58,19 +60,24 @@ export function EditorChrome({
       <div className={`grid ${readOnly ? 'grid-cols-1' : 'grid-cols-6'} gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200`}>
         {tabs.filter(tab => !readOnly || tab.id === 'templates').map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
+          const disabled = tab.id === 'images' && disableImageTab;
+          const isActive = !disabled && activeTab === tab.id;
           return (
             <button
               key={tab.id}
               data-tab={tab.id}
-              onClick={() => onTabChange(tab.id)}
+              onClick={() => { if (!disabled) onTabChange(tab.id); }}
+              disabled={disabled}
+              title={disabled ? ui("Für Ticketmodelle nicht verfügbar", "Non disponibile per i biglietti") : undefined}
               className={`flex flex-col items-center justify-center gap-1 px-1 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                isActive
-                  ? 'bg-[#0D4D5E] text-white shadow-xs'
-                  : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-200/80 border border-slate-200/70'
+                disabled
+                  ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-55'
+                  : isActive
+                    ? 'bg-[#0D4D5E] text-white shadow-xs'
+                    : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-200/80 border border-slate-200/70'
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#AAD0D1]' : 'text-[#0D4D5E]'}`} />
+              <Icon className={`w-3.5 h-3.5 shrink-0 ${disabled ? 'text-slate-400' : isActive ? 'text-[#AAD0D1]' : 'text-[#0D4D5E]'}`} />
               <span className="truncate">{tab.label}</span>
             </button>
           );

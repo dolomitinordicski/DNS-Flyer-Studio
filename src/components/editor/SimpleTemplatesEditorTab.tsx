@@ -22,7 +22,7 @@ export function SimpleTemplatesEditorTab({
 }: SimpleTemplatesEditorTabProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const templates = FLYER_PRODUCTS
-    .filter(product => canBypassAvailability || isFlyerProductEnabled(availabilityPolicy, product.type))
+    .filter(product => product.type === 'dns_price_list' || canBypassAvailability || isFlyerProductEnabled(availabilityPolicy, product.type))
     .map(product => ({
       product,
       template: FLYER_TEMPLATES.find(item => item.id === product.templateId),
@@ -70,6 +70,16 @@ export function SimpleTemplatesEditorTab({
                   <div className="text-xs font-bold text-slate-900 mt-1 font-vietnam">
                     {template!.name.replace(/^\d+\.\s*/, '')}
                   </div>
+                  {product.type === 'dns_price_list' && !isDNSAdmin && (
+                    <p className="text-[10px] font-bold text-blue-800 mt-1">
+                      {ui('Nur Ansicht · zentral von DNS verwaltet', 'Sola lettura · gestito centralmente da DNS')}
+                    </p>
+                  )}
+                  {product.type === 'regional_price_list' && !isDNSAdmin && (
+                    <p className="text-[10px] font-bold text-emerald-800 mt-1">
+                      {ui('Euer Gebietsflyer · bearbeitbar', 'Flyer della vostra area · modificabile')}
+                    </p>
+                  )}
                   {restricted && <p className="text-[10px] font-bold text-amber-800 mt-1">
                     {ui('Nur mit DNS-Zentralberechtigung verfügbar', 'Disponibile con autorizzazione DNS centrale')}
                   </p>}

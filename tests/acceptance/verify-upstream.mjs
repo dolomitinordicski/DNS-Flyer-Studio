@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
-const sha='773ed775d12a60bc4072df2da6f9b2c3672a10e8';
+const sha='18866122656e8a15dfc9b57388ee3819db6b209b';
 const normalize=s=>s.replace(/\r\n/g,'\n').trimEnd();
 for(const file of ['firestore.rules','storage.rules']){
   const remote=await fetch(`https://raw.githubusercontent.com/dolomitinordicski/dns-shared-data/${sha}/${file}`);

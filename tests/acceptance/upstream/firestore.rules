@@ -1111,12 +1111,21 @@ service cloud.firestore {
 
     // DNS Flyer Studio working documents.
     match /flyerDocuments/{document} {
-      allow read: if activeUser()
+      // Only canonical central DNS price list is visible across areas.
+      // Other documents retain the original scoped rules.
+      allow get: if activeUser()
+        && (hasFlyerPermission('flyer.read', resource.data)
+          || (document.matches('^current__network__dolomiti-nordicski__[0-9]{4}-[0-9]{2}__dns_price_list$')
+            && resource.data.scopeType == 'network'
+            && resource.data.scopeId == 'dolomiti-nordicski'
+            && resource.data.schema == 'dns.flyer-document'));
+      allow list: if activeUser()
         && hasFlyerPermission('flyer.read', resource.data);
 
       allow create: if activeUser()
         && validFlyerDocument(request.resource.data)
         && request.resource.data.id == document
+        && (!document.matches('^current__network__dolomiti-nordicski__[0-9]{4}-[0-9]{2}__dns_price_list$') || isAdmin())
         && request.resource.data.ownerUserId == request.auth.uid
         && hasFlyerPermission('flyer.write', request.resource.data);
 
@@ -1127,9 +1136,11 @@ service cloud.firestore {
         && request.resource.data.scopeId == resource.data.scopeId
         && request.resource.data.seasonId == resource.data.seasonId
         && request.resource.data.ownerUserId == resource.data.ownerUserId
+        && (!document.matches('^current__network__dolomiti-nordicski__[0-9]{4}-[0-9]{2}__dns_price_list$') || isAdmin())
         && hasFlyerPermission('flyer.write', resource.data);
 
       allow delete: if activeUser()
+        && (!document.matches('^current__network__dolomiti-nordicski__[0-9]{4}-[0-9]{2}__dns_price_list$') || isAdmin())
         && hasFlyerPermission('flyer.write', resource.data);
     }
 
@@ -1393,7 +1404,10 @@ service cloud.firestore {
     }
 
     match /flyerAvailabilityPolicies/{policyId} {
-      allow get: if policyId == 'dns-global' && canReadFlyerDesignPolicy();
+      // Contains only global boolean template availability. Every active DNS
+      // account may read it; only DNS Admin may create/update it. Do not
+      // depend on the optional flyerPolicyReaders provisioning index.
+      allow get: if policyId == 'dns-global' && activeUser();
       allow list: if false;
       allow create, update: if policyId == 'dns-global'
         && isAdmin() && validFlyerAvailabilityPolicy(request.resource.data);

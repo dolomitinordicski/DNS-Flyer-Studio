@@ -189,6 +189,53 @@ for(const role of ['none','inactive','expired','future','malformed','writeonly']
   });
 }
 
+
+test('area: official DNS flyer is one central read-only document; regional flyer remains editable',async({page})=>{
+  await login(page,'admin');
+  await page.evaluate(async()=>{
+    const m=await import('/tests/acceptance/operations.ts');
+    const {FLYER_TEMPLATES}=await import('/src/data/templates.ts');
+    const official=FLYER_TEMPLATES.find(template=>template.id==='official_price_list');
+    if(!official)throw new Error('OFFICIAL_TEMPLATE_MISSING');
+    await m.saveFlyerDocument({
+      ...official.defaultContent,
+      layoutTemplateId:'official_price_list',
+      regionId:'dns_central',
+      validityPeriod:'2026-27',
+      title:'DNS Central Flyer',
+      heroImageUrl:'',
+    });
+  });
+  await logout(page);
+  await login(page,'writer');
+  await expect(editor(page)).toBeVisible();
+  await expect(page.getByRole('button',{name:/DNS Gesamtpreisliste|Listino generale DNS/})).toBeVisible();
+  await page.getByRole('button',{name:/DNS Gesamtpreisliste|Listino generale DNS/}).click();
+  await expect(page.getByText(/DNS-Gesamtflyer.*Nur Ansicht|Flyer generale DNS.*Sola lettura/).first()).toBeVisible();
+  await expect(page.locator('[data-tab="content"]')).toHaveCount(0);
+  await expect(page.locator('[data-tab="images"]')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'LEGACY'})).toHaveCount(0);
+  const cannotOverwrite=await page.evaluate(async()=>{
+    const m=await import('/tests/acceptance/operations.ts');
+    const {FLYER_TEMPLATES}=await import('/src/data/templates.ts');
+    const source=FLYER_TEMPLATES.find(template=>template.id==='official_price_list').defaultContent;
+    try {
+      await m.saveFlyerDocument({
+        ...source,regionId:'dns_central',layoutTemplateId:'official_price_list',
+        validityPeriod:'2026-27',title:'Tampered DNS'
+      });
+      return false;
+    } catch { return true; }
+  });
+  expect(cannotOverwrite).toBe(true);
+  await page.getByRole('button',{name:/Regionale Preisliste|Listino regionale/}).click();
+  await expect(page.locator('[data-tab="content"]')).toBeVisible();
+  await expect(page.getByText(/Flyer generale DNS.*Sola lettura|DNS-Gesamtflyer.*Nur Ansicht/)).toHaveCount(0);
+  await page.goto('/?legacy=1');
+  await expect(page.getByRole('button',{name:'LEGACY'})).toHaveCount(0);
+  expect(new URL(page.url()).searchParams.has('legacy')).toBe(false);
+});
+
 test('reader: read allowed; service and direct Firebase writes denied',async({page})=>{
   await login(page,'reader');
   // Read-only users must see verified saved content, but must not autosave.

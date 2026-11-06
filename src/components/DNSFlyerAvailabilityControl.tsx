@@ -32,18 +32,18 @@ export function DNSFlyerAvailabilityControl({
     }
   };
 
-  return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-5 no-print" role="dialog" aria-modal="true" aria-label="DNS Flyer Availability">
-    <div className="w-full max-w-xl rounded-2xl bg-white p-7 shadow-2xl space-y-5">
-      <div className="flex items-start justify-between gap-4">
+  return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-2 sm:p-4 no-print" role="dialog" aria-modal="true" aria-label="DNS Flyer Availability">
+    <div className="flex w-full max-w-lg max-h-[calc(100dvh-1rem)] min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
         <div>
-          <h2 className="text-2xl font-bold text-[#0D4D5E]">{ui('DNS · Flyer-Verfügbarkeit', 'DNS · Flyer disponibili')}</h2>
+          <h2 className="text-base sm:text-lg font-bold text-[#0D4D5E]">{ui('DNS · Flyer-Verfügbarkeit', 'DNS · Flyer disponibili')}</h2>
         </div>
-        <button type="button" onClick={onClose} className="rounded-lg border px-3 py-1.5">{ui('Schließen', 'Chiudi')}</button>
+        <button type="button" onClick={onClose} className="shrink-0 rounded-lg border px-3 py-1.5 text-sm">{ui('Schließen', 'Chiudi')}</button>
       </div>
 
-      <div className="space-y-2">
+      <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto px-4 py-3">
         {FLYER_PRODUCTS.map(product => (
-          <label key={product.type} className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 px-4 py-3">
+          <label key={product.type} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2">
             <div>
               <strong className="block text-sm text-slate-900">{product.label[uiLanguage]}</strong>
             </div>
@@ -60,12 +60,14 @@ export function DNSFlyerAvailabilityControl({
         ))}
       </div>
 
-      {message && <p role="status" className="text-sm">{message}</p>}
-      <div className="flex justify-end">
+      <div className="shrink-0 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-white px-4 py-3">
+        <p role="status" className="min-w-0 flex-1 text-xs text-slate-600">{message}</p>
+        <div className="flex justify-end">
         <button type="button" disabled={saving} onClick={save}
-          className="rounded-lg bg-[#0D4D5E] px-5 py-3 font-bold text-white disabled:opacity-50">
+          className="rounded-lg bg-[#0D4D5E] px-4 py-2 text-sm font-bold text-white disabled:opacity-50">
           {saving ? ui('Speichern…', 'Salvataggio…') : ui('Verfügbarkeit speichern', 'Salva disponibilità')}
         </button>
+        </div>
       </div>
     </div>
   </div>;

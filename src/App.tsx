@@ -685,8 +685,8 @@ export default function App() {
         <button type="button" onClick={() => setAvailabilityPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">Flyer disponibili</button>
         <button type="button" onClick={() => setDesignPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">DNS Design Control</button>
       </div>}
-      {isDNSAdmin && availabilityPanelOpen && <DNSFlyerAvailabilityControl policy={availabilityPolicy} onClose={() => setAvailabilityPanelOpen(false)} />}
-      {isDNSAdmin && designPanelOpen && <DNSDesignControl policy={designPolicy} onClose={() => setDesignPanelOpen(false)} />}
+      {isDNSAdmin && availabilityPanelOpen && <DNSFlyerAvailabilityControl uiLanguage={uiLanguage} policy={availabilityPolicy} onClose={() => setAvailabilityPanelOpen(false)} />}
+      {isDNSAdmin && designPanelOpen && <DNSDesignControl uiLanguage={uiLanguage} policy={designPolicy} onClose={() => setDesignPanelOpen(false)} />}
       {coreUserId && canReadFlyer && isReadOnlyDNS && availabilityStatus === 'ready' && currentStateReady && !currentStateError && (
         <div role="status" className="no-print border-b border-blue-300 bg-blue-50 px-5 py-3 text-sm font-medium text-blue-950">
           {uiLanguage === 'de'

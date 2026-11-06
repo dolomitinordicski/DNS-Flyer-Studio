@@ -95,6 +95,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             onApplyTemplate={onApplyTemplate}
             isDNSAdmin={isDNSAdmin}
             canWriteFlyer={canWriteFlyer}
+            canEditDNSGlobal={canEditDNSGlobal}
             availabilityPolicy={availabilityPolicy}
             canBypassAvailability={canBypassAvailability}
           />

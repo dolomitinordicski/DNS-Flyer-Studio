@@ -352,9 +352,6 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-vietnam tracking-tight">
                 {ui('Flyer-Register & Planung', 'Registro Grafico & Programmazione Flyer')}
               </h1>
-              <p className="text-slate-200 text-sm sm:text-base font-normal leading-relaxed">
-                {ui('Zentrale Übersicht über veröffentlichte und geplante Flyer der 8 DNS-Gebiete. Nach Organisation filtern, Zeiträume analysieren und offizielle Veröffentlichungen verwalten.', 'Panoramica centralizzata dei flyer pubblicati e in programma per tutte le 8 aree DNS. Filtra per organizzazione, analizza la copertura temporale e gestisci le release ufficiali.')}
-              </p>
             </div>
 
             {/* Quick Action Button */}
@@ -849,9 +846,6 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
               <h3 className="text-lg font-bold text-slate-900 font-vietnam">
                 {ui('Veröffentlichungskalender (Saison 2025/2026)', 'Calendario Programmazione Release (Stagione 2025/2026)')}
               </h3>
-              <p className="text-xs text-slate-500">
-                Sviluppo cronologico delle campagne pubblicitarie regionali
-              </p>
             </div>
 
             <div className="space-y-8 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200">
@@ -888,14 +882,14 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                           isIssued ? 'bg-emerald-50 text-emerald-700' : 'bg-sky-50 text-sky-700'
                         }`}>
-                          {isIssued ? 'Pubblicato' : 'In Arrivo'}
+                          {isIssued ? ui('Veröffentlicht', 'Pubblicato') : ui('Geplant', 'Programmato')}
                         </span>
                         
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => setPreviewRecord(record)}
                             className="p-2 rounded-xl bg-slate-100 hover:bg-[#AAD0D1]/40 text-[#0D4D5E] transition-all"
-                            title="Anteprima Ingrandita HD"
+                            title={ui("Vorschau vergrößern", "Ingrandisci anteprima")}
                           >
                             <Eye className="w-4 h-4 text-[#0D4D5E]" />
                           </button>
@@ -963,7 +957,7 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                           r.status === 'issued' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
                         }`}>
-                          {r.status === 'issued' ? 'Emesso' : 'In Programma'}
+                          {r.status === 'issued' ? ui('Veröffentlicht', 'Pubblicato') : ui('Geplant', 'Programmato')}
                         </span>
                       </td>
                       <td className="p-4 text-slate-600 font-semibold">
@@ -1209,11 +1203,11 @@ export const FlyerDashboard: React.FC<FlyerDashboardProps> = ({ uiLanguage, onLo
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                       previewRecord.status === 'issued' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
                     }`}>
-                      {previewRecord.status === 'issued' ? 'Emesso' : 'In Programma'}
+                      {previewRecord.status === 'issued' ? ui('Veröffentlicht', 'Pubblicato') : ui('Geplant', 'Programmato')}
                     </span>
                   </div>
                   <h3 className="text-lg sm:text-xl font-black text-slate-900 font-vietnam">
-                    Anteprima Grafica: {previewRecord.title}
+                    {ui('Flyer-Vorschau', 'Anteprima flyer')}: {previewRecord.title}
                   </h3>
                 </div>
               </div>

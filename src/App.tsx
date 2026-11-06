@@ -393,7 +393,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (!coreUserId || !canReadFlyer || !canWriteFlyer || currentStateReady || currentStateError) return;
+    if (!coreUserId || !canReadFlyer || currentStateReady || currentStateError) return;
     if (!isDNSAdmin && !currentReportingAreaId) return;
     // Auth and policy snapshots are asynchronous: retry initial flyer restore
     // once policy resolves. A denied/missing policy must never load a default flyer.

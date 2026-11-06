@@ -393,7 +393,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (!coreUserId || !canReadFlyer || !canWriteFlyer || currentStateReady || currentStateError) return;
+    if (!coreUserId || !canReadFlyer || currentStateReady || currentStateError) return;
     if (!isDNSAdmin && !currentReportingAreaId) return;
     // Auth and policy snapshots are asynchronous: retry initial flyer restore
     // once policy resolves. A denied/missing policy must never load a default flyer.
@@ -604,6 +604,8 @@ export default function App() {
         canvasHint: 'I contenuti inseriti e la grafica rispettano il Corporate Identity Manual di Dolomiti NordicSki (Be Vietnam Pro, Roboto, Palette Istituzionale).',
       };
 
+  const verifiedPreview = isDNSAdmin || (availabilityStatus === 'ready' && currentStateReady && !currentStateError);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-roboto select-none">
       
@@ -615,10 +617,10 @@ export default function App() {
         onToggleOrientation={handleToggleOrientation}
         showCropMarks={content.showCropMarks}
         onToggleCropMarks={handleToggleCropMarks}
-        onOpenShareModal={() => setIsShareModalOpen(true)}
-        onPrintPdf={() => setIsExportModalOpen(true)}
-        onExportPng={() => setIsExportModalOpen(true)}
-        isExporting={isExporting}
+        onOpenShareModal={() => { if (verifiedPreview) setIsShareModalOpen(true); }}
+        onPrintPdf={() => { if (verifiedPreview) setIsExportModalOpen(true); }}
+        onExportPng={() => { if (verifiedPreview) setIsExportModalOpen(true); }}
+        isExporting={isExporting || !verifiedPreview}
         activeView={activeView}
         onToggleView={(view) => setActiveView(view)}
         isOnlineTicketModel={isOnlineTicketModel}
@@ -671,7 +673,38 @@ export default function App() {
       {isDNSAdmin && availabilityPanelOpen && <DNSFlyerAvailabilityControl policy={availabilityPolicy} onClose={() => setAvailabilityPanelOpen(false)} />}
       {isDNSAdmin && designPanelOpen && <DNSDesignControl policy={designPolicy} onClose={() => setDesignPanelOpen(false)} />}
       {/* Main View Switching */}
-      {activeView === 'dashboard' ? (
+      {!isDNSAdmin && (availabilityStatus !== 'ready' || !currentStateReady || !!currentStateError) ? (
+        <section className="flex-1 flex items-center justify-center p-8 no-print">
+          <div role="status" className="w-full max-w-lg rounded-xl border border-amber-200 bg-white p-6 text-slate-800 shadow-sm">
+            <h2 className="text-lg font-bold text-[#0D4D5E]">
+              {uiLanguage === 'de' ? 'Flyer noch nicht verfügbar' : 'Flyer non ancora disponibile'}
+            </h2>
+            <p className="mt-2 text-sm">
+              {availabilityStatus === 'error'
+                ? (uiLanguage === 'de'
+                  ? 'Die Flyer-Freigaben können nicht gelesen werden. Vorhandene Flyer werden nicht durch ein Beispiel ersetzt.'
+                  : 'Impossibile leggere i flyer abilitati. I documenti esistenti non vengono sostituiti con un modello di esempio.')
+                : currentStateError
+                  ? (uiLanguage === 'de'
+                    ? 'Das gespeicherte Dokument konnte nicht geprüft werden. Speichern bleibt gesperrt.'
+                    : 'Impossibile verificare il documento salvato. Il salvataggio resta bloccato.')
+                  : (uiLanguage === 'de'
+                    ? 'Freigaben und gespeicherten Flyer werden geprüft…'
+                    : 'Verifica disponibilità e caricamento dei flyer salvati…')}
+            </p>
+            {availabilityStatus === 'error' && (
+              <button type="button" className="mt-4 rounded-lg border px-4 py-2 text-sm font-semibold" onClick={() => window.location.reload()}>
+                {uiLanguage === 'de' ? 'Seite neu laden' : 'Ricarica pagina'}
+              </button>
+            )}
+            {currentStateError && availabilityStatus === 'ready' && (
+              <button type="button" className="mt-4 rounded-lg border px-4 py-2 text-sm font-semibold" onClick={() => void handleApplyTemplate(activeTemplateId)}>
+                {uiLanguage === 'de' ? 'Erneut versuchen' : 'Riprova'}
+              </button>
+            )}
+          </div>
+        </section>
+      ) : activeView === 'dashboard' ? (
         <FlyerDashboard 
           uiLanguage={uiLanguage}
           onLoadFlyerIntoEditor={(loadedContent) => {
@@ -776,7 +809,7 @@ export default function App() {
       {/* Social Media Direct Sharing Modal */}
       <SocialShareModal
         uiLanguage={uiLanguage}
-        isOpen={isShareModalOpen}
+        isOpen={isShareModalOpen && verifiedPreview}
         onClose={() => setIsShareModalOpen(false)}
         content={content}
         onDownloadPng={handleExportPng}
@@ -792,7 +825,7 @@ export default function App() {
       {/* Multilingual Export & Print Modal */}
       <ExportModal
         uiLanguage={uiLanguage}
-        isOpen={isExportModalOpen}
+        isOpen={isExportModalOpen && verifiedPreview}
         onClose={() => setIsExportModalOpen(false)}
         format={content.format}
         activeLanguage={content.activeLanguage || 'it'}

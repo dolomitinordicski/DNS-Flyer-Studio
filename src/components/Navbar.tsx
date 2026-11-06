@@ -159,7 +159,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={onOpenShareModal}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1.5 text-[10px] font-semibold text-white/75 hover:text-white"
+            disabled={isExporting}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1.5 text-[10px] font-semibold text-white/75 hover:text-white disabled:opacity-40"
           >
             <Share2 className="h-3.5 w-3.5" />
             {t.share}

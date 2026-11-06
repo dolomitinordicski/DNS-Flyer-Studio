@@ -190,7 +190,17 @@ for(const role of ['none','inactive','expired','future','malformed','writeonly']
 }
 
 test('reader: read allowed; service and direct Firebase writes denied',async({page})=>{
-  await login(page,'reader');await expect(editor(page)).toBeVisible();
+  await login(page,'reader');
+  // Read-only users must see verified saved content, but must not autosave.
+  // Capture the failure state when an authorization or loading guard regresses.
+  try {
+    await expect(editor(page)).toBeVisible({ timeout: 15000 });
+  } catch (error) {
+    const alerts = await page.getByRole('alert').allTextContents();
+    const status = await page.getByRole('status').allTextContents();
+    console.error('READ_ONLY_UI_DIAGNOSTIC', JSON.stringify({ alerts, status }));
+    throw error;
+  }
   const result=await page.evaluate(async()=>{const m=await import('/tests/acceptance/operations.ts');
     const readable=(await m.getDoc(m.doc(m.dnsCoreDb,'flyerDocuments','readable-draft'))).exists();
     let serviceDenied=false,rawDenied=false;

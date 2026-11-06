@@ -79,7 +79,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             <ul className="list-disc pl-4 mt-1">{blockErrors.map((message, index) => <li key={index}>{message}</li>)}</ul>
           </div>
         )}
-        {!readOnly && <PrintProofControl content={content} language={uiLanguage} />
+        {!readOnly && <PrintProofControl content={content} language={uiLanguage} />}
         {(readOnly || activeTab === 'templates') && (
           <SimpleTemplatesEditorTab
             uiLanguage={uiLanguage}

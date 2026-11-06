@@ -29,6 +29,8 @@ interface EditorPanelProps {
   canBypassAvailability?: boolean;
   readOnly?: boolean;
   onCollapse: () => void;
+  showBackend?: boolean;
+  onOpenBackend?: () => void;
 }
 
 export const EditorPanel: React.FC<EditorPanelProps> = ({
@@ -48,6 +50,8 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onToggleOrientation,
   readOnly = false,
   onCollapse,
+  showBackend = false,
+  onOpenBackend,
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [activeTab, setActiveTab] = useState<EditorTabId>('templates');
@@ -65,6 +69,8 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
       <EditorChrome
         uiLanguage={uiLanguage}
         onCollapse={onCollapse}
+        showBackend={showBackend}
+        onOpenBackend={onOpenBackend}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         readOnly={readOnly}

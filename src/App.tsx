@@ -640,8 +640,6 @@ export default function App() {
         coreUserEmail={coreUserEmail}
         onCoreSignIn={handleCoreSignIn}
         onCoreSignOut={handleCoreSignOut}
-        showBackend={isDNSAdmin && !!coreUserId && canReadFlyer}
-        onOpenBackend={() => setBackendOpen(true)}
       />
       {coreAuthError && (
         <div role="alert" className="bg-red-50 border-b border-red-200 text-red-800 px-4 py-2 text-sm flex items-center justify-between gap-4 no-print">
@@ -698,12 +696,6 @@ export default function App() {
         </div>
       )}
 
-      {isDNSAdmin && backendOpen && <FlyerAdminBackend
-        uiLanguage={uiLanguage}
-        availabilityPolicy={availabilityPolicy}
-        designPolicy={designPolicy}
-        onClose={() => setBackendOpen(false)}
-      />}
       {coreUserId && canReadFlyer && isReadOnlyDNS && availabilityStatus === 'ready' && currentStateReady && !currentStateError && (
         <div role="status" className="no-print border-b border-blue-300 bg-blue-50 px-5 py-3 text-sm font-medium text-blue-950">
           {uiLanguage === 'de'
@@ -711,8 +703,15 @@ export default function App() {
             : 'Flyer generale DNS · Sola lettura. Questo documento è gestito centralmente da DNS e non può essere modificato dalle aree. Per le modifiche selezionate “Listino regionale”.'}
         </div>
       )}
-      {/* Main View Switching */}
-      {!isDNSAdmin && (availabilityStatus !== 'ready' || !currentStateReady || !!currentStateError) ? (
+      {/* Admin backend is an inline workspace view, not a popup. */}
+      {isDNSAdmin && backendOpen ? (
+        <FlyerAdminBackend
+          uiLanguage={uiLanguage}
+          availabilityPolicy={availabilityPolicy}
+          designPolicy={designPolicy}
+          onClose={() => setBackendOpen(false)}
+        />
+      ) : !isDNSAdmin && (availabilityStatus !== 'ready' || !currentStateReady || !!currentStateError) ? (
         <section className="flex-1 flex items-center justify-center p-8 no-print">
           <div role="status" className="w-full max-w-lg rounded-xl border border-amber-200 bg-white p-6 text-slate-800 shadow-sm">
             <h2 className="text-lg font-bold text-[#0D4D5E]">
@@ -774,6 +773,8 @@ export default function App() {
                 autosaveErrorCode={autosave.errorCode}
                 uiLanguage={uiLanguage}
                 onCollapse={() => setEditorCollapsed(true)}
+                showBackend={isDNSAdmin && !!coreUserId && canReadFlyer}
+                onOpenBackend={() => setBackendOpen(true)}
                 content={content}
                 onChangeContent={handleUpdateContent}
                 onApplyTemplate={handleApplyTemplate}

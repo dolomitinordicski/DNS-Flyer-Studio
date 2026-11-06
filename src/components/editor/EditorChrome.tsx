@@ -21,14 +21,14 @@ interface EditorChromeProps {
   uiLanguage: 'de' | 'it';
   activeTab: EditorTabId;
   onTabChange: (tab: EditorTabId) => void;
-  onOpenLegacy?: () => void;
+  readOnly?: boolean;
 }
 
 export function EditorChrome({
   uiLanguage,
   activeTab,
   onTabChange,
-  onOpenLegacy,
+  readOnly = false,
 }: EditorChromeProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const tabs = [
@@ -52,22 +52,11 @@ export function EditorChrome({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          {onOpenLegacy && (
-            <button
-              type="button"
-              onClick={onOpenLegacy}
-              className="px-2.5 py-1 bg-amber-300 text-slate-950 hover:bg-amber-200 rounded-lg text-[10px] font-black transition-all"
-              title={ui('Altes Studio zum Vergleich öffnen', 'Apri il vecchio Studio per confronto')}
-            >
-              LEGACY
-            </button>
-          )}
-        </div>
+
       </div>
 
-      <div className="grid grid-cols-6 gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200">
-        {tabs.map((tab) => {
+      <div className={`grid ${readOnly ? 'grid-cols-1' : 'grid-cols-6'} gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200">
+        {tabs.filter(tab => !readOnly || tab.id === 'templates').map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (

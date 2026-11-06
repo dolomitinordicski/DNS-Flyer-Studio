@@ -15,12 +15,10 @@ import {
 } from './data/dnsFlyerAvailabilityPolicy';
 import { FlyerCanvas } from './components/FlyerCanvas';
 import { EditorPanel } from './components/EditorPanel';
-import { LegacyEditorPanel } from './components/LegacyEditorPanel';
 import { SocialShareModal } from './components/SocialShareModal';
 import { FlyerDashboard } from './components/FlyerDashboard';
 import { FlyerContent, PaperFormat, PaperOrientation, LayoutTemplateId, LanguageCode } from './types';
 import { FLYER_TEMPLATES } from './data/templates';
-import { LEGACY_FLYER_TEMPLATES } from './data/legacyTemplates';
 import { Printer, Download, Eye, RotateCw, Sparkles, CheckCircle2 } from 'lucide-react';
 import { ExportModal } from './components/ExportModal';
 import { getContentForLanguage } from './utils/multilingual';
@@ -83,7 +81,6 @@ export default function App() {
   }, [coreUserId]);
   const [hasDNSNetworkAccess, setHasDNSNetworkAccess] = useState(false);
   const [canWriteFlyer, setCanWriteFlyer] = useState(false);
-  const [isLegacyMode, setIsLegacyMode] = useState(() => new URLSearchParams(window.location.search).get('legacy') === '1');
 
   // Initial Flyer Content from Template 1 or LocalStorage
   const [content, setContent] = useState<FlyerContent>(() => {
@@ -158,7 +155,6 @@ export default function App() {
       setContent({ ...FLYER_TEMPLATES[0].defaultContent } as FlyerContent);
       setActiveView('editor');
       setIsShareModalOpen(false);
-      setIsLegacyMode(false);
       setCoreUserEmail(user?.email ?? null);
       setCoreUserId(user?.uid ?? null);
       if (!user) {
@@ -179,6 +175,8 @@ export default function App() {
             }));
           }
           setIsDNSAdmin(access.isAdmin);
+          // Regional editor is the safe default for area accounts.
+          if (!access.isAdmin) setActiveTemplateId('regional_price_list');
           setHasDNSNetworkAccess(access.hasNetworkAccess);
           setCanWriteFlyer(access.canWrite);
           setCanReadFlyer(access.canRead);
@@ -231,13 +229,6 @@ export default function App() {
     }
   };
 
-  const setLegacyReviewMode = (enabled: boolean) => {
-    const url = new URL(window.location.href);
-    if (enabled) url.searchParams.set('legacy', '1');
-    else url.searchParams.delete('legacy');
-    window.history.replaceState({}, '', url);
-    setIsLegacyMode(enabled);
-  };
 
   // Save to localStorage whenever content changes
   React.useEffect(() => {
@@ -261,13 +252,14 @@ export default function App() {
   const [currentStateError, setCurrentStateError] = useState<string | null>(null);
   // DNS Core saves the active draft after edits settle; local recovery remains immediate.
   // Temporary export-language snapshots are deliberately excluded.
+  const isReadOnlyDNS = !isDNSAdmin && activeTemplateId === 'official_price_list';
   const autosaveAllowed = canWriteFlyer && !!coreUserId && currentStateReady && !isExporting
-    && !isLegacyMode;
+    && !isReadOnlyDNS;
   const autosave = useFlyerAutosave(content, coreUserId, autosaveAllowed);
 
   const handleSaveDraftNow = async (snapshot: FlyerContent = content, title?: string) => {
     if (!currentStateReady || currentStateError) throw new Error('FLYER_CURRENT_STATE_UNVERIFIED');
-    if (!canWriteFlyer) throw new Error('FLYER_WRITE_PERMISSION_REQUIRED');
+    if (!canWriteFlyer || isReadOnlyDNS) throw new Error('FLYER_WRITE_PERMISSION_REQUIRED');
     if (!isDNSAdmin && (!currentReportingAreaId ||
       coreReportingAreaId(snapshot.regionId) !== currentReportingAreaId)) throw new Error('FLYER_AREA_SCOPE_DENIED');
     await autosave.saveNow(snapshot, title);
@@ -317,7 +309,7 @@ export default function App() {
 
   // Update Flyer Content partial
   const handleUpdateContent = (updated: Partial<FlyerContent>) => {
-    if (!canWriteFlyer) return;
+    if (!canWriteFlyer || isReadOnlyDNS) return;
     setContent(prev => {
       const next = { ...prev, ...updated };
       if (!isDNSAdmin && currentReportingAreaId) {
@@ -346,7 +338,7 @@ export default function App() {
       ...content,
       ...template.defaultContent,
       layoutTemplateId: templateId,
-      regionId: selectedProduct?.dataPolicy.access === 'dns-only'
+      regionId: (selectedProduct?.type === 'dns_price_list' || selectedProduct?.dataPolicy.access === 'dns-only')
         ? 'dns_central'
         : (currentReportingAreaId || template.defaultContent.regionId || content.regionId || 'dns_central'),
       translations: selectedProduct?.dataPolicy.languageMode === 'monolingual'
@@ -373,6 +365,9 @@ export default function App() {
         autosave.selectDraft(current.id, current.content);
         setContent(selectedProduct ? lockContentToProduct(current.content, selectedProduct) : current.content);
       } else {
+        if (selectedProduct?.type === 'dns_price_list' && !isDNSAdmin) {
+          throw new Error('FLYER_CENTRAL_NOT_PUBLISHED');
+        }
         const currentId = canonicalFlyerDocumentId(scoped);
         autosave.selectDraft(currentId);
         setContent(scoped);
@@ -402,22 +397,6 @@ export default function App() {
   }, [coreUserId, canReadFlyer, canWriteFlyer, currentReportingAreaId, isDNSAdmin, activeTemplateId, currentStateReady, availabilityStatus, currentStateError]);
 
 
-  const handleApplyLegacyTemplate = (templateId: LayoutTemplateId) => {
-    const template = LEGACY_FLYER_TEMPLATES.find(t => t.id === templateId);
-    if (!template?.defaultContent) return;
-
-    setActiveTemplateId(templateId);
-    setContent(prev => ({
-      ...prev,
-      ...template.defaultContent,
-      layoutTemplateId: templateId,
-      format: template.defaultContent.format || prev.format || 'A4',
-      orientation: template.defaultContent.orientation || prev.orientation || 'portrait',
-      activeLanguage: template.defaultContent.activeLanguage || prev.activeLanguage || 'it',
-      importedImages: prev.importedImages || [],
-      ...(!isDNSAdmin && currentReportingAreaId ? { regionId: findReportingAreaLogo(currentReportingAreaId).id } : {}),
-    } as FlyerContent));
-  };
 
   // Helper to compute optimal graphic sizes for format & orientation
   const getOptimalGraphicSizes = (fmt: PaperFormat, isLandscape: boolean) => {
@@ -612,9 +591,9 @@ export default function App() {
       {/* Top Navbar */}
       <Navbar
         paperFormat={content.format}
-        onChangeFormat={handleChangeFormat}
+        onChangeFormat={format => { if (!isReadOnlyDNS) handleChangeFormat(format); }}
         orientation={content.orientation}
-        onToggleOrientation={handleToggleOrientation}
+        onToggleOrientation={() => { if (!isReadOnlyDNS) handleToggleOrientation(); }}
         showCropMarks={content.showCropMarks}
         onToggleCropMarks={handleToggleCropMarks}
         onOpenShareModal={() => { if (verifiedPreview) setIsShareModalOpen(true); }}
@@ -666,12 +645,19 @@ export default function App() {
         </div>
       )}
 
-      {isDNSAdmin && !isLegacyMode && <div className="no-print flex justify-end gap-2 border-b bg-white px-5 py-2">
+      {isDNSAdmin && <div className="no-print flex justify-end gap-2 border-b bg-white px-5 py-2">
         <button type="button" onClick={() => setAvailabilityPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">Flyer disponibili</button>
         <button type="button" onClick={() => setDesignPanelOpen(true)} className="rounded-lg border border-[#0D4D5E] px-4 py-2 text-sm font-semibold text-[#0D4D5E]">DNS Design Control</button>
       </div>}
       {isDNSAdmin && availabilityPanelOpen && <DNSFlyerAvailabilityControl policy={availabilityPolicy} onClose={() => setAvailabilityPanelOpen(false)} />}
       {isDNSAdmin && designPanelOpen && <DNSDesignControl policy={designPolicy} onClose={() => setDesignPanelOpen(false)} />}
+      {coreUserId && canReadFlyer && isReadOnlyDNS && availabilityStatus === 'ready' && currentStateReady && !currentStateError && (
+        <div role="status" className="no-print border-b border-blue-300 bg-blue-50 px-5 py-3 text-sm font-medium text-blue-950">
+          {uiLanguage === 'de'
+            ? 'DNS-Gesamtflyer · Nur Ansicht. Dieses Dokument wird zentral von DNS verwaltet und kann von Gebieten nicht geändert werden. Für Bearbeitungen wählt bitte „Regionale Preisliste“.'
+            : 'Flyer generale DNS · Sola lettura. Questo documento è gestito centralmente da DNS e non può essere modificato dalle aree. Per le modifiche selezionate “Listino regionale”.'}
+        </div>
+      )}
       {/* Main View Switching */}
       {!isDNSAdmin && (availabilityStatus !== 'ready' || !currentStateReady || !!currentStateError) ? (
         <section className="flex-1 flex items-center justify-center p-8 no-print">
@@ -697,6 +683,11 @@ export default function App() {
                 {uiLanguage === 'de' ? 'Seite neu laden' : 'Ricarica pagina'}
               </button>
             )}
+            {isReadOnlyDNS && (
+              <button type="button" className="mt-4 mr-3 rounded-lg bg-[#0D4D5E] px-4 py-2 text-sm font-semibold text-white" onClick={() => void handleApplyTemplate('regional_price_list')}>
+                {uiLanguage === 'de' ? 'Regionalen Flyer öffnen' : 'Apri flyer della tua area'}
+              </button>
+            )}
             {currentStateError && availabilityStatus === 'ready' && (
               <button type="button" className="mt-4 rounded-lg border px-4 py-2 text-sm font-semibold" onClick={() => void handleApplyTemplate(activeTemplateId)}>
                 {uiLanguage === 'de' ? 'Erneut versuchen' : 'Riprova'}
@@ -718,16 +709,6 @@ export default function App() {
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           
           {/* Left Sidebar Editor Controls */}
-            {isLegacyMode ? (
-              <LegacyEditorPanel
-                uiLanguage={uiLanguage}
-                content={content}
-                onChangeContent={handleUpdateContent}
-                onApplyTemplate={handleApplyLegacyTemplate}
-                onMakeItPerfect={handleMakeItPerfect}
-                onExitLegacy={() => setLegacyReviewMode(false)}
-              />
-            ) : (
               <EditorPanel
                 autosaveStatus={autosave.status}
                 autosaveErrorCode={autosave.errorCode}
@@ -735,15 +716,14 @@ export default function App() {
                 content={content}
                 onChangeContent={handleUpdateContent}
                 onApplyTemplate={handleApplyTemplate}
-                onMakeItPerfect={handleMakeItPerfect}
-                onChangeFormat={handleChangeFormat}
-                onToggleOrientation={handleToggleOrientation}
+                onMakeItPerfect={() => { if (!isReadOnlyDNS) handleMakeItPerfect(); }}
+                onChangeFormat={format => { if (!isReadOnlyDNS) handleChangeFormat(format); }}
+                onToggleOrientation={() => { if (!isReadOnlyDNS) handleToggleOrientation(); }}
                 isDNSAdmin={isDNSAdmin || hasDNSNetworkAccess}
+                readOnly={isReadOnlyDNS}
                 availabilityPolicy={availabilityStatus === 'ready' ? availabilityPolicy : { ...DEFAULT_FLYER_AVAILABILITY, enabled: Object.fromEntries(Object.keys(DEFAULT_FLYER_AVAILABILITY.enabled).map(key => [key, false])) as DNSFlyerAvailabilityPolicy['enabled'] }}
                 canBypassAvailability={isDNSAdmin}
-                onOpenLegacy={() => setLegacyReviewMode(true)}
               />
-            )}
 
           {/* Center / Right Canvas Live Preview Area */}
           <main 

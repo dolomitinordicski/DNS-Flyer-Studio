@@ -33,14 +33,15 @@ export function DNSDesignControl({ policy, onClose, uiLanguage }: { policy: DNSF
     catch (error) { setMessage(ui('Speichern fehlgeschlagen: ', 'Salvataggio non riuscito: ') + (error instanceof Error ? error.message : String(error))); }
     finally { setSaving(false); }
   };
-  return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-5 no-print" role="dialog" aria-modal="true" aria-label="DNS Design Control">
-    <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-7 shadow-2xl space-y-5">
-      <div className="flex items-start justify-between gap-4">
-        <div><h2 className="text-2xl font-bold text-[#0D4D5E]">DNS · Design Control</h2></div>
-        <button type="button" onClick={onClose} className="rounded-lg border px-3 py-1.5">{ui('Schließen', 'Chiudi')}</button>
+  return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-2 sm:p-4 no-print" role="dialog" aria-modal="true" aria-label="DNS Design Control">
+    <div className="flex w-full max-w-lg max-h-[calc(100dvh-1rem)] min-h-0 flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+        <div><h2 className="text-base sm:text-lg font-bold text-[#0D4D5E]">DNS · Design Control</h2></div>
+        <button type="button" onClick={onClose} className="shrink-0 rounded-lg border px-3 py-1.5 text-sm">{ui('Schließen', 'Chiudi')}</button>
       </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3 space-y-3">
       <label className="block text-sm font-semibold">{ui('Anwendungsbereich', 'Livello di applicazione')}
-        <select className="mt-1 w-full rounded-lg border p-3" value={target} onChange={event=>setTarget(event.target.value)}>
+        <select className="mt-1 w-full rounded-lg border p-2" value={target} onChange={event=>setTarget(event.target.value)}>
           <option value="global">{ui("Global · alle Flyer", "Globale · tutti i flyer")}</option>
           {FLYER_TEMPLATES.map(template=><option key={template.id} value={template.id}>{template.name}</option>)}
         </select>
@@ -51,8 +52,11 @@ export function DNSDesignControl({ policy, onClose, uiLanguage }: { policy: DNSF
           {field.options.map(option => <option key={option.value} value={option.value}>{({square:ui('Eckig', 'Squadrato'),soft:ui('Weich', 'Morbido'),round:ui('Abgerundet', 'Arrotondato'),pill:ui('Pille', 'Pillola'),none:ui('Keine', 'Nessuna'),top:ui('Oben', 'Alto'),right:ui('Rechts', 'Destra'),bottom:ui('Unten', 'Basso'),left:ui('Links', 'Sinistra')} as Record<string,string>)[option.value] ?? option.title}</option>)}
         </select>
       </label>)}
-      {message && <p role="status" className="text-sm">{message}</p>}
-      <div className="flex justify-end"><button type="button" disabled={saving} onClick={save} className="rounded-lg bg-[#0D4D5E] px-5 py-3 font-bold text-white disabled:opacity-50">{saving ? ui('Speichern…', 'Salvataggio…') : ui('DNS-Einstellungen speichern', 'Salva impostazioni DNS')}</button></div>
+      </div>
+      <div className="shrink-0 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-white px-4 py-3">
+        <p role="status" className="min-w-0 flex-1 text-xs text-slate-600">{message}</p>
+        <div className="flex justify-end"><button type="button" disabled={saving} onClick={save} className="rounded-lg bg-[#0D4D5E] px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{saving ? ui('Speichern…', 'Salvataggio…') : ui('DNS-Einstellungen speichern', 'Salva impostazioni DNS')}</button></div>
+      </div>
     </div>
   </div>;
 }

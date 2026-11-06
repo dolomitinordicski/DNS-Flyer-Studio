@@ -343,7 +343,7 @@ test('area writer: regional PDF print calls the browser without a Flyer export e
   await expect(editor(page)).toBeVisible();
   await page.getByRole('button',{name:/^(Regionale Preisliste|Listino regionale)$/}).click();
   await page.getByRole('button',{name:/^PDF/}).click();
-  await page.getByRole('button',{name:/PDF drucken \\/ Als PDF speichern|Stampa PDF \\/ Salva come PDF/}).click();
+  await page.getByRole('button',{name:/PDF drucken|Stampa PDF/}).click();
   await expect(page.locator('[data-dns-export-stage]')).toHaveCount(0,{timeout:20000});
   expect(errors).toEqual([]);
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, LogIn, LogOut, Printer, Share2 } from 'lucide-react';
+import { Download, LogIn, LogOut, Printer, Share2, Settings2 } from 'lucide-react';
 import { formatDNSCoreHeaderStatus } from '@dolomitinordicski/dns-shared-data/ui/header-status';
 import { PaperFormat, PaperOrientation } from '../types';
 import type { DNSCoreHeaderStatus } from '../lib/dnsCoreHeader';
@@ -26,6 +26,8 @@ interface NavbarProps {
   coreUserEmail?: string | null;
   onCoreSignIn: () => void;
   onCoreSignOut: () => void;
+  showBackend?: boolean;
+  onOpenBackend?: () => void;
 }
 
 const copy = {
@@ -77,6 +79,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   coreUserEmail,
   onCoreSignIn,
   onCoreSignOut,
+  showBackend = false,
+  onOpenBackend,
 }) => {
   const t = copy[uiLanguage];
   const coreHeader = formatDNSCoreHeaderStatus(coreStatus, uiLanguage);
@@ -123,6 +127,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
+              {showBackend && onOpenBackend && (
+                <button type="button" onClick={onOpenBackend}
+                  title={uiLanguage === 'de' ? 'Flyer-Verwaltung öffnen' : 'Apri amministrazione flyer'}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#AAD0D1]/50 bg-white/10 px-2.5 py-1.5 text-[10px] font-bold tracking-wide text-white transition-colors hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+                  <Settings2 aria-hidden="true" className="h-3.5 w-3.5 text-[#AAD0D1]" />
+                  BACKEND
+                </button>
+              )}
               <div className="dns-tool-header-status" data-state={coreHeader.state} aria-live="polite">
                 <span className="dns-tool-header-status-dot" />
                 {coreHeader.text}

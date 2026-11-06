@@ -67,7 +67,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             : autosaveStatus === 'saving' ? ui('In DNS Core speichern…', 'Salvataggio in DNS Core…')
             : autosaveStatus === 'saved' ? ui('In DNS Core gespeichert ✓', 'Salvato automaticamente in DNS Core ✓')
             : ui('Cloud-Speicherung fehlgeschlagen · Erneut versuchen', 'Errore salvataggio cloud · riprova')}
-        </div>
+        </div>}
         {!readOnly && autosaveStatus === 'error' && autosaveErrorCode && (
           <div role="alert" className="text-[11px] p-2 bg-red-50 text-red-800 rounded border border-red-200">
             {ui('DNS Core Firestore: Entwurf nicht gespeichert', 'DNS Core Firestore: bozza non salvata')}: <code>{autosaveErrorCode}</code>

@@ -3,6 +3,7 @@ import {
   Cloud,
   Image as ImageIcon,
   LayoutTemplate,
+  PanelLeftClose,
   PanelsTopLeft,
   Palette,
   QrCode,
@@ -23,6 +24,7 @@ interface EditorChromeProps {
   onTabChange: (tab: EditorTabId) => void;
   readOnly?: boolean;
   disableImageTab?: boolean;
+  onCollapse: () => void;
 }
 
 export function EditorChrome({
@@ -31,6 +33,7 @@ export function EditorChrome({
   onTabChange,
   readOnly = false,
   disableImageTab = false,
+  onCollapse,
 }: EditorChromeProps) {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const tabs = [
@@ -54,7 +57,16 @@ export function EditorChrome({
             </div>
           </div>
         </div>
-
+        <button
+          type="button"
+          onClick={onCollapse}
+          aria-label={ui('Editor ausblenden', 'Nascondi pannello editor')}
+          title={ui('Editor ausblenden', 'Nascondi pannello editor')}
+          aria-expanded="true"
+          className="group relative ml-2 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/25 bg-white/10 text-[#D9EFF0] shadow-sm transition-colors hover:border-white/55 hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          <PanelLeftClose aria-hidden="true" className="h-[19px] w-[19px]" />
+        </button>
       </div>
 
       <div className={`grid ${readOnly ? 'grid-cols-1' : 'grid-cols-6'} gap-1 bg-[#F4F9FA] p-2 border-b border-slate-200`}>

@@ -28,6 +28,7 @@ interface EditorPanelProps {
   availabilityPolicy: DNSFlyerAvailabilityPolicy;
   canBypassAvailability?: boolean;
   readOnly?: boolean;
+  onCollapse: () => void;
 }
 
 export const EditorPanel: React.FC<EditorPanelProps> = ({
@@ -46,6 +47,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onChangeFormat,
   onToggleOrientation,
   readOnly = false,
+  onCollapse,
 }) => {
   const ui = (de: string, it: string) => uiLanguage === 'de' ? de : it;
   const [activeTab, setActiveTab] = useState<EditorTabId>('templates');
@@ -62,6 +64,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
     <aside className="w-full h-full min-h-0 bg-white border-r border-slate-200 text-slate-800 flex flex-col overflow-hidden no-print">
       <EditorChrome
         uiLanguage={uiLanguage}
+        onCollapse={onCollapse}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         readOnly={readOnly}

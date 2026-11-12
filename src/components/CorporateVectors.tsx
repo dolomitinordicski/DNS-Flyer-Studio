@@ -1,4 +1,5 @@
 import React from 'react';
+import dnsPrintLogoLight from '../assets/logo-print-vector.svg';
 import { NordicSwooshConfig, NordicSwooshSize } from '../types';
 
 export const BRAND_COLORS = {
@@ -42,7 +43,7 @@ const SVG_KURVE_LANGLAEUFER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="
  * 100% Pure Vector SVG Data URLs - 0 Raster Artifacts, Crisp at any DPI
  */
 export const OFFICIAL_ASSET_PATHS = {
-  logoFarbe: createSvgDataUrl(SVG_FULL_COLOR),
+  logoFarbe: dnsPrintLogoLight,
   logoNegativ: createSvgDataUrl(SVG_FULL_NEGATIV),
   logoWhiteSvg: createSvgDataUrl(SVG_FULL_NEGATIV),
   logoGrau: createSvgDataUrl(SVG_FULL_GRAU),
@@ -231,6 +232,22 @@ export const DolomitiFullLogo: React.FC<{
       const rounding = cornerStyle === 'sharp' ? 'rounded-none' : 'rounded-xl';
       wrapperClass += ` px-3 py-1.5 ${rounding} shadow-2xs border bg-white border-[#AAD0D1]`;
     }
+  }
+
+  // Light backgrounds use the exact canonical Adobe Illustrator paths + Foundation colors
+  // shared by dns-shared-data/brand/logo-print-vector.svg. Dark/negative and specialty
+  // variants retain their established vector treatment unchanged.
+  if (!isNeg && !isGrau && !isMono) {
+    return (
+      <div className={wrapperClass}>
+        <img
+          src={dnsPrintLogoLight}
+          alt="Dolomiti NordicSki"
+          className="h-full w-auto max-h-full object-contain shrink-0"
+          draggable={false}
+        />
+      </div>
+    );
   }
 
   return (

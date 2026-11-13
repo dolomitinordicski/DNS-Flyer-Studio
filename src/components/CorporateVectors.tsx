@@ -37,7 +37,7 @@ const SVG_FULL_GRAU = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="55 45 83
 
 const SVG_KURVE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="625 220 275 140"><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_LOWER}"/></svg>`;
 
-const SVG_KURVE_LANGLAEUFER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="625 45 275 315"><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_LOWER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_SKIER_CHEST}"/><path fill="${BRAND_COLORS.darkTeal}" d="${PATH_SKIER_BODY}"/></svg>`;
+const SVG_KURVE_LANGLAEUFER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="625 45 275 315"><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_LOWER}"/><path fill="${BRAND_COLORS.skierBlue}" d="${PATH_SKIER_CHEST}"/><path fill="${BRAND_COLORS.darkTeal}" d="${PATH_SKIER_BODY}"/></svg>`;
 
 /**
  * Official Dolomiti NordicSki Brand Assets
@@ -101,7 +101,7 @@ export const DolomitiSkierTrackEmblem: React.FC<{
   color
 }) => {
   const trackColor = color || BRAND_COLORS.lightTeal;
-  const chestColor = color || BRAND_COLORS.lightTeal;
+  const chestColor = color || BRAND_COLORS.skierBlue;
   const bodyColor = color || BRAND_COLORS.darkTeal;
 
   return (

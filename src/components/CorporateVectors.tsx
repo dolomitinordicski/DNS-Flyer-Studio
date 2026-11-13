@@ -8,6 +8,7 @@ export const BRAND_COLORS = {
   darkGray: '#4C4C4C',
   lightGray: '#A8A8A8',
   white: '#FFFFFF',
+  skierBlue: '#0D4D5E',
 };
 
 // Raw Path Strings from Official Adobe Illustrator Export
@@ -28,15 +29,15 @@ function createSvgDataUrl(svgString: string): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
 }
 
-const SVG_FULL_COLOR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="55 45 835 315"><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_DOLOMITI}"/><path fill="${BRAND_COLORS.darkTeal}" d="${PATH_NORDICSKI}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_LOWER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_SKIER_CHEST}"/><path fill="${BRAND_COLORS.darkTeal}" d="${PATH_SKIER_BODY}"/></svg>`;
+const SVG_FULL_COLOR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="55 45 835 315"><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_DOLOMITI}"/><path fill="${BRAND_COLORS.darkTeal}" d="${PATH_NORDICSKI}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_LOWER}"/><path fill="${BRAND_COLORS.skierBlue}" d="${PATH_SKIER_CHEST}"/><path fill="${BRAND_COLORS.darkTeal}" d="${PATH_SKIER_BODY}"/></svg>`;
 
-const SVG_FULL_NEGATIV = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="55 45 835 315"><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_DOLOMITI}"/><path fill="${BRAND_COLORS.white}" d="${PATH_NORDICSKI}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_LOWER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_SKIER_CHEST}"/><path fill="${BRAND_COLORS.white}" d="${PATH_SKIER_BODY}"/></svg>`;
+const SVG_FULL_NEGATIV = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="55 45 835 315"><path fill="${BRAND_COLORS.white}" d="${PATH_DOLOMITI}"/><path fill="${BRAND_COLORS.white}" d="${PATH_NORDICSKI}"/><path fill="${BRAND_COLORS.white}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.white}" d="${PATH_TRACK_LOWER}"/><path fill="${BRAND_COLORS.white}" d="${PATH_SKIER_CHEST}"/><path fill="${BRAND_COLORS.white}" d="${PATH_SKIER_BODY}"/></svg>`;
 
 const SVG_FULL_GRAU = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="55 45 835 315"><path fill="${BRAND_COLORS.lightGray}" d="${PATH_DOLOMITI}"/><path fill="${BRAND_COLORS.darkGray}" d="${PATH_NORDICSKI}"/><path fill="${BRAND_COLORS.lightGray}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.lightGray}" d="${PATH_TRACK_LOWER}"/><path fill="${BRAND_COLORS.lightGray}" d="${PATH_SKIER_CHEST}"/><path fill="${BRAND_COLORS.darkGray}" d="${PATH_SKIER_BODY}"/></svg>`;
 
 const SVG_KURVE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="625 220 275 140"><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_LOWER}"/></svg>`;
 
-const SVG_KURVE_LANGLAEUFER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="625 45 275 315"><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_LOWER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_SKIER_CHEST}"/><path fill="${BRAND_COLORS.darkTeal}" d="${PATH_SKIER_BODY}"/></svg>`;
+const SVG_KURVE_LANGLAEUFER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="625 45 275 315"><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_UPPER}"/><path fill="${BRAND_COLORS.lightTeal}" d="${PATH_TRACK_LOWER}"/><path fill="${BRAND_COLORS.skierBlue}" d="${PATH_SKIER_CHEST}"/><path fill="${BRAND_COLORS.darkTeal}" d="${PATH_SKIER_BODY}"/></svg>`;
 
 /**
  * Official Dolomiti NordicSki Brand Assets
@@ -100,7 +101,7 @@ export const DolomitiSkierTrackEmblem: React.FC<{
   color
 }) => {
   const trackColor = color || BRAND_COLORS.lightTeal;
-  const chestColor = color || BRAND_COLORS.lightTeal;
+  const chestColor = color || BRAND_COLORS.skierBlue;
   const bodyColor = color || BRAND_COLORS.darkTeal;
 
   return (
@@ -217,10 +218,10 @@ export const DolomitiFullLogo: React.FC<{
   const isGrau = variant === 'grayscale';
   const isMono = variant === 'monochrome';
 
-  const dolomitiColor = isMono ? 'currentColor' : isGrau ? BRAND_COLORS.lightGray : BRAND_COLORS.lightTeal;
+  const dolomitiColor = isMono ? 'currentColor' : isNeg ? BRAND_COLORS.white : isGrau ? BRAND_COLORS.lightGray : BRAND_COLORS.lightTeal;
   const nordicColor = isMono ? 'currentColor' : isNeg ? BRAND_COLORS.white : isGrau ? BRAND_COLORS.darkGray : BRAND_COLORS.darkTeal;
-  const trackColor = isMono ? 'currentColor' : isGrau ? BRAND_COLORS.lightGray : BRAND_COLORS.lightTeal;
-  const chestColor = isMono ? 'currentColor' : isGrau ? BRAND_COLORS.lightGray : BRAND_COLORS.lightTeal;
+  const trackColor = isMono ? 'currentColor' : isNeg ? BRAND_COLORS.white : isGrau ? BRAND_COLORS.lightGray : BRAND_COLORS.lightTeal;
+  const chestColor = isMono ? 'currentColor' : isNeg ? BRAND_COLORS.white : isGrau ? BRAND_COLORS.lightGray : BRAND_COLORS.skierBlue;
   const bodyColor = isMono ? 'currentColor' : isNeg ? BRAND_COLORS.white : isGrau ? BRAND_COLORS.darkGray : BRAND_COLORS.darkTeal;
 
   let wrapperClass = `inline-flex items-center max-w-full shrink-0 ${className}`;
